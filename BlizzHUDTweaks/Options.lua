@@ -17,6 +17,16 @@ function addon:SetSliderValue(info, value)
   addon:RefreshFrames()
 end
 
+function addon:GetUpdateTickerValue(info)
+  return (self.db.profile[info.arg][info[#info]] or 1) * 100
+end
+
+function addon:SetUpdateTickerValue(info, value)
+  local interval = (value or 0.1)
+  self.db.profile[info.arg][info[#info]] = interval / 100
+  addon:RefreshUpdateTicker(interval)
+end
+
 function addon:GetValue(info)
   return self.db.profile[info.arg][info[#info]]
 end
@@ -50,6 +60,23 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       type = "toggle",
       get = "GetValue",
       set = "SetValue",
+      arg = frameName
+    }
+  end
+  if not withUseGlobal then
+    order = order + 0.1
+    subOptions["UpdateInterval"] = {
+      order = order,
+      name = "Update Interval",
+      desc = "The interval in which the add-on should check for necessary alpha changes. If you don't need mouseovers to be instantaneously, a value of 0.1 should be fine for you.",
+      descStyle = "inline",
+      width = "full",
+      type = "range",
+      get = "GetUpdateTickerValue",
+      set = "SetUpdateTickerValue",
+      min = 0.01,
+      max = 1,
+      step = 0.01,
       arg = frameName
     }
   end

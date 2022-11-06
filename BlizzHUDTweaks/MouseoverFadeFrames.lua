@@ -1,18 +1,20 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 
-function addon:Fade(frame, targetAlpha, duration)
-  local currentAlpha = frame:GetAlpha()
-  targetAlpha = tonumber(string.format("%.2f", targetAlpha))
+function addon:Fade(frame, currentAlpha, targetAlpha, duration)
+  if not frame.fadeAnimation then
+    local animationGroup = frame:CreateAnimationGroup()
+    animationGroup:SetToFinalAlpha(true)
 
-  local animation = frame:CreateAnimationGroup()
-  local fadeIn = animation:CreateAnimation("Alpha")
-  fadeIn:SetFromAlpha(currentAlpha)
-  fadeIn:SetToAlpha(targetAlpha)
-  fadeIn:SetDuration(duration)
-  fadeIn:SetStartDelay(0)
-  animation:SetToFinalAlpha(true)
+    frame.animationGroup = animationGroup
+    frame.fadeAnimation = animationGroup:CreateAnimation("Alpha")
+  end
 
-  animation:Play()
+  frame.fadeAnimation:SetFromAlpha(currentAlpha)
+  frame.fadeAnimation:SetToAlpha(targetAlpha)
+  frame.fadeAnimation:SetDuration(duration)
+  frame.fadeAnimation:SetStartDelay(0)
+
+  frame.animationGroup:Restart()
 end
 
 local function getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)
@@ -83,6 +85,7 @@ local frameOptions
 local alpha
 local fadeDuration
 local currentAlpha
+local targetAlpha
 
 function addon:RefreshFrames()
   globalOptions = globalOptions or self.db.profile["*Global*"]
@@ -92,10 +95,11 @@ function addon:RefreshFrames()
     alpha = getNextFrameAlpha(frame, UnitAffectingCombat("player"), globalOptions, frameOptions)
     fadeDuration = getFadeDuration(globalOptions, frameOptions)
     currentAlpha = tonumber(string.format("%.2f", frame:GetAlpha()))
+    targetAlpha = tonumber(string.format("%.2f", alpha))
 
-    if alpha and alpha ~= currentAlpha and not frame.fading then
+    if targetAlpha and targetAlpha ~= currentAlpha and not frame.fading then
       setFadingState(frame, fadeDuration)
-      addon:Fade(frame, alpha, fadeDuration)
+      addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
     end
   end
 end

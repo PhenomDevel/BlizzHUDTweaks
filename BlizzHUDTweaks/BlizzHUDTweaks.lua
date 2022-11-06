@@ -96,6 +96,7 @@ do
   for frameName, v in pairs(defaultConfig.profile) do
     if frameName ~= "*Global*" then
       v["UseGlobalOptions"] = true
+      v["UpdateInterval"] = 0.001
     end
 
     if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
@@ -129,6 +130,26 @@ function addon:LoadProfile()
   -- Do nothing for now
 end
 
+function addon:RefreshUpdateTicker(interval)
+  if BlizzHUDTweaks.updateTicker then
+    BlizzHUDTweaks.updateTicker:Cancel()
+  end
+
+  if not BlizzHUDTweaks.updateTicker or BlizzHUDTweaks.updateTicker:IsCancelled() then
+    if interval and interval < 0.01 then
+      interval = 0.01
+    end
+
+    BlizzHUDTweaks.updateTicker =
+      C_Timer.NewTicker(
+      interval or 0.1,
+      function()
+        addon:RefreshFrames()
+      end
+    )
+  end
+end
+
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, false)
 
@@ -148,10 +169,6 @@ function addon:OnInitialize()
   -- TODO: Maybe let the user decide how often it should be updated
   -- NOTE: HookScript would be the better option with OnEnter and OnLeave but it does not trigger for
   -- action bars when the action buttons are mouseovered directly
-  C_Timer.NewTicker(
-    0.1,
-    function()
-      addon:RefreshFrames()
-    end
-  )
+
+  addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
 end
