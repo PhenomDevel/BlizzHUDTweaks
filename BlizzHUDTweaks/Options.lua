@@ -57,7 +57,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["MouseOverInCombat"] = {
     order = order,
     name = "Allow mouseover in combat",
-    desc = "TODO",
+    desc = "When activated you can mouseover action bars and frames while within combat.",
     width = "full",
     type = "toggle",
     get = "GetValue",
@@ -69,7 +69,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["FadeDuration"] = {
     order = order,
     name = "Fade Duration",
-    desc = "TODO",
+    desc = "The duration how long the fade should take (fade in and out).",
     width = "full",
     type = "range",
     get = "GetSliderValue",
@@ -91,7 +91,6 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["FadeInCombat"] = {
     order = order,
     name = "Enabled",
-    desc = "TODO",
     width = "normal",
     type = "toggle",
     get = "GetValue",
@@ -125,7 +124,6 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["FadeOutOfCombat"] = {
     order = order,
     name = "Enabled",
-    desc = "TODO",
     width = "normal",
     type = "toggle",
     get = "GetValue",
@@ -159,7 +157,6 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["FadeInRestedArea"] = {
     order = order,
     name = "Enabled",
-    desc = "TODO",
     width = "normal",
     type = "toggle",
     get = "GetValue",
@@ -171,7 +168,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["RestedAreaAlpha"] = {
     order = order,
     name = "Alpha",
-    desc = "Set the alpha value of the frame when not in combat.",
+    desc = "Set the alpha value of the frame while in a rested area.",
     width = "normal",
     type = "range",
     get = "GetSliderValue",

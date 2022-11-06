@@ -49,11 +49,22 @@ do
   end
 end
 
+--credit https://www.mmo-champion.com/threads/2414999-How-do-I-disable-the-GCD-flash-on-my-bars
+function addon:HideGCDFlash()
+  for _, v in pairs(_G) do
+    if type(v) == "table" and type(v.SetDrawBling) == "function" then
+      v:SetDrawBling(false)
+    end
+  end
+end
+
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, true)
 
   AC:RegisterOptionsTable("BlizzHUDTweaks_options", BlizzHUDTweaks.GetAceOptions(self.db))
   self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+
+  addon:HideGCDFlash()
 
   -- TODO: Maybe let the user decide how often it should be updated
   C_Timer.NewTicker(
