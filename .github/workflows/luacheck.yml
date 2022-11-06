@@ -1,0 +1,22 @@
+name: Luacheck
+
+on:
+  push:
+    branches:
+      - Development
+
+jobs:
+  Luacheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v1
+
+      - name: Install and run Luacheck
+        uses: nebularg/actions-luacheck@v1
+        with:
+          files: 'BlizzHUDTweaks/Source'
+          config: 'https://github.com/PhenomDevel/BlizzHUDTweaks/blob/master/.luacheckrc'
+          args: "--no-color -q"
+          annotate: warning

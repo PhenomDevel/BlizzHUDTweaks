@@ -1,0 +1,32 @@
+package-as: BlizzHUDTweaks
+
+externals:
+  BlizzHUDTweaks/Libs/AceAddon-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceAddon-3.0
+  BlizzHUDTweaks/Libs/AceConsole-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceConsole-3.0
+  BlizzHUDTweaks/Libs/AceEvent-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceEvent-3.0
+  BlizzHUDTweaks/Libs/AceDB-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceDB-3.0
+  BlizzHUDTweaks/Libs/AceGUI-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceGUI-3.0
+  BlizzHUDTweaks/Libs/AceTimer-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceTimer-3.0
+  BlizzHUDTweaks/Libs/CallbackHandler-1.0: https://repos.curseforge.com/wow/callbackhandler/trunk/CallbackHandler-1.0
+  BlizzHUDTweaks/Libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
+
+enable-nolib-creation: no
+
+ignore:
+  - README.md
+  - .luacheckrc
+  - doc
+  - LICENSE
+  - .gitignore
+  - .pkgmeta
+  - generate-doc.bat
+  - ldoc
+  - scripts
+  - changelog.sh
+
+manual-changelog:
+    filename: CHANGELOG.md
+    markup-type: markdown
+
+move-folders:
+  BlizzHUDTweaks/BlizzHUDTweaks: BlizzHUDTweaks
