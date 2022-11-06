@@ -64,7 +64,7 @@ function addon:LoadProfile()
 end
 
 function addon:OnInitialize()
-  self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, true)
+  self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, false)
 
   self.db.RegisterCallback(self, "OnProfileChanged", "LoadProfile")
   self.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
