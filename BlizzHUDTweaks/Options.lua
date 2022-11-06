@@ -191,11 +191,13 @@ function addon:getFadeFrameOptions()
   }
 
   local order = 1
-  local withUseGlobal = false
+  local withUseGlobal
 
   for frameName, _ in pairs(self.db.profile) do
     if frameName ~= "*Global*" then
       withUseGlobal = true
+    else
+      withUseGlobal = false
     end
     addFrameOptions(order, options.args, frameName, withUseGlobal)
     order = order + 1
