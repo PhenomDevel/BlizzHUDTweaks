@@ -62,6 +62,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
     type = "toggle",
     get = "GetValue",
     set = "SetValue",
+    disabled = "GetUseGlobalOptions",
     arg = frameName
   }
   order = order + 0.1
@@ -109,7 +110,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
     set = "SetSliderValue",
     min = 0,
     max = 100,
-    step = 5,
+    step = 1,
     disabled = "GetUseGlobalOptions",
     arg = frameName
   }
@@ -143,7 +144,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
     set = "SetSliderValue",
     min = 0,
     max = 100,
-    step = 5,
+    step = 1,
     disabled = "GetUseGlobalOptions",
     arg = frameName
   }
@@ -177,7 +178,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
     set = "SetSliderValue",
     min = 0,
     max = 100,
-    step = 5,
+    step = 1,
     disabled = "GetUseGlobalOptions",
     arg = frameName
   }

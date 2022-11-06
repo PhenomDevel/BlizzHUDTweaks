@@ -22,22 +22,30 @@ local defaultConfig = {
     ["Minimap"] = {},
     ["ObjectiveTrackerFrame"] = {},
     ["BuffFrame"] = {},
-    ["DebuffFrame"] = {},
-    ["StatusTrackingBar"] = {}
+    ["DebuffFrame"] = {}
   }
 }
 
 do
-  for _, v in pairs(defaultConfig.profile) do
-    v["UseGlobalOptions"] = false
-    v["MouseOverInCombat"] = true
+  for frameName, v in pairs(defaultConfig.profile) do
+    if frameName ~= "*Global*" then
+      v["UseGlobalOptions"] = true
+    end
+
+    if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
+      v["UseGlobalOptions"] = false
+      v["FadeOutOfCombat"] = false
+    else
+      v["FadeOutOfCombat"] = true
+    end
+
     v["FadeDuration"] = 0.0025
-    v["FadeInCombat"] = true
     v["InCombatAlpha"] = 0.3
-    v["FadeOutOfCombat"] = true
-    v["OutOfCombatAlpha"] = 0.3
-    v["FadeInRestedArea"] = true
+    v["OutOfCombatAlpha"] = 0.6
     v["RestedAreaAlpha"] = 0.3
+    v["FadeInCombat"] = false
+
+    v["FadeInRestedArea"] = false
   end
 end
 
