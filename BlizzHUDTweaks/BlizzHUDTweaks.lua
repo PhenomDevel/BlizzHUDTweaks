@@ -12,6 +12,9 @@ local defaultConfig = {
     ["TargetFrame"] = {
       displayName = "Target Frame"
     },
+    ["FocusFrame"] = {
+      displayName = "Focus Frame"
+    },
     ["ActionBar1"] = {
       displayName = "Action Bar 1"
     },
@@ -69,6 +72,7 @@ local defaultConfig = {
 local frameMapping = {
   ["PlayerFrame"] = PlayerFrame,
   ["TargetFrame"] = TargetFrame,
+  ["FocusFrame"] = FocusFrame,
   ["ActionBar1"] = MainMenuBar,
   ["ActionBar2"] = MultiBarBottomLeft,
   ["ActionBar3"] = MultiBarBottomRight,
@@ -98,6 +102,7 @@ do
       v["UseGlobalOptions"] = true
     else
       v["UpdateInterval"] = 0.1
+      v["TreatTargetLikeInCombat"] = true
     end
 
     if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
