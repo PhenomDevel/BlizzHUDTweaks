@@ -28,7 +28,7 @@ local defaultConfig = {
 }
 
 do
-  for k, v in pairs(defaultConfig.profile) do
+  for _, v in pairs(defaultConfig.profile) do
     v["UseGlobalOptions"] = false
     v["MouseOverInCombat"] = true
     v["FadeDuration"] = 0.0025
