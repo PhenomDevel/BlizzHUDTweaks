@@ -1,5 +1,5 @@
 local _, BlizzHUDTweaks = ...
-local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0")
+local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0", "AceConsole-3.0")
 local AC = LibStub("AceConfig-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
 
@@ -177,10 +177,17 @@ function addon:OnInitialize()
   AC:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
   ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
 
+  self:RegisterChatCommand("blizzhudtweaks", "OpenOptions")
+  self:RegisterChatCommand("bhudt", "OpenOptions")
+
   addon:HideGCDFlash()
 
   -- TODO: Maybe let the user decide how often it should be updated
   -- NOTE: HookScript would be the better option with OnEnter and OnLeave but it does not trigger for
   -- action bars when the action buttons are mouseovered directly
   addon:InitializeUpdateTicker()
+end
+
+function addon:OpenOptions()
+  InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
 end

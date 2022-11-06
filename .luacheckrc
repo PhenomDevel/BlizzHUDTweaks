@@ -95,6 +95,7 @@ globals = {
   "ZoneAbilityFrame",
   "MinimapCluster",
   "StatusTrackingBarManager",
+  "PlayerCastingBarFrame",
   -- Locals
   "L"
 }

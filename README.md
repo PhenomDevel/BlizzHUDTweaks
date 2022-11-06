@@ -1,6 +1,10 @@
 # BlizzHUDTweaks
 A simple add-on which will provide some tweaks to the newly introduced Blizzard HUD (in Dragonflight).
 
+# Usage
+Openb the options via the ingame options menu or by typing `/bhudt` or `/blizzhudtweaks`.
+
+# Features
 ## Mouseover Fade (action bars, frames)
 You can fade out most of the actions bars and frames for different scenarios. You can set different alpha values for `In Combat`, `Out of Combat`, and `In Resting Area`. You also can set the options globally and use them for each action bar/frame.
 
@@ -17,5 +21,5 @@ The Add-ons determines the alpha which should be applied to the corresponding fr
 
 ## More will eventually follow
 
-#### Credits
+# Credits
 Initial impressions and ideas came from [Conceal](https://www.curseforge.com/wow/addons/conceal) but i had some things missing and wanted to optimize some stuff.
