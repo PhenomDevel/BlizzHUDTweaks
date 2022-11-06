@@ -65,6 +65,9 @@ local defaultConfig = {
     },
     ["StatusTrackingBarManager"] = {
       displayName = "Reputation and Experience Bar"
+    },
+    ["PlayerCastingBarFrame"] = {
+      displayName = "Player Cast Bar"
     }
   }
 }
@@ -89,7 +92,8 @@ local frameMapping = {
   ["DebuffFrame"] = DebuffFrame,
   ["ZoneAbilityFrame"] = ZoneAbilityFrame,
   ["MinimapCluster"] = MinimapCluster,
-  ["StatusTrackingBarManager"] = StatusTrackingBarManager
+  ["StatusTrackingBarManager"] = StatusTrackingBarManager,
+  ["PlayerCastingBarFrame"] = PlayerCastingBarFrame
 }
 
 function addon:GetFrameMapping()
