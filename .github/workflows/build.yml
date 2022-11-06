@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - "*"
       - "!**-alpha**"
@@ -20,7 +20,7 @@ jobs:
         uses: nebularg/actions-luacheck@v1
         with:
           files: 'BlizzHUDTweaks/Source'
-          config: 'https://github.com/PhenomDevel/BlizzHUDTweaks/blob/master/.luacheckrc'
+          config: 'https://github.com/PhenomDevel/BlizzHUDTweaks/blob/main/.luacheckrc'
           args: "--no-color -q"
           annotate: warning
 
