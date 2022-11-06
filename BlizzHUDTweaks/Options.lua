@@ -32,10 +32,10 @@ function addon:GetUseGlobalOptions(info)
   end
 end
 
-local function addFrameOptions(order, t, frameName, withUseGlobal)
+local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   local subOptions = {}
   t[frameName] = {
-    name = frameName,
+    name = frameOptions.displayName or frameName,
     type = "group",
     args = subOptions
   }
@@ -191,13 +191,13 @@ function addon:getFadeFrameOptions()
   local order = 1
   local withUseGlobal
 
-  for frameName, _ in pairs(self.db.profile) do
+  for frameName, frameOptions in pairs(self.db.profile) do
     if frameName ~= "*Global*" then
       withUseGlobal = true
     else
       withUseGlobal = false
     end
-    addFrameOptions(order, options.args, frameName, withUseGlobal)
+    addFrameOptions(order, options.args, frameName, frameOptions, withUseGlobal)
     order = order + 1
   end
 

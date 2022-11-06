@@ -6,25 +6,91 @@ local ACD = LibStub("AceConfigDialog-3.0")
 local defaultConfig = {
   ["profile"] = {
     ["*Global*"] = {},
-    ["PlayerFrame"] = {},
-    ["TargetFrame"] = {},
-    ["ActionBar1"] = {},
-    ["ActionBar2"] = {},
-    ["ActionBar3"] = {},
-    ["ActionBar4"] = {},
-    ["ActionBar5"] = {},
-    ["ActionBar6"] = {},
-    ["ActionBar7"] = {},
-    ["ActionBar8"] = {},
-    ["PetActionBar"] = {},
-    ["StanceBar"] = {},
-    ["MicroButtonAndBagsBar"] = {},
-    ["Minimap"] = {},
-    ["ObjectiveTrackerFrame"] = {},
-    ["BuffFrame"] = {},
-    ["DebuffFrame"] = {}
+    ["PlayerFrame"] = {
+      displayName = "Player Frame"
+    },
+    ["TargetFrame"] = {
+      displayName = "Target Frame"
+    },
+    ["ActionBar1"] = {
+      displayName = "Action Bar 1"
+    },
+    ["ActionBar2"] = {
+      displayName = "Action Bar 2"
+    },
+    ["ActionBar3"] = {
+      displayName = "Action Bar 3"
+    },
+    ["ActionBar4"] = {
+      displayName = "Action Bar 4"
+    },
+    ["ActionBar5"] = {
+      displayName = "Action Bar 5"
+    },
+    ["ActionBar6"] = {
+      displayName = "Action Bar 6"
+    },
+    ["ActionBar7"] = {
+      displayName = "Action Bar 7"
+    },
+    ["ActionBar8"] = {
+      displayName = "Action Bar 8"
+    },
+    ["PetActionBar"] = {
+      displayName = "Pet Action Bar"
+    },
+    ["StanceBar"] = {
+      displayName = "Stance Bar"
+    },
+    ["MicroButtonAndBagsBar"] = {
+      displayName = "System and Bags Bar"
+    },
+    ["ObjectiveTrackerFrame"] = {
+      displayName = "Objective Tracker"
+    },
+    ["BuffFrame"] = {
+      displayName = "Buff Frame"
+    },
+    ["DebuffFrame"] = {
+      displayName = "Debuff Frame"
+    },
+    ["ZoneAbilityFrame"] = {
+      displayName = "Extra Action Button Frame"
+    },
+    ["MinimapCluster"] = {
+      displayName = "Minimap"
+    },
+    ["StatusTrackingBarManager"] = {
+      displayName = "Reputation and Experience Bar"
+    }
   }
 }
+
+local frameMapping = {
+  ["PlayerFrame"] = PlayerFrame,
+  ["TargetFrame"] = TargetFrame,
+  ["ActionBar1"] = MainMenuBar,
+  ["ActionBar2"] = MultiBarBottomLeft,
+  ["ActionBar3"] = MultiBarBottomRight,
+  ["ActionBar4"] = MultiBarRight,
+  ["ActionBar5"] = MultiBarLeft,
+  ["ActionBar6"] = MultiBar5,
+  ["ActionBar7"] = MultiBar6,
+  ["ActionBar8"] = MultiBar7,
+  ["PetActionBar"] = PetActionBar,
+  ["StanceBar"] = StanceBar,
+  ["MicroButtonAndBagsBar"] = MicroButtonAndBagsBar,
+  ["ObjectiveTrackerFrame"] = ObjectiveTrackerFrame,
+  ["BuffFrame"] = BuffFrame,
+  ["DebuffFrame"] = DebuffFrame,
+  ["ZoneAbilityFrame"] = ZoneAbilityFrame,
+  ["MinimapCluster"] = MinimapCluster,
+  ["StatusTrackingBarManager"] = StatusTrackingBarManager
+}
+
+function addon:GetFrameMapping()
+  return frameMapping
+end
 
 do
   for frameName, v in pairs(defaultConfig.profile) do

@@ -15,26 +15,6 @@ function addon:Fade(frame, targetAlpha, duration)
   animation:Play()
 end
 
-local frameMapping = {
-  ["PlayerFrame"] = PlayerFrame,
-  ["TargetFrame"] = TargetFrame,
-  ["ActionBar1"] = MainMenuBar,
-  ["ActionBar2"] = MultiBarBottomLeft,
-  ["ActionBar3"] = MultiBarBottomRight,
-  ["ActionBar4"] = MultiBarRight,
-  ["ActionBar5"] = MultiBarLeft,
-  ["ActionBar6"] = MultiBar5,
-  ["ActionBar7"] = MultiBar6,
-  ["ActionBar8"] = MultiBar7,
-  ["PetActionBar"] = PetActionBar,
-  ["StanceBar"] = StanceBar,
-  ["MicroButtonAndBagsBar"] = MicroButtonAndBagsBar,
-  ["Minimap"] = Minimap,
-  ["ObjectiveTrackerFrame"] = ObjectiveTrackerFrame,
-  ["BuffFrame"] = BuffFrame,
-  ["DebuffFrame"] = DebuffFrame
-}
-
 local function getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)
   local alpha = 1
 
@@ -107,6 +87,7 @@ function addon:RefreshFrames()
     local alpha = getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)
     local fadeDuration = getFadeDuration(globalOptions, frameOptions)
     local currentAlpha = tonumber(string.format("%.2f", frame:GetAlpha()))
+  for frameName, frame in pairs(addon:GetFrameMapping()) do
 
     if alpha and alpha ~= currentAlpha and not frame.fading then
       setFadingState(frame, fadeDuration)

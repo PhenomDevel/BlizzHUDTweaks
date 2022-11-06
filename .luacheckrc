@@ -92,6 +92,9 @@ globals = {
   "BuffFrame",
   "DebuffFrame",
   "IsResting",
+  "ZoneAbilityFrame",
+  "MinimapCluster",
+  "StatusTrackingBarManager",
   -- Locals
   "L"
 }
