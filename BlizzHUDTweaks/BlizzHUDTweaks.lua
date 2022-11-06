@@ -59,11 +59,23 @@ function addon:HideGCDFlash()
   end
 end
 
+function addon:LoadProfile()
+  -- Do nothing for now
+end
+
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, true)
 
+  self.db.RegisterCallback(self, "OnProfileChanged", "LoadProfile")
+  self.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
+  self.db.RegisterCallback(self, "OnProfileReset", "LoadProfile")
+
   AC:RegisterOptionsTable("BlizzHUDTweaks_options", BlizzHUDTweaks.GetAceOptions(self.db))
   self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+
+  local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+  AC:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
+  ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
 
   addon:HideGCDFlash()
 
