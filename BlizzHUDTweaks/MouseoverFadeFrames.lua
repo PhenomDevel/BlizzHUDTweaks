@@ -22,6 +22,12 @@ local function getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)
 
   if frame:IsMouseOver() and not inCombat then
     alpha = 1
+  elseif not inCombat and UnitExists("target") and globalOptions.TreatTargetLikeInCombat then
+    if frameOptions.UseGlobalOptions then
+      alpha = globalOptions.InCombatAlpha or 0.3
+    else
+      alpha = frameOptions.InCombatAlpha or 0.3
+    end
   elseif frameOptions.UseGlobalOptions then
     if frame:IsMouseOver() and globalOptions.MouseOverInCombat then
       alpha = 1

@@ -74,6 +74,17 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   end
   if not withUseGlobal then
     order = order + 0.1
+    subOptions["TreatTargetLikeInCombat"] = {
+      order = order,
+      name = "Treat target as in combat",
+      desc = "When active the fade will change to the in combat fade when you have a target.",
+      width = "full",
+      type = "toggle",
+      get = "GetValue",
+      set = "SetValue",
+      arg = frameName
+    }
+    order = order + 0.1
     subOptions["UpdateInterval"] = {
       order = order,
       name = "Update Interval",
