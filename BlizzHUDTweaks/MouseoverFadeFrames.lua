@@ -58,8 +58,10 @@ local function getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)
 
   -- Overwrite Alpha Settings if player is in resting area for some cases
   if IsResting("player") and not inCombat and not frame:IsMouseOver() then
-    if frameOptions.UseGlobalOptions and globalOptions.FadeInRestedArea then
-      alpha = globalOptions.RestedAreaAlpha
+    if frameOptions.UseGlobalOptions then
+      if globalOptions.FadeInRestedArea then
+        alpha = globalOptions.RestedAreaAlpha
+      end
     elseif frameOptions.FadeInRestedArea then
       alpha = frameOptions.RestedAreaAlpha
     end
