@@ -11,7 +11,7 @@ function addon:Fade(frame, currentAlpha, targetAlpha, duration)
 
   frame.fadeAnimation:SetFromAlpha(currentAlpha)
   frame.fadeAnimation:SetToAlpha(targetAlpha)
-  frame.fadeAnimation:SetDuration(duration)
+  frame.fadeAnimation:SetDuration(math.min(duration, 2))
   frame.fadeAnimation:SetStartDelay(0)
 
   frame.animationGroup:Restart()
@@ -65,7 +65,7 @@ local function getFadeDuration(globalOptions, frameOptions)
     end
   end
 
-  return fadeDuration * 100
+  return fadeDuration
 end
 
 local function setFadingState(frame, duration)
@@ -88,7 +88,7 @@ local currentAlpha
 local targetAlpha
 
 function addon:RefreshFrames()
-  globalOptions = globalOptions or self.db.profile["*Global*"]
+  globalOptions = self.db.profile["*Global*"]
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
     frameOptions = self.db.profile[frameName]

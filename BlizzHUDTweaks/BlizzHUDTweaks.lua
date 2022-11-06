@@ -96,7 +96,8 @@ do
   for frameName, v in pairs(defaultConfig.profile) do
     if frameName ~= "*Global*" then
       v["UseGlobalOptions"] = true
-      v["UpdateInterval"] = 0.001
+    else
+      v["UpdateInterval"] = 0.1
     end
 
     if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
@@ -107,7 +108,7 @@ do
     end
 
     v["MouseOverInCombat"] = true
-    v["FadeDuration"] = 0.0025
+    v["FadeDuration"] = 0.25
     v["InCombatAlpha"] = 0.3
     v["OutOfCombatAlpha"] = 0.6
     v["RestedAreaAlpha"] = 0.3
@@ -127,7 +128,7 @@ function addon:HideGCDFlash()
 end
 
 function addon:LoadProfile()
-  -- Do nothing for now
+  addon:InitializeUpdateTicker()
 end
 
 function addon:RefreshUpdateTicker(interval)
@@ -142,12 +143,15 @@ function addon:RefreshUpdateTicker(interval)
 
     BlizzHUDTweaks.updateTicker =
       C_Timer.NewTicker(
-      interval or 0.1,
+      math.min(interval, 1),
       function()
         addon:RefreshFrames()
       end
     )
   end
+end
+function addon:InitializeUpdateTicker()
+  addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
 end
 
 function addon:OnInitialize()
@@ -169,6 +173,5 @@ function addon:OnInitialize()
   -- TODO: Maybe let the user decide how often it should be updated
   -- NOTE: HookScript would be the better option with OnEnter and OnLeave but it does not trigger for
   -- action bars when the action buttons are mouseovered directly
-
-  addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
+  addon:InitializeUpdateTicker()
 end

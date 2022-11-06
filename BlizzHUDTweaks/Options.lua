@@ -9,21 +9,30 @@ local aceOptions = {
 }
 
 function addon:GetSliderValue(info)
-  return (self.db.profile[info.arg][info[#info]] or 1) * 100
+  return (self.db.profile[info.arg][info[#info]] or 1)
 end
 
 function addon:SetSliderValue(info, value)
+  self.db.profile[info.arg][info[#info]] = (value or 1)
+  addon:RefreshFrames()
+end
+
+function addon:GetFadeSliderValue(info)
+  return (self.db.profile[info.arg][info[#info]] or 1) * 100
+end
+
+function addon:SetFadeSliderValue(info, value)
   self.db.profile[info.arg][info[#info]] = (value or 1) / 100
   addon:RefreshFrames()
 end
 
 function addon:GetUpdateTickerValue(info)
-  return (self.db.profile[info.arg][info[#info]] or 1) * 100
+  return (self.db.profile[info.arg][info[#info]] or 1)
 end
 
 function addon:SetUpdateTickerValue(info, value)
   local interval = (value or 0.1)
-  self.db.profile[info.arg][info[#info]] = interval / 100
+  self.db.profile[info.arg][info[#info]] = interval
   addon:RefreshUpdateTicker(interval)
 end
 
@@ -132,8 +141,8 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     desc = "Set the alpha value of the frame when within combat.",
     width = "normal",
     type = "range",
-    get = "GetSliderValue",
-    set = "SetSliderValue",
+    get = "GetFadeSliderValue",
+    set = "SetFadeSliderValue",
     min = 0,
     max = 100,
     step = 1,
@@ -165,8 +174,8 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     desc = "Set the alpha value of the frame when not in combat.",
     width = "normal",
     type = "range",
-    get = "GetSliderValue",
-    set = "SetSliderValue",
+    get = "GetFadeSliderValue",
+    set = "SetFadeSliderValue",
     min = 0,
     max = 100,
     step = 1,
@@ -198,8 +207,8 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     desc = "Set the alpha value of the frame while in a rested area.",
     width = "normal",
     type = "range",
-    get = "GetSliderValue",
-    set = "SetSliderValue",
+    get = "GetFadeSliderValue",
+    set = "SetFadeSliderValue",
     min = 0,
     max = 100,
     step = 1,
