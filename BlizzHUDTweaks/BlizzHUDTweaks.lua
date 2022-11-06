@@ -146,6 +146,8 @@ function addon:OnInitialize()
   addon:HideGCDFlash()
 
   -- TODO: Maybe let the user decide how often it should be updated
+  -- NOTE: HookScript would be the better option with OnEnter and OnLeave but it does not trigger for
+  -- action bars when the action buttons are mouseovered directly
   C_Timer.NewTicker(
     0.1,
     function()

@@ -78,16 +78,20 @@ local function setFadingState(frame, duration)
   end
 end
 
-function addon:RefreshFrames()
-  local globalOptions = self.db.profile["*Global*"]
-  local inCombat = UnitAffectingCombat("player")
+local globalOptions
+local frameOptions
+local alpha
+local fadeDuration
+local currentAlpha
 
-  for frameName, frame in pairs(frameMapping) do
-    local frameOptions = self.db.profile[frameName]
-    local alpha = getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)
-    local fadeDuration = getFadeDuration(globalOptions, frameOptions)
-    local currentAlpha = tonumber(string.format("%.2f", frame:GetAlpha()))
+function addon:RefreshFrames()
+  globalOptions = globalOptions or self.db.profile["*Global*"]
+
   for frameName, frame in pairs(addon:GetFrameMapping()) do
+    frameOptions = self.db.profile[frameName]
+    alpha = getNextFrameAlpha(frame, UnitAffectingCombat("player"), globalOptions, frameOptions)
+    fadeDuration = getFadeDuration(globalOptions, frameOptions)
+    currentAlpha = tonumber(string.format("%.2f", frame:GetAlpha()))
 
     if alpha and alpha ~= currentAlpha and not frame.fading then
       setFadingState(frame, fadeDuration)
