@@ -101,37 +101,32 @@ function addon:GetFrameMapping()
 end
 
 do
+  defaultConfig.profile["enabled"] = true
+
   for frameName, v in pairs(defaultConfig.profile) do
-    if frameName ~= "*Global*" then
-      v["UseGlobalOptions"] = true
-    else
-      v["UpdateInterval"] = 0.1
-      v["TreatTargetLikeInCombat"] = true
-    end
+    if type(v) == "table" then
+      if frameName ~= "*Global*" then
+        v["UseGlobalOptions"] = true
+      else
+        v["UpdateInterval"] = 0.1
+        v["TreatTargetLikeInCombat"] = true
+      end
 
-    if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
-      v["UseGlobalOptions"] = false
-      v["FadeOutOfCombat"] = false
-    else
-      v["FadeOutOfCombat"] = true
-    end
+      if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
+        v["UseGlobalOptions"] = false
+        v["FadeOutOfCombat"] = false
+      else
+        v["FadeOutOfCombat"] = true
+      end
 
-    v["MouseOverInCombat"] = true
-    v["FadeDuration"] = 0.25
-    v["InCombatAlpha"] = 0.3
-    v["OutOfCombatAlpha"] = 0.6
-    v["RestedAreaAlpha"] = 0.3
-    v["FadeInCombat"] = false
+      v["MouseOverInCombat"] = true
+      v["FadeDuration"] = 0.25
+      v["InCombatAlpha"] = 0.3
+      v["OutOfCombatAlpha"] = 0.6
+      v["RestedAreaAlpha"] = 0.3
+      v["FadeInCombat"] = false
 
-    v["FadeInRestedArea"] = false
-  end
-end
-
---credit https://www.mmo-champion.com/threads/2414999-How-do-I-disable-the-GCD-flash-on-my-bars
-function addon:HideGCDFlash()
-  for _, v in pairs(_G) do
-    if type(v) == "table" and type(v.SetDrawBling) == "function" then
-      v:SetDrawBling(false)
+      v["FadeInRestedArea"] = false
     end
   end
 end
@@ -140,27 +135,37 @@ function addon:LoadProfile()
   addon:InitializeUpdateTicker()
 end
 
-function addon:RefreshUpdateTicker(interval)
+function addon:ClearUpdateTicker()
   if BlizzHUDTweaks.updateTicker then
     BlizzHUDTweaks.updateTicker:Cancel()
   end
+end
+
+function addon:StartUpdateTicker(interval)
+  BlizzHUDTweaks.updateTicker =
+    C_Timer.NewTicker(
+    math.min(interval, 1),
+    function()
+      addon:RefreshFrames()
+    end
+  )
+end
+
+function addon:RefreshUpdateTicker(interval)
+  addon:ClearUpdateTicker()
 
   if not BlizzHUDTweaks.updateTicker or BlizzHUDTweaks.updateTicker:IsCancelled() then
     if interval and interval < 0.01 then
       interval = 0.01
     end
 
-    BlizzHUDTweaks.updateTicker =
-      C_Timer.NewTicker(
-      math.min(interval, 1),
-      function()
-        addon:RefreshFrames()
-      end
-    )
+    addon:StartUpdateTicker(interval)
   end
 end
 function addon:InitializeUpdateTicker()
-  addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
+  if self.db.profile["enabled"] then
+    addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
+  end
 end
 
 function addon:OnInitialize()
@@ -190,4 +195,17 @@ end
 
 function addon:OpenOptions()
   InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+end
+
+function addon:DisableAll()
+  addon:Print("Disabled all fading.")
+  addon:ClearUpdateTicker()
+  for _, frame in pairs(addon:GetFrameMapping()) do
+    frame:SetAlpha(1)
+  end
+end
+
+function addon:EnableAll()
+  addon:Print("Enabled fading of action bars and frames.")
+  addon:InitializeUpdateTicker()
 end

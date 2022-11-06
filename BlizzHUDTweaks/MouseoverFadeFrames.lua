@@ -9,12 +9,14 @@ function addon:Fade(frame, currentAlpha, targetAlpha, duration)
     frame.fadeAnimation = animationGroup:CreateAnimation("Alpha")
   end
 
-  frame.fadeAnimation:SetFromAlpha(currentAlpha)
-  frame.fadeAnimation:SetToAlpha(targetAlpha)
-  frame.fadeAnimation:SetDuration(math.min(duration, 2))
-  frame.fadeAnimation:SetStartDelay(0)
+  if not frame.fadeAnimation:IsPlaying() then
+    frame.fadeAnimation:SetFromAlpha(currentAlpha)
+    frame.fadeAnimation:SetToAlpha(targetAlpha)
+    frame.fadeAnimation:SetDuration(math.min(duration, 2))
+    frame.fadeAnimation:SetStartDelay(0)
 
-  frame.animationGroup:Restart()
+    frame.animationGroup:Restart()
+  end
 end
 
 local function getNextFrameAlpha(frame, inCombat, globalOptions, frameOptions)

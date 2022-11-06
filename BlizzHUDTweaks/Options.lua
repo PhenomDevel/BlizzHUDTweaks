@@ -72,6 +72,18 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       arg = frameName
     }
   end
+  order = order + 0.1
+  subOptions["MouseOverInCombat"] = {
+    order = order,
+    name = "Allow mouseover in combat",
+    desc = "When activated you can mouseover action bars and frames while within combat to show the frame with full alpha.",
+    width = "full",
+    type = "toggle",
+    get = "GetValue",
+    set = "SetValue",
+    disabled = "GetUseGlobalOptions",
+    arg = frameName
+  }
   if not withUseGlobal then
     order = order + 0.1
     subOptions["TreatTargetLikeInCombat"] = {
@@ -89,8 +101,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       order = order,
       name = "Update Interval",
       desc = "The interval in which the add-on should check for necessary alpha changes. If you don't need mouseovers to be instantaneously, a value of 0.1 should be fine for you.",
-      descStyle = "inline",
-      width = "full",
+      width = "normal",
       type = "range",
       get = "GetUpdateTickerValue",
       set = "SetUpdateTickerValue",
@@ -100,24 +111,13 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       arg = frameName
     }
   end
-  order = order + 0.1
-  subOptions["MouseOverInCombat"] = {
-    order = order,
-    name = "Allow mouseover in combat",
-    desc = "When activated you can mouseover action bars and frames while within combat to show the frame with full alpha.",
-    width = "full",
-    type = "toggle",
-    get = "GetValue",
-    set = "SetValue",
-    disabled = "GetUseGlobalOptions",
-    arg = frameName
-  }
+
   order = order + 0.1
   subOptions["FadeDuration"] = {
     order = order,
     name = "Fade Duration",
     desc = "The duration how long the fade should take (fade in and out).",
-    width = "full",
+    width = "normal",
     type = "range",
     get = "GetSliderValue",
     set = "SetSliderValue",
@@ -239,19 +239,41 @@ function addon:getFadeFrameOptions()
   local withUseGlobal
 
   for frameName, frameOptions in pairs(self.db.profile) do
-    if frameName ~= "*Global*" then
-      withUseGlobal = true
-    else
-      withUseGlobal = false
+    if type(frameOptions) == "table" then
+      if frameName ~= "*Global*" then
+        withUseGlobal = true
+      else
+        withUseGlobal = false
+      end
+      addFrameOptions(order, options.args, frameName, frameOptions, withUseGlobal)
+      order = order + 1
     end
-    addFrameOptions(order, options.args, frameName, frameOptions, withUseGlobal)
-    order = order + 1
   end
 
   return options
 end
+function addon:getGlobalOptions()
+  return {
+    order = 0,
+    name = "Enabled",
+    width = "full",
+    type = "toggle",
+    get = function(info)
+      return self.db.profile[info[#info]]
+    end,
+    set = function(info, value)
+      self.db.profile[info[#info]] = value
+      if not value then
+        addon:DisableAll()
+      else
+        addon:EnableAll()
+      end
+    end
+  }
+end
 
 function BlizzHUDTweaks.GetAceOptions()
+  aceOptions.args["enabled"] = addon:getGlobalOptions()
   aceOptions.args["mouseoverFadeFrames"] = addon:getFadeFrameOptions()
   return aceOptions
 end
