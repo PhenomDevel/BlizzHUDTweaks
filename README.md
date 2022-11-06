@@ -1,3 +1,5 @@
+[![Build](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml)
+
 # BlizzHUDTweaks
 A simple add-on which will provide some tweaks to the newly introduced Blizzard HUD (in Dragonflight).
 
