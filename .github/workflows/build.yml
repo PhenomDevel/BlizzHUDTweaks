@@ -19,7 +19,7 @@ jobs:
       - name: Install and run Luacheck
         uses: nebularg/actions-luacheck@v1
         with:
-          files: 'BlizzHUDTweaks/Source'
+          files: 'BlizzHUDTweaks'
           config: 'https://github.com/PhenomDevel/BlizzHUDTweaks/blob/main/.luacheckrc'
           args: "--no-color -q"
           annotate: warning
