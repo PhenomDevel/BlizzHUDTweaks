@@ -55,6 +55,7 @@ function addon:OnInitialize()
   AC:RegisterOptionsTable("BlizzHUDTweaks_options", BlizzHUDTweaks.GetAceOptions(self.db))
   self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
 
+  -- TODO: Maybe let the user decide how often it should be updated
   C_Timer.NewTicker(
     0.1,
     function()
