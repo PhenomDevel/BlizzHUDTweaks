@@ -39,6 +39,7 @@ do
       v["FadeOutOfCombat"] = true
     end
 
+    v["MouseOverInCombat"] = true
     v["FadeDuration"] = 0.0025
     v["InCombatAlpha"] = 0.3
     v["OutOfCombatAlpha"] = 0.6

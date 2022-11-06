@@ -57,7 +57,7 @@ local function addFrameOptions(order, t, frameName, withUseGlobal)
   subOptions["MouseOverInCombat"] = {
     order = order,
     name = "Allow mouseover in combat",
-    desc = "When activated you can mouseover action bars and frames while within combat.",
+    desc = "When activated you can mouseover action bars and frames while within combat to show the frame with full alpha.",
     width = "full",
     type = "toggle",
     get = "GetValue",
