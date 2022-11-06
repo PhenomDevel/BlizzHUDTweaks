@@ -96,6 +96,7 @@ globals = {
   "MinimapCluster",
   "StatusTrackingBarManager",
   "PlayerCastingBarFrame",
+  "FocusFrame",
   -- Locals
   "L"
 }
