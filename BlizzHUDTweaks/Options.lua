@@ -1,4 +1,3 @@
-local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 
 local aceOptions = {
