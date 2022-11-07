@@ -76,18 +76,6 @@ local function getFadeDuration(globalOptions, frameOptions)
   return fadeDuration
 end
 
-local function setFadingState(frame, duration)
-  if frame then
-    frame.fading = duration
-    C_Timer.After(
-      duration,
-      function()
-        frame.fading = false
-      end
-    )
-  end
-end
-
 local globalOptions
 local frameOptions
 local alpha
@@ -106,7 +94,6 @@ function addon:RefreshFrames()
     targetAlpha = tonumber(string.format("%.2f", alpha))
 
     if targetAlpha and targetAlpha ~= currentAlpha and not frame.fading then
-      setFadingState(frame, fadeDuration)
       addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
     end
   end

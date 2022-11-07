@@ -23,5 +23,8 @@ The Add-ons determines the alpha which should be applied to the corresponding fr
 
 ## More will eventually follow
 
+# Performance
+Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
+
 # Credits
 Initial impressions and ideas came from [Conceal](https://www.curseforge.com/wow/addons/conceal) but i had some things missing and wanted to optimize some stuff.

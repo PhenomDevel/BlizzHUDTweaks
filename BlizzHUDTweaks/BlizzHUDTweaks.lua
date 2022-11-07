@@ -58,7 +58,7 @@ local defaultConfig = {
       displayName = "Debuff Frame"
     },
     ["ZoneAbilityFrame"] = {
-      displayName = "Extra Action Button Frame"
+      displayName = "Zone Ability Frame"
     },
     ["MinimapCluster"] = {
       displayName = "Minimap"
@@ -68,6 +68,9 @@ local defaultConfig = {
     },
     ["PlayerCastingBarFrame"] = {
       displayName = "Player Cast Bar"
+    },
+    ["ExtraActionButtonFrame"] = {
+      diplayName = "Extra Action Button"
     }
   }
 }
@@ -93,7 +96,8 @@ local frameMapping = {
   ["ZoneAbilityFrame"] = ZoneAbilityFrame,
   ["MinimapCluster"] = MinimapCluster,
   ["StatusTrackingBarManager"] = StatusTrackingBarManager,
-  ["PlayerCastingBarFrame"] = PlayerCastingBarFrame
+  ["PlayerCastingBarFrame"] = PlayerCastingBarFrame,
+  ["ExtraActionButtonFrame"] = ExtraActionButtonFrame
 }
 
 function addon:GetFrameMapping()

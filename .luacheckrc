@@ -97,6 +97,7 @@ globals = {
   "StatusTrackingBarManager",
   "PlayerCastingBarFrame",
   "FocusFrame",
+  "ExtraActionButtonFrame",
   -- Locals
   "L"
 }
