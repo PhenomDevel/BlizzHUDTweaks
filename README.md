@@ -30,7 +30,9 @@ Even though the add-on has to check more or less in a set interval, it is very p
 ## Action bar / frame not showing even though it should
 - Please ensure you have enabled the wanted option for the given action bar or frame
 - Also, make sure you haven't set the `Bar Visible` option in the Blizzard Edit Mode to something else than `Always visible`
-  - If set to `Out of Combat` you might be missing the frame or can't mouseover it since the blizzard option overwrites everything else
+  - If set to `Out of Combat` you might be missing the frame or can't mouseover it since the blizzard option overwrites everything else
 
 # Credits
-Initial impressions and ideas came from [Conceal](https://www.curseforge.com/wow/addons/conceal) but i had some things missing and wanted to optimize some stuff.
+The initial impressions came from [Conceal](https://www.curseforge.com/wow/addons/conceal). However, I disliked the design approach and wanted to add missing features. Therefore, I wrote my personal add-on which extends the feature set.
+
+The code is 99% rewritten with the only exception being the [HideGCDFlash](https://www.mmo-champion.com/threads/2414999-How-do-I-disable-the-GCD-flash-on-my-bars) function which initially already came from the linked mmo-champion post.
