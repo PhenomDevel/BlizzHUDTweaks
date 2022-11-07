@@ -100,10 +100,6 @@ local frameMapping = {
   ["ExtraActionButtonFrame"] = ExtraActionButtonFrame
 }
 
-function addon:GetFrameMapping()
-  return frameMapping
-end
-
 do
   defaultConfig.profile["enabled"] = true
 
@@ -135,6 +131,13 @@ do
   end
 end
 
+-------------------------------------------------------------------------------
+-- Public API
+
+function addon:GetFrameMapping()
+  return frameMapping
+end
+
 function addon:LoadProfile()
   addon:InitializeUpdateTicker()
 end
@@ -150,7 +153,8 @@ function addon:StartUpdateTicker(interval)
     C_Timer.NewTicker(
     math.min(interval, 1),
     function()
-      addon:RefreshFrames()
+      addon:RefreshFrameAlphas()
+      addon:RefreshMouseoverFrameAlphas()
     end
   )
 end
@@ -179,7 +183,7 @@ function addon:OnInitialize()
   self.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
   self.db.RegisterCallback(self, "OnProfileReset", "LoadProfile")
 
-  AC:RegisterOptionsTable("BlizzHUDTweaks_options", BlizzHUDTweaks.GetAceOptions(self.db))
+  AC:RegisterOptionsTable("BlizzHUDTweaks_options", addon:GetAceOptions(self.db))
   self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
 
   local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
@@ -202,7 +206,7 @@ function addon:OpenOptions()
 end
 
 function addon:DisableAll()
-  addon:Print("Disabled all fading.")
+  addon:Print("Disabled fading for all action bars and frames.")
   addon:ClearUpdateTicker()
   for _, frame in pairs(addon:GetFrameMapping()) do
     frame:SetAlpha(1)
