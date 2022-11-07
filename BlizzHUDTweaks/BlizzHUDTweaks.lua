@@ -70,7 +70,7 @@ local defaultConfig = {
       displayName = "Player Cast Bar"
     },
     ["ExtraActionButtonFrame"] = {
-      diplayName = "Extra Action Button"
+      displayName = "Extra Action Button"
     }
   }
 }
