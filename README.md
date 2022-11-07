@@ -16,13 +16,32 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 - In Combat Fade
 - Out of Combat Fade
 - Rested Area Fade
+- Set options globally or for each frame
+- Treat targeting as in combat fade
 
-The priority is as follows:
-Mouseover > In Combat Fade > Out of Combat Fade > Rested Area Fade.
-The Add-ons determines the alpha which should be applied to the corresponding frames based on the settings you applied and the resting/combat state of the player character.
+The priority of the checks is as follows
+1. In Combat Face
+2. Has Target Fade (which uses the `In Combat Fade` values)
+3. Out Of Combat Fade
+4. Rested Area Fade
+
+### Supported action bars and frames
+- Action Bar 1-8
+- Player Frame
+- Target Frame
+- Focus Frame
+- Buff Frame
+- Debuff Frame
+- Pet Action Bar
+- Stance Bar
+- Micro Button and Bags Bar
+- Objective Tracker Frame
+- Extra Action Button / Zone Ability Frame
+- Minimap
+- Status Tracking Bar (Rep. & Exp.)
+- Player Casting Bar Frame
 
 ## More will eventually follow
-
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
 
