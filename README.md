@@ -26,5 +26,11 @@ The Add-ons determines the alpha which should be applied to the corresponding fr
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
 
+# FAQ
+## Action bar / frame not showing even though it should
+- Please ensure you have enabled the wanted option for the given action bar or frame
+- Also, make sure you haven't set the `Bar Visible` option in the Blizzard Edit Mode to something else than `Always visible`
+  - If set to `Out of Combat` you might be missing the frame or can't mouseover it since the blizzard option overwrites everything else
+
 # Credits
 Initial impressions and ideas came from [Conceal](https://www.curseforge.com/wow/addons/conceal) but i had some things missing and wanted to optimize some stuff.
