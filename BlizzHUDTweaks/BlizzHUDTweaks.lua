@@ -143,6 +143,7 @@ function addon:GetFrameMapping()
 end
 
 function addon:LoadProfile()
+  addon:RefreshFrameAlphas(true)
   addon:InitializeUpdateTicker()
 end
 
