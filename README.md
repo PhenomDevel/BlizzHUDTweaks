@@ -4,7 +4,7 @@
 A simple add-on which will provide some tweaks to the newly introduced Blizzard HUD (in Dragonflight).
 
 # Usage
-Openb the options via the ingame options menu or by typing `/bhudt` or `/blizzhudtweaks`.
+Open the options via the ingame options menu or by typing `/bht` or `/blizzhudtweaks`.
 
 # Features
 ## Mouseover Fade (action bars, frames)

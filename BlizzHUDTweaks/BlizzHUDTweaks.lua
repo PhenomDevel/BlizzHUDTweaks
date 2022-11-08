@@ -196,7 +196,7 @@ function addon:OnInitialize()
   ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
 
   self:RegisterChatCommand("blizzhudtweaks", "OpenOptions")
-  self:RegisterChatCommand("bhudt", "OpenOptions")
+  self:RegisterChatCommand("bht", "OpenOptions")
 
   addon:HideGCDFlash()
 
