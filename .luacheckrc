@@ -98,6 +98,7 @@ globals = {
   "PlayerCastingBarFrame",
   "FocusFrame",
   "ExtraActionButtonFrame",
+  "PetFrame",
   -- Locals
   "L"
 }
