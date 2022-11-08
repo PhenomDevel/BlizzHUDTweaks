@@ -1,3 +1,4 @@
+local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 
 local function determineFadeDuration(globalOptions, frameOptions)
@@ -14,18 +15,6 @@ local function determineFadeDuration(globalOptions, frameOptions)
   end
 
   return fadeDuration
-end
-
-local lastIsResting, lastInCombat, lastTargetExists
-local function shouldUpdateFrames()
-  local isResting, inCombat, targetExists = IsResting("player"), UnitAffectingCombat("player"), UnitExists("target")
-
-  if lastIsResting ~= isResting or lastInCombat ~= inCombat or lastTargetExists ~= targetExists then
-    lastIsResting = isResting
-    lastInCombat = inCombat
-    lastTargetExists = targetExists
-    return true
-  end
 end
 
 local function inCombatAlphaValue(globalOptions, frameOptions)
@@ -51,10 +40,10 @@ local function outOfCombatAlphaValue(globalOptions, frameOptions)
 end
 
 local function restedAreaAlphaValue(globalOptions, frameOptions)
-  local inCombat = UnitAffectingCombat("player")
+  local inCombat = BlizzHUDTweaks.inCombat
   local alpha = 1
 
-  if IsResting("player") and not inCombat then
+  if BlizzHUDTweaks.isResting and not inCombat then
     if frameOptions.UseGlobalOptions then
       if globalOptions.FadeInRestedArea then
         alpha = globalOptions.RestedAreaAlpha
@@ -68,16 +57,19 @@ local function restedAreaAlphaValue(globalOptions, frameOptions)
 end
 
 local function determineTargetAlpha(globalOptions, frameOptions)
-  local inCombat = UnitAffectingCombat("player")
+  local inCombat = BlizzHUDTweaks.inCombat
+  local isResting = BlizzHUDTweaks.isResting
+  local hasTarget = BlizzHUDTweaks.hasTarget
+
   local alpha = 1
 
   if inCombat then
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and UnitExists("Target") then
+  elseif not inCombat and hasTarget then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and not IsResting("player") then
+  elseif not inCombat and not isResting then
     alpha = outOfCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and IsResting("player") then
+  elseif not inCombat and isResting then
     alpha = restedAreaAlphaValue(globalOptions, frameOptions)
   end
 
@@ -91,7 +83,7 @@ end
 local mouseoverFrames = {}
 
 function addon:RefreshMouseoverFrameAlphas()
-  local inCombat = UnitAffectingCombat("player")
+  local inCombat = BlizzHUDTweaks.inCombat
   local globalOptions = self.db.profile["*Global*"]
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
@@ -119,7 +111,7 @@ end
 -------------------------------------------------------------------------------
 -- Public API
 
-function addon:Fade(frame, currentAlpha, targetAlpha, duration)
+function addon:Fade(frame, currentAlpha, targetAlpha, duration, delay)
   if currentAlpha and targetAlpha then
     if not frame.fadeAnimation then
       local animationGroup = frame:CreateAnimationGroup()
@@ -138,19 +130,18 @@ function addon:Fade(frame, currentAlpha, targetAlpha, duration)
   end
 end
 
-function addon:RefreshFrameAlphas(isForced)
-  if shouldUpdateFrames() or isForced then
-    local globalOptions = self.db.profile["*Global*"]
+function addon:RefreshFrameAlphas(useFadeDelay)
+  local globalOptions = self.db.profile["*Global*"]
 
-    for frameName, frame in pairs(addon:GetFrameMapping()) do
-      local frameOptions = self.db.profile[frameName]
-      local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
-      local currentAlpha = getNormalizedFrameAlpha(frame)
-      local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+  for frameName, frame in pairs(addon:GetFrameMapping()) do
+    local frameOptions = self.db.profile[frameName]
+    local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
+    local currentAlpha = getNormalizedFrameAlpha(frame)
+    local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
 
-      if targetAlpha and targetAlpha ~= currentAlpha then
-        addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
+    if targetAlpha and targetAlpha ~= currentAlpha then
       end
+      addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
     end
   end
 end

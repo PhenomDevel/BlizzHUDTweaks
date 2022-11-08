@@ -202,6 +202,12 @@ function addon:OnInitialize()
   self:RegisterChatCommand("bht", "OpenOptions")
 
   addon:HideGCDFlash()
+  addon:RegisterEvent("PLAYER_REGEN_ENABLED")
+  addon:RegisterEvent("PLAYER_REGEN_DISABLED")
+  addon:RegisterEvent("PLAYER_UPDATE_RESTING")
+  addon:RegisterEvent("PLAYER_TARGET_CHANGED")
+  addon:RegisterEvent("PLAYER_ENTERING_WORLD")
+
   QueueStatusButton:SetParent(UIParent)
 
   -- TODO: Maybe let the user decide how often it should be updated
@@ -225,4 +231,35 @@ end
 function addon:EnableAll()
   addon:Print("Enabled fading of action bars and frames.")
   addon:InitializeUpdateTicker()
+  addon:RefreshFrameAlphas()
+end
+
+function addon:PLAYER_REGEN_ENABLED()
+  BlizzHUDTweaks.inCombat = false
+  addon:RefreshFrameAlphas(true)
+end
+
+function addon:PLAYER_REGEN_DISABLED()
+  BlizzHUDTweaks.inCombat = true
+  addon:RefreshFrameAlphas()
+end
+
+function addon:PLAYER_UPDATE_RESTING()
+  BlizzHUDTweaks.isResting = IsResting("player")
+  addon:RefreshFrameAlphas()
+end
+
+function addon:PLAYER_TARGET_CHANGED()
+  BlizzHUDTweaks.hasTarget = UnitExists("target")
+
+  if BlizzHUDTweaks.hasTarget then
+    addon:RefreshFrameAlphas()
+  else
+    addon:RefreshFrameAlphas(true)
+  end
+end
+
+function addon:PLAYER_ENTERING_WORLD()
+  BlizzHUDTweaks.isResting = IsResting("player")
+  addon:RefreshFrameAlphas()
 end
