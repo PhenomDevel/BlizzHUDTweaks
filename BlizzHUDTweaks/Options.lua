@@ -11,6 +11,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   local subOptions = {}
   t[frameName] = {
     name = frameOptions.displayName or frameName,
+    desc = frameOptions.description or nil,
     type = "group",
     args = subOptions
   }
@@ -56,7 +57,10 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     subOptions["UpdateInterval"] = {
       order = order,
       name = "Update Interval",
-      desc = "The interval in which the add-on should check for necessary alpha changes. If you don't need mouseovers to be instantaneously, a value of 0.1 should be fine for you.",
+      desc = "The interval in which the add-on should check for necessary alpha changes." ..
+        "If you don't need mouseovers to be instantaneously, a value of 0.1 should be fine for you." ..
+          addon:ColoredString("\n\nNOTE: ", "eb4034") ..
+            "Setting a value below 0.1 puts some stress on the CPU, since the add-on will check for mouseovers far more often. It shouldn't be a real problem, but if you have any FPS issues, try increasing the value again.",
       width = "normal",
       type = "range",
       get = "GetUpdateTickerValue",
@@ -150,6 +154,23 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     arg = frameName
   }
   order = order + 0.1
+  subOptions["OutOfCombatFadeDelay"] = {
+    order = order,
+    name = "Fade Delay",
+    desc = "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha." ..
+      "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing` action bars or frames when entering/leaving combat fast, e.g. while questing." ..
+        addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
+    width = "normal",
+    type = "range",
+    get = "GetSliderValue",
+    set = "SetSliderValue",
+    min = 0,
+    max = 60,
+    step = 0.5,
+    disabled = "GetUseGlobalOptions",
+    arg = frameName
+  }
+  order = order + 0.1
   subOptions["RestedAreaFade"] = {
     order = order,
     name = "Rested Area Fade",
@@ -193,7 +214,7 @@ end
 
 function addon:SetSliderValue(info, value)
   self.db.profile[info.arg][info[#info]] = (value or 1)
-  addon:RefreshFrameAlphas(true)
+  addon:RefreshFrameAlphas()
 end
 
 function addon:GetFadeSliderValue(info)
@@ -202,7 +223,7 @@ end
 
 function addon:SetFadeSliderValue(info, value)
   self.db.profile[info.arg][info[#info]] = (value or 1) / 100
-  addon:RefreshFrameAlphas(true)
+  addon:RefreshFrameAlphas()
 end
 
 function addon:GetUpdateTickerValue(info)
@@ -221,7 +242,7 @@ end
 
 function addon:SetValue(info, value)
   self.db.profile[info.arg][info[#info]] = value
-  addon:RefreshFrameAlphas(true)
+  addon:RefreshFrameAlphas()
 end
 
 function addon:GetUseGlobalOptions(info)

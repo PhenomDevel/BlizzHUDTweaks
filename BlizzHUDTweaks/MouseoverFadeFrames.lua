@@ -76,6 +76,18 @@ local function determineTargetAlpha(globalOptions, frameOptions)
   return alpha
 end
 
+local function determineFadeDelay(globalOptions, frameOptions)
+  local delay
+
+  if frameOptions.UseGlobalOptions then
+    delay = globalOptions.OutOfCombatFadeDelay
+  else
+    delay = frameOptions.OutOfCombatFadeDelay
+  end
+
+  return delay
+end
+
 local function getNormalizedFrameAlpha(frame)
   return tonumber(string.format("%.2f", frame:GetAlpha()))
 end
@@ -124,7 +136,7 @@ function addon:Fade(frame, currentAlpha, targetAlpha, duration, delay)
     frame.fadeAnimation:SetFromAlpha(currentAlpha)
     frame.fadeAnimation:SetToAlpha(targetAlpha)
     frame.fadeAnimation:SetDuration(math.min(duration, 2))
-    frame.fadeAnimation:SetStartDelay(0)
+    frame.fadeAnimation:SetStartDelay(delay or 0)
 
     frame.animationGroup:Restart()
   end
@@ -140,6 +152,9 @@ function addon:RefreshFrameAlphas(useFadeDelay)
     local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
 
     if targetAlpha and targetAlpha ~= currentAlpha then
+      local fadeDelay = 0
+      if useFadeDelay then
+        fadeDelay = determineFadeDelay(globalOptions, frameOptions)
       end
       addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
     end

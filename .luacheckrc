@@ -99,6 +99,7 @@ globals = {
   "FocusFrame",
   "ExtraActionButtonFrame",
   "PetFrame",
+  "QueueStatusButton",
   -- Locals
   "L"
 }

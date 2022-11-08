@@ -5,7 +5,10 @@ local ACD = LibStub("AceConfigDialog-3.0")
 
 local defaultConfig = {
   ["profile"] = {
-    ["*Global*"] = {},
+    ["*Global*"] = {
+      displayName = "* |T134063:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Global Settings|r",
+      description = "You can set global values which can be activated for each frame."
+    },
     ["PlayerFrame"] = {
       displayName = "Player Frame"
     },
@@ -104,7 +107,8 @@ local frameMapping = {
   ["StatusTrackingBarManager"] = StatusTrackingBarManager,
   ["PlayerCastingBarFrame"] = PlayerCastingBarFrame,
   ["ExtraActionButtonFrame"] = ExtraActionButtonFrame,
-  ["PetFrame"] = PetFrame
+  ["PetFrame"] = PetFrame,
+  ["QueueStatusButton"] = QueueStatusButton
 }
 
 do
@@ -128,10 +132,11 @@ do
 
       v["MouseOverInCombat"] = true
       v["FadeDuration"] = 0.25
-      v["InCombatAlpha"] = 0.3
+      v["InCombatAlpha"] = 1
       v["OutOfCombatAlpha"] = 0.6
       v["RestedAreaAlpha"] = 0.3
-      v["FadeInCombat"] = false
+      v["FadeInCombat"] = true
+      v["OutOfCombatFadeDelay"] = 0
 
       v["FadeInRestedArea"] = false
     end
@@ -146,7 +151,7 @@ function addon:GetFrameMapping()
 end
 
 function addon:LoadProfile()
-  addon:RefreshFrameAlphas(true)
+  addon:RefreshFrameAlphas()
   addon:InitializeUpdateTicker()
 end
 
@@ -161,7 +166,6 @@ function addon:StartUpdateTicker(interval)
     C_Timer.NewTicker(
     math.min(interval, 1),
     function()
-      addon:RefreshFrameAlphas()
       addon:RefreshMouseoverFrameAlphas()
     end
   )

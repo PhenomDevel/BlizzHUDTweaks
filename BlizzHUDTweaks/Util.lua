@@ -12,3 +12,17 @@ function addon:HideGCDFlash()
     end
   end
 end
+
+function addon:ColoredString(s, color, hasAlpha)
+  if color then
+    local finalColor = color
+
+    if not hasAlpha then
+      finalColor = "FF" .. finalColor
+    end
+
+    return "|c" .. finalColor .. tostring(s) .. "|r"
+  else
+    return "|c" .. "FFFFFFFF" .. tostring(s) .. "|r"
+  end
+end
