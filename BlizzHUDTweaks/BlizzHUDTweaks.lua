@@ -74,6 +74,9 @@ local defaultConfig = {
     },
     ["PetFrame"] = {
       displayName = "Pet Frame"
+    },
+    ["QueueStatusButton"] = {
+      displayName = "Queue Status Eye"
     }
   }
 }
@@ -199,6 +202,7 @@ function addon:OnInitialize()
   self:RegisterChatCommand("bht", "OpenOptions")
 
   addon:HideGCDFlash()
+  QueueStatusButton:SetParent(UIParent)
 
   -- TODO: Maybe let the user decide how often it should be updated
   -- NOTE: HookScript would be the better option with OnEnter and OnLeave but it does not trigger for
