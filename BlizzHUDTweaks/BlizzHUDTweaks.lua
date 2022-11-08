@@ -71,6 +71,9 @@ local defaultConfig = {
     },
     ["ExtraActionButtonFrame"] = {
       displayName = "Extra Action Button"
+    },
+    ["PetFrame"] = {
+      displayName = "Pet Frame"
     }
   }
 }
@@ -97,7 +100,8 @@ local frameMapping = {
   ["MinimapCluster"] = MinimapCluster,
   ["StatusTrackingBarManager"] = StatusTrackingBarManager,
   ["PlayerCastingBarFrame"] = PlayerCastingBarFrame,
-  ["ExtraActionButtonFrame"] = ExtraActionButtonFrame
+  ["ExtraActionButtonFrame"] = ExtraActionButtonFrame,
+  ["PetFrame"] = PetFrame
 }
 
 do
