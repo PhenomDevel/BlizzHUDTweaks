@@ -60,7 +60,8 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       desc = "The interval in which the add-on should check for necessary alpha changes." ..
         "If you don't need mouseovers to be instantaneously, a value of 0.1 should be fine for you." ..
           addon:ColoredString("\n\nNOTE: ", "eb4034") ..
-            "Setting a value below 0.1 puts some stress on the CPU, since the add-on will check for mouseovers far more often. It shouldn't be a real problem, but if you have any FPS issues, try increasing the value again.",
+            "Setting a value below 0.1 puts some stress on the CPU, since the add-on will check" ..
+              "for mouseovers far more often. It shouldn't be a real problem, but if " .. "you have any FPS issues, try increasing the value again.",
       width = "normal",
       type = "range",
       get = "GetUpdateTickerValue",
@@ -158,8 +159,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = "Fade Delay",
     desc = "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha." ..
-      "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing` action bars or frames when entering/leaving combat fast, e.g. while questing." ..
-        addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
+      "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing`" ..
+        " action bars or frames when entering/leaving combat fast, e.g. while questing." ..
+          addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
     width = "normal",
     type = "range",
     get = "GetSliderValue",
