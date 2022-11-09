@@ -70,6 +70,12 @@ local function inCombatFadeActive(globalOptions, frameOptions)
   end
 end
 
+local function treatTargetFadeActive(globalOptions, frameOptions)
+  if globalOptions.TreatTargetLikeInCombat then
+    return true
+  end
+end
+
 local function restedAreaFadeActive(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     if globalOptions.FadeInRestedArea then
@@ -89,7 +95,7 @@ local function determineTargetAlpha(globalOptions, frameOptions)
 
   if inCombat and inCombatFadeActive(globalOptions, frameOptions) then
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and hasTarget and inCombatFadeActive(globalOptions, frameOptions) then
+  elseif not inCombat and hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
   elseif not inCombat and isResting and restedAreaFadeActive(globalOptions, frameOptions) then
     alpha = restedAreaAlphaValue(globalOptions, frameOptions)

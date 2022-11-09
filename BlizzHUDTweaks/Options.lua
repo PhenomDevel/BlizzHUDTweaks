@@ -63,7 +63,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
           addon:ColoredString("\n\nNOTE: ", "eb4034") ..
             "Setting a value below 0.1 puts some stress on the CPU, since the add-on will check" ..
               "for mouseovers far more often. It shouldn't be a real problem, but if " .. "you have any FPS issues, try increasing the value again.",
-      width = "normal",
+      width = 0.8,
       type = "range",
       get = "GetUpdateTickerValue",
       set = "SetUpdateTickerValue",
@@ -79,7 +79,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = "Fade Duration",
     desc = "The duration how long the fade should take (fade in and out).",
-    width = "normal",
+    width = 0.8,
     type = "range",
     get = "GetSliderValue",
     set = "SetSliderValue",
@@ -100,7 +100,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   subOptions["FadeInCombat"] = {
     order = order,
     name = "Enabled",
-    width = "normal",
+    width = 0.6,
     type = "toggle",
     get = "GetValue",
     set = "SetValue",
@@ -112,7 +112,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = "Alpha",
     desc = "Set the alpha value of the frame when within combat.",
-    width = "normal",
+    width = 0.8,
     type = "range",
     get = "GetFadeSliderValue",
     set = "SetFadeSliderValue",
@@ -133,7 +133,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   subOptions["FadeOutOfCombat"] = {
     order = order,
     name = "Enabled",
-    width = "normal",
+    width = 0.6,
     type = "toggle",
     get = "GetValue",
     set = "SetValue",
@@ -145,7 +145,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = "Alpha",
     desc = "Set the alpha value of the frame when not in combat.",
-    width = "normal",
+    width = 0.8,
     type = "range",
     get = "GetFadeSliderValue",
     set = "SetFadeSliderValue",
@@ -163,7 +163,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing`" ..
         " action bars or frames when entering/leaving combat fast, e.g. while questing." ..
           addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
-    width = "normal",
+    width = 0.8,
     type = "range",
     get = "GetSliderValue",
     set = "SetSliderValue",
@@ -184,7 +184,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   subOptions["FadeInRestedArea"] = {
     order = order,
     name = "Enabled",
-    width = "normal",
+    width = 0.6,
     type = "toggle",
     get = "GetValue",
     set = "SetValue",
@@ -196,7 +196,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = "Alpha",
     desc = "Set the alpha value of the frame while in a rested area.",
-    width = "normal",
+    width = 0.8,
     type = "range",
     get = "GetFadeSliderValue",
     set = "SetFadeSliderValue",
