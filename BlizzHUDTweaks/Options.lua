@@ -17,6 +17,18 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     args = subOptions
   }
 
+  order = order + 0.1
+  subOptions["CopyFrom"] = {
+    order = order,
+    name = "Copy from",
+    desc = "Copies all settings ",
+    width = "full",
+    type = "select",
+    set = "CopyFrom",
+    values = addon:GetFrameTable(),
+    arg = frameName
+  }
+
   if withUseGlobal then
     order = order + 0.1
     subOptions["UseGlobalOptions"] = {
@@ -210,6 +222,10 @@ end
 
 -------------------------------------------------------------------------------
 -- Public API
+
+function addon:CopyFrom(info, value)
+  print(info, value)
+end
 
 function addon:GetSliderValue(info)
   return (self.db.profile[info.arg][info[#info]] or 1)
