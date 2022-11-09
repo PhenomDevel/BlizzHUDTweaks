@@ -48,6 +48,7 @@ The priority of the checks is as follows
 - Micro Button Bar
 - Bags Bar
 - Durability Frame
+- Vehicle Seat Frame
 
 ## More will eventually follow
 # Performance
