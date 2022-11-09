@@ -103,6 +103,7 @@ globals = {
   "MicroButtonAndBagsBarMovable",
   "EditModeExpandedBackpackBar",
   "DurabilityFrame",
+  "VehicleSeatIndicator",
   -- Locals
   "L"
 }

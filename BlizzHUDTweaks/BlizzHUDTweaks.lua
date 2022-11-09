@@ -171,7 +171,7 @@ local function hideFrameOptions(profile, frameNames)
   end
 end
 
-local additionalFrameNames = {"MicroButtonAndBagsBarMovable", "EditModeExpandedBackpackBar", "DurabilityFrame"}
+local additionalFrameNames = {"MicroButtonAndBagsBarMovable", "EditModeExpandedBackpackBar", "DurabilityFrame", "VehicleSeatIndicator"}
 local function updateFramesForLoadedAddons(profile)
   if IsAddOnLoaded("EditModeExpanded") then
     ensureFrameOptions(profile, "EditModeExpanded", additionalFrameNames)
@@ -179,6 +179,7 @@ local function updateFramesForLoadedAddons(profile)
     frameMapping["MicroButtonAndBagsBarMovable"] = MicroButtonAndBagsBarMovable
     frameMapping["EditModeExpandedBackpackBar"] = EditModeExpandedBackpackBar
     frameMapping["DurabilityFrame"] = DurabilityFrame
+    frameMapping["VehicleSeatIndicator"] = VehicleSeatIndicator
 
     hideFrameOptions(profile, {"MicroButtonAndBagsBar"})
     showFrameOptions(profile, additionalFrameNames)
