@@ -41,6 +41,7 @@ The priority of the checks is as follows
 - Minimap
 - Status Tracking Bar (Rep. & Exp.)
 - Player Casting Bar Frame
+- LFG Eye
 
 ## More will eventually follow
 # Performance
