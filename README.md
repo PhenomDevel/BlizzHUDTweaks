@@ -43,6 +43,12 @@ The priority of the checks is as follows
 - Player Casting Bar Frame
 - LFG Eye
 
+### Additional Frames
+#### [EditModeExpanded](https://www.curseforge.com/wow/addons/edit-mode-expanded)
+- Micro Button Bar
+- Bags Bar
+- Durability Frame
+
 ## More will eventually follow
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.

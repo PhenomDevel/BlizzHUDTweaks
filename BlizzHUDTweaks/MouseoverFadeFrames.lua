@@ -20,10 +20,10 @@ end
 local function inCombatAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     if globalOptions.FadeInCombat then
-      return globalOptions.InCombatAlpha or 0.25
+      return globalOptions.InCombatAlpha
     end
   elseif frameOptions.FadeInCombat then
-    return frameOptions.InCombatAlpha or 0.25
+    return frameOptions.InCombatAlpha
   end
 end
 
@@ -134,8 +134,8 @@ function addon:Fade(frame, currentAlpha, targetAlpha, duration, delay)
       frame.fadeAnimation = animationGroup:CreateAnimation("Alpha")
     end
 
-    frame.fadeAnimation:SetFromAlpha(currentAlpha)
-    frame.fadeAnimation:SetToAlpha(targetAlpha)
+    frame.fadeAnimation:SetFromAlpha(currentAlpha or 1)
+    frame.fadeAnimation:SetToAlpha(targetAlpha or 1)
     frame.fadeAnimation:SetDuration(math.min(duration, 2))
     frame.fadeAnimation:SetStartDelay(delay or 0)
 
@@ -150,9 +150,8 @@ function addon:RefreshMouseoverFrameAlphas()
   local globalOptions = self.db.profile["*Global*"]
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
-    local isMouseover = frame:IsMouseOver()
-
     local frameOptions = self.db.profile[frameName]
+    local isMouseover = frame:IsMouseOver()
     local currentAlpha = getNormalizedFrameAlpha(frame)
     local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
 
@@ -176,6 +175,7 @@ function addon:RefreshFrameAlphas(useFadeDelay)
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
     local frameOptions = self.db.profile[frameName]
+
     local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
     local currentAlpha = getNormalizedFrameAlpha(frame)
     local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)

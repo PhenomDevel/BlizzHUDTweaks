@@ -111,35 +111,80 @@ local frameMapping = {
   ["QueueStatusButton"] = QueueStatusButton
 }
 
+local function setFrameDefaultOptions(frameOptions)
+  frameOptions["MouseOverInCombat"] = true
+  frameOptions["FadeDuration"] = 0.25
+
+  frameOptions["FadeInCombat"] = true
+  frameOptions["InCombatAlpha"] = 1
+
+  frameOptions["FadeOutOfCombat"] = true
+  frameOptions["OutOfCombatAlpha"] = 0.6
+  frameOptions["OutOfCombatFadeDelay"] = 0
+
+  frameOptions["FadeInRestedArea"] = false
+  frameOptions["RestedAreaAlpha"] = 0.3
+end
+
 do
   defaultConfig.profile["enabled"] = true
 
-  for frameName, v in pairs(defaultConfig.profile) do
-    if type(v) == "table" then
+  for frameName, frameOptions in pairs(defaultConfig.profile) do
+    if type(frameOptions) == "table" then
+      setFrameDefaultOptions(frameOptions)
+
       if frameName ~= "*Global*" then
-        v["UseGlobalOptions"] = true
+        frameOptions["UseGlobalOptions"] = true
       else
-        v["UpdateInterval"] = 0.1
-        v["TreatTargetLikeInCombat"] = true
+        frameOptions["UpdateInterval"] = 0.1
+        frameOptions["TreatTargetLikeInCombat"] = true
       end
 
       if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
-        v["UseGlobalOptions"] = false
-        v["FadeOutOfCombat"] = false
-      else
-        v["FadeOutOfCombat"] = true
+        frameOptions["UseGlobalOptions"] = false
+        frameOptions["FadeOutOfCombat"] = false
       end
-
-      v["MouseOverInCombat"] = true
-      v["FadeDuration"] = 0.25
-      v["InCombatAlpha"] = 1
-      v["OutOfCombatAlpha"] = 0.6
-      v["RestedAreaAlpha"] = 0.3
-      v["FadeInCombat"] = true
-      v["OutOfCombatFadeDelay"] = 0
-
-      v["FadeInRestedArea"] = false
     end
+  end
+end
+
+local function ensureFrameOptions(profile, addonName, frameNames)
+  for _, name in ipairs(frameNames) do
+    if not profile[name] then
+      profile[name] = {
+        displayName = name .. " (" .. addonName .. ")",
+        description = "This frame is added because you have `" .. addonName .. "` loaded"
+      }
+    end
+  end
+end
+
+local function showFrameOptions(profile, frameNames)
+  for _, name in ipairs(frameNames) do
+    profile[name]["Hidden"] = false
+  end
+end
+
+local function hideFrameOptions(profile, frameNames)
+  for _, name in ipairs(frameNames) do
+    profile[name]["Hidden"] = true
+  end
+end
+
+local additionalFrameNames = {"MicroButtonAndBagsBarMovable", "EditModeExpandedBackpackBar", "DurabilityFrame"}
+local function updateFramesForLoadedAddons(profile)
+  if IsAddOnLoaded("EditModeExpanded") then
+    ensureFrameOptions(profile, "EditModeExpanded", additionalFrameNames)
+
+    frameMapping["MicroButtonAndBagsBarMovable"] = MicroButtonAndBagsBarMovable
+    frameMapping["EditModeExpandedBackpackBar"] = EditModeExpandedBackpackBar
+    frameMapping["DurabilityFrame"] = DurabilityFrame
+
+    hideFrameOptions(profile, {"MicroButtonAndBagsBar"})
+    showFrameOptions(profile, additionalFrameNames)
+  else
+    showFrameOptions(profile, {"MicroButtonAndBagsBar"})
+    hideFrameOptions(profile, additionalFrameNames)
   end
 end
 
@@ -151,6 +196,7 @@ function addon:GetFrameMapping()
 end
 
 function addon:LoadProfile()
+  updateFramesForLoadedAddons(self.db.profile)
   addon:RefreshFrameAlphas()
   addon:InitializeUpdateTicker()
 end
@@ -190,6 +236,7 @@ end
 
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, false)
+  updateFramesForLoadedAddons(self.db.profile)
 
   self.db.RegisterCallback(self, "OnProfileChanged", "LoadProfile")
   self.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")

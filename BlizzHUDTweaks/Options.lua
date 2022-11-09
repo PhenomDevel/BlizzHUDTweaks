@@ -9,6 +9,7 @@ local aceOptions = {
 
 local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   local subOptions = {}
+
   t[frameName] = {
     name = frameOptions.displayName or frameName,
     desc = frameOptions.description or nil,
@@ -270,8 +271,11 @@ function addon:getFadeFrameOptions()
       else
         withUseGlobal = false
       end
-      addFrameOptions(order, options.args, frameName, frameOptions, withUseGlobal)
-      order = order + 1
+
+      if not frameOptions.Hidden then
+        addFrameOptions(order, options.args, frameName, frameOptions, withUseGlobal)
+        order = order + 1
+      end
     end
   end
 

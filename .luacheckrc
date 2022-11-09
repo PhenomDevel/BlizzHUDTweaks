@@ -100,6 +100,9 @@ globals = {
   "ExtraActionButtonFrame",
   "PetFrame",
   "QueueStatusButton",
+  "MicroButtonAndBagsBarMovable",
+  "EditModeExpandedBackpackBar",
+  "DurabilityFrame",
   -- Locals
   "L"
 }

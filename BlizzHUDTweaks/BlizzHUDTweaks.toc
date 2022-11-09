@@ -8,6 +8,7 @@
 ## X-Category: HUDs
 ## X-Wago-ID: rkGrWlNy
 ## X-Curse-Project-ID: 698104
+## OptionalDeps: EditModeExpanded
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
