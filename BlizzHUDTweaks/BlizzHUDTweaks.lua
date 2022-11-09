@@ -205,7 +205,9 @@ function addon:GetFrameTable()
 
   for frameName, frameOptions in pairs(self.db.profile) do
     if type(frameOptions) == "table" then
-      t[frameName] = frameOptions.displayName or frameName
+      if not frameOptions.Hidden and frameName ~= "*Global*" then
+        t[frameName] = frameOptions.displayName or frameName
+      end
     end
   end
 
@@ -289,7 +291,6 @@ function addon:OpenOptions()
 end
 
 function addon:DisableAll()
-  BlizzHUDTweaks.enabled = false
   addon:Print("Disabled fading for all action bars and frames.")
   addon:ClearUpdateTicker()
   for _, frame in pairs(addon:GetFrameMapping()) do
@@ -298,16 +299,19 @@ function addon:DisableAll()
 end
 
 function addon:EnableAll()
-  BlizzHUDTweaks.enabled = true
   addon:Print("Enabled fading of action bars and frames.")
   addon:InitializeUpdateTicker()
   addon:RefreshFrameAlphas()
 end
 
+function addon:IsEnabled()
+  return self.db.profile["enabled"]
+end
+
 function addon:PLAYER_REGEN_ENABLED()
   BlizzHUDTweaks.inCombat = false
 
-  if BlizzHUDTweaks.enabled then
+  if addon:IsEnabled() then
     addon:RefreshFrameAlphas(true)
   end
 end
@@ -315,7 +319,7 @@ end
 function addon:PLAYER_REGEN_DISABLED()
   BlizzHUDTweaks.inCombat = true
 
-  if BlizzHUDTweaks.enabled then
+  if addon:IsEnabled() then
     addon:RefreshFrameAlphas()
   end
 end
@@ -323,7 +327,7 @@ end
 function addon:PLAYER_UPDATE_RESTING()
   BlizzHUDTweaks.isResting = IsResting("player")
 
-  if BlizzHUDTweaks.enabled then
+  if addon:IsEnabled() then
     addon:RefreshFrameAlphas()
   end
 end
@@ -331,7 +335,7 @@ end
 function addon:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
 
-  if BlizzHUDTweaks.enabled then
+  if addon:IsEnabled() then
     if BlizzHUDTweaks.hasTarget then
       addon:RefreshFrameAlphas()
     else
@@ -343,7 +347,7 @@ end
 function addon:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
 
-  if BlizzHUDTweaks.enabled then
+  if addon:IsEnabled() then
     addon:RefreshFrameAlphas()
   end
 end

@@ -17,19 +17,18 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     args = subOptions
   }
 
-  order = order + 0.1
-  subOptions["CopyFrom"] = {
-    order = order,
-    name = "Copy from",
-    desc = "Copies all settings ",
-    width = "full",
-    type = "select",
-    set = "CopyFrom",
-    values = addon:GetFrameTable(),
-    arg = frameName
-  }
-
   if withUseGlobal then
+    order = order + 0.1
+    subOptions["CopyFrom"] = {
+      order = order,
+      name = "Copy from",
+      desc = "Copies all settings of the selected frame to the current frame. This can be used to quickly change many frames to a specific behavior.",
+      width = "full",
+      type = "select",
+      set = "CopyFrom",
+      values = addon:GetFrameTable(),
+      arg = frameName
+    }
     order = order + 0.1
     subOptions["UseGlobalOptions"] = {
       order = order,
@@ -224,7 +223,14 @@ end
 -- Public API
 
 function addon:CopyFrom(info, value)
-  print(info, value)
+  local fromFrameOptions = self.db.profile[value]
+
+  if fromFrameOptions then
+    local copy = addon:tClone(fromFrameOptions)
+    copy.displayName = self.db.profile[info.arg].displayName
+    self.db.profile[info.arg] = copy
+    addon:RefreshFrameAlphas()
+  end
 end
 
 function addon:GetSliderValue(info)
