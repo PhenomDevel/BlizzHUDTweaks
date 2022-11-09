@@ -18,8 +18,10 @@ local function determineFadeDuration(globalOptions, frameOptions)
 end
 
 local function inCombatAlphaValue(globalOptions, frameOptions)
-  if frameOptions.UseGlobalOptions and globalOptions.FadeInCombat then
-    return globalOptions.InCombatAlpha or 0.25
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeInCombat then
+      return globalOptions.InCombatAlpha or 0.25
+    end
   elseif frameOptions.FadeInCombat then
     return frameOptions.InCombatAlpha or 0.25
   end
@@ -32,16 +34,18 @@ local function treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
 end
 
 local function outOfCombatAlphaValue(globalOptions, frameOptions)
-  if frameOptions.UseGlobalOptions and globalOptions.FadeOutOfCombat then
-    return globalOptions.OutOfCombatAlpha or 0.25
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeOutOfCombat then
+      return globalOptions.OutOfCombatAlpha
+    end
   elseif frameOptions.FadeOutOfCombat then
-    return frameOptions.OutOfCombatAlpha or 0.25
+    return frameOptions.OutOfCombatAlpha
   end
 end
 
 local function restedAreaAlphaValue(globalOptions, frameOptions)
   local inCombat = BlizzHUDTweaks.inCombat
-  local alpha = 1
+  local alpha
 
   if BlizzHUDTweaks.isResting and not inCombat then
     if frameOptions.UseGlobalOptions then
@@ -56,21 +60,46 @@ local function restedAreaAlphaValue(globalOptions, frameOptions)
   return alpha
 end
 
+local function inCombatFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeInCombat then
+      return true
+    end
+  elseif frameOptions.FadeInCombat then
+    return true
+  end
+end
+
+local function restedAreaFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeInRestedArea then
+      return true
+    end
+  elseif frameOptions.FadeInRestedArea then
+    return true
+  end
+end
+
 local function determineTargetAlpha(globalOptions, frameOptions)
   local inCombat = BlizzHUDTweaks.inCombat
   local isResting = BlizzHUDTweaks.isResting
   local hasTarget = BlizzHUDTweaks.hasTarget
 
-  local alpha = 1
+  local alpha
 
-  if inCombat then
+  if inCombat and inCombatFadeActive(globalOptions, frameOptions) then
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and hasTarget then
+  elseif not inCombat and hasTarget and inCombatFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and not isResting then
-    alpha = outOfCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and isResting then
+  elseif not inCombat and isResting and restedAreaFadeActive(globalOptions, frameOptions) then
     alpha = restedAreaAlphaValue(globalOptions, frameOptions)
+  else
+    alpha = outOfCombatAlphaValue(globalOptions, frameOptions)
+  end
+
+  if not alpha then
+    -- Always fallback to 1 if nothing else did match
+    alpha = 1
   end
 
   return alpha
@@ -90,6 +119,28 @@ end
 
 local function getNormalizedFrameAlpha(frame)
   return tonumber(string.format("%.2f", frame:GetAlpha()))
+end
+
+-------------------------------------------------------------------------------
+-- Public API
+
+function addon:Fade(frame, currentAlpha, targetAlpha, duration, delay)
+  if currentAlpha and targetAlpha then
+    if not frame.fadeAnimation then
+      local animationGroup = frame:CreateAnimationGroup()
+      animationGroup:SetToFinalAlpha(true)
+
+      frame.animationGroup = animationGroup
+      frame.fadeAnimation = animationGroup:CreateAnimation("Alpha")
+    end
+
+    frame.fadeAnimation:SetFromAlpha(currentAlpha)
+    frame.fadeAnimation:SetToAlpha(targetAlpha)
+    frame.fadeAnimation:SetDuration(math.min(duration, 2))
+    frame.fadeAnimation:SetStartDelay(delay or 0)
+
+    frame.animationGroup:Restart()
+  end
 end
 
 local mouseoverFrames = {}
@@ -117,28 +168,6 @@ function addon:RefreshMouseoverFrameAlphas()
     end
 
     mouseoverFrames[frameName] = isMouseover
-  end
-end
-
--------------------------------------------------------------------------------
--- Public API
-
-function addon:Fade(frame, currentAlpha, targetAlpha, duration, delay)
-  if currentAlpha and targetAlpha then
-    if not frame.fadeAnimation then
-      local animationGroup = frame:CreateAnimationGroup()
-      animationGroup:SetToFinalAlpha(true)
-
-      frame.animationGroup = animationGroup
-      frame.fadeAnimation = animationGroup:CreateAnimation("Alpha")
-    end
-
-    frame.fadeAnimation:SetFromAlpha(currentAlpha)
-    frame.fadeAnimation:SetToAlpha(targetAlpha)
-    frame.fadeAnimation:SetDuration(math.min(duration, 2))
-    frame.fadeAnimation:SetStartDelay(delay or 0)
-
-    frame.animationGroup:Restart()
   end
 end
 
