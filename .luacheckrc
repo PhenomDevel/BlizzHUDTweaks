@@ -104,6 +104,7 @@ globals = {
   "EditModeExpandedBackpackBar",
   "DurabilityFrame",
   "VehicleSeatIndicator",
+  "TargetFrameToT",
   -- Locals
   "L"
 }
