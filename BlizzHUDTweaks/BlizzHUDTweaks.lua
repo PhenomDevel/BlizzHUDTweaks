@@ -15,6 +15,9 @@ local defaultConfig = {
     ["TargetFrame"] = {
       displayName = "Target Frame"
     },
+    ["TargetFrameToT"] = {
+      displayName = "Target of Target Frame"
+    },
     ["FocusFrame"] = {
       displayName = "Focus Frame"
     },
@@ -87,6 +90,7 @@ local defaultConfig = {
 local frameMapping = {
   ["PlayerFrame"] = PlayerFrame,
   ["TargetFrame"] = TargetFrame,
+  ["TargetFrameToT"] = TargetFrameToT,
   ["FocusFrame"] = FocusFrame,
   ["ActionBar1"] = MainMenuBar,
   ["ActionBar2"] = MultiBarBottomLeft,
@@ -216,8 +220,10 @@ end
 
 function addon:LoadProfile()
   updateFramesForLoadedAddons(self.db.profile)
-  addon:RefreshFrameAlphas()
-  addon:InitializeUpdateTicker()
+  if addon:IsEnabled() then
+    addon:RefreshFrameAlphas()
+    addon:InitializeUpdateTicker()
+  end
 end
 
 function addon:ClearUpdateTicker()
