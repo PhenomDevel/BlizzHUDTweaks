@@ -7,17 +7,58 @@ local aceOptions = {
   args = {}
 }
 
+local function generateFrameOptionDescription(frameOptions, frameName)
+  local desc = "Frame: " .. frameName
+
+  if frameOptions.description then
+    desc = desc .. "\n" .. frameOptions.description
+  end
+
+  if frameOptions.UseGlobalOptions then
+    desc = desc .. "\n\n|cFFa0a832*|r Uses the global settings."
+  end
+
+  return desc
+end
+
+local function generateFrameOptionName(frameOptions, frameName)
+  local name = frameOptions.displayName or frameName
+
+  if frameOptions.UseGlobalOptions then
+    name = name .. " (|cFFa0a832*|r)"
+  end
+
+  if not frameOptions.Enabled then
+    name = "|cFFba3504" .. name .. "|r"
+  end
+
+  return name
+end
+
 local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   local subOptions = {}
 
   t[frameName] = {
-    name = frameOptions.displayName or frameName,
-    desc = frameOptions.description or nil,
+    name = generateFrameOptionName(frameOptions, frameName),
+    desc = generateFrameOptionDescription(frameOptions, frameName),
     type = "group",
     args = subOptions
   }
 
   if withUseGlobal then
+    order = order + 0.1
+    subOptions["Enabled"] = {
+      order = order,
+      name = "Enabled",
+      width = "full",
+      type = "toggle",
+      get = "GetValue",
+      set = function(info, value)
+        addon:SetValue(info, value)
+        addon:RefreshOptions()
+      end,
+      arg = frameName
+    }
     order = order + 0.1
     subOptions["CopyFrom"] = {
       order = order,
@@ -37,7 +78,10 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       width = "full",
       type = "toggle",
       get = "GetValue",
-      set = "SetValue",
+      set = function(info, value)
+        addon:SetValue(info, value)
+        addon:RefreshOptions()
+      end,
       arg = frameName
     }
   end
@@ -278,7 +322,7 @@ end
 
 function addon:getFadeFrameOptions()
   local options = {
-    name = "Fade Frame Options",
+    name = "Mouseover Frame Fading",
     type = "group",
     args = {}
   }

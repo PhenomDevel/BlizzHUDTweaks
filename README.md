@@ -61,6 +61,8 @@ Even though the add-on has to check more or less in a set interval, it is very p
   - If set to `Out of Combat` you might be missing the frame or can't mouseover it since the blizzard option overwrites everything else
 ## Frame fading out when fade delay is set
 - Usually this only happens when you mouseover a frame. Mouseover overwrites the fade animation, which has a set delay and will not maintain the delay after you leave the frame.
+## Fading is setup but nothing happens
+- Make sure you have `Enabled` the fading for the given frame
 
 # Credits
 The initial impressions came from [Conceal](https://www.curseforge.com/wow/addons/conceal). However, I disliked the design approach and wanted to add missing features. Therefore, I wrote my personal add-on which extends the feature set.

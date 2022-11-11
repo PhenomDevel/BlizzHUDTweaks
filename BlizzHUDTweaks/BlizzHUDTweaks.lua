@@ -2,8 +2,49 @@ local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0", "AceConsole-3.0")
 local AC = LibStub("AceConfig-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
+local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", false)
+
+local function getBlizzHUDTweaksLibDbIconData(db)
+  local LibDataBroker = LibStub:GetLibrary("LibDataBroker-1.1", false)
+  if LibDBIcon and LibDataBroker then
+    return LibDataBroker:NewDataObject(
+      "BlizzHUDTweaks",
+      {
+        type = "data source",
+        text = "BlizzHUDTweaks",
+        icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
+        OnClick = function(self, button)
+          if button == "LeftButton" then
+            addon:OpenOptions()
+          elseif button == "RightButton" then
+            if addon:IsEnabled() then
+              db.profile["enabled"] = false
+              addon:DisableAll()
+            else
+              db.profile["enabled"] = true
+              addon:EnableAll()
+            end
+          end
+        end,
+        OnEnter = function()
+          GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
+          GameTooltip:AddDoubleLine("|cFF69CCF0BlizzHUDTweaks|r", "v" .. db.global.version)
+          GameTooltip:AddDoubleLine("|cFFdcabffLeft-Click|r", "Open Options")
+          GameTooltip:AddDoubleLine("|cFFdcabffRight-Click|r", "Toggle Addon")
+          GameTooltip:Show()
+        end,
+        OnLeave = function()
+          GameTooltip:Hide()
+        end
+      }
+    )
+  end
+end
 
 local defaultConfig = {
+  ["global"] = {
+    ["version"] = "@project-version@"
+  },
   ["profile"] = {
     ["*Global*"] = {
       displayName = "* |T134063:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Global Settings|r",
@@ -83,6 +124,12 @@ local defaultConfig = {
     },
     ["QueueStatusButton"] = {
       displayName = "Queue Status Eye"
+    },
+    ["DurabilityFrame"] = {
+      displayName = "Durability Frame"
+    },
+    ["VehicleSeatIndicator"] = {
+      displayName = "Vehicle Seats Frame"
     }
   }
 }
@@ -112,10 +159,13 @@ local frameMapping = {
   ["PlayerCastingBarFrame"] = PlayerCastingBarFrame,
   ["ExtraActionButtonFrame"] = ExtraActionButtonFrame,
   ["PetFrame"] = PetFrame,
-  ["QueueStatusButton"] = QueueStatusButton
+  ["QueueStatusButton"] = QueueStatusButton,
+  ["DurabilityFrame"] = DurabilityFrame,
+  ["VehicleSeatIndicator"] = VehicleSeatIndicator
 }
 
 local function setFrameDefaultOptions(frameOptions)
+  frameOptions["Enabled"] = true
   frameOptions["MouseOverInCombat"] = true
   frameOptions["FadeDuration"] = 0.25
 
@@ -152,49 +202,81 @@ do
   end
 end
 
-local function ensureFrameOptions(profile, addonName, frameNames)
-  for _, name in ipairs(frameNames) do
-    if not profile[name] then
-      profile[name] = {
-        displayName = name .. " (" .. addonName .. ")",
-        description = "This frame is added because you have `" .. addonName .. "` loaded"
+local function ensureFrameOptions(profile, addonName, frames)
+  for _, frameOptions in ipairs(frames) do
+    if not profile[frameOptions.name] then
+      profile[frameOptions.name] = {
+        displayName = frameOptions.name .. " (" .. addonName .. ")",
+        description = "This frame is added because you have `" .. addonName .. "` loaded",
+        Enabled = true
       }
     end
   end
 end
 
-local function showFrameOptions(profile, frameNames)
-  for _, name in ipairs(frameNames) do
-    if profile[name] then
-      profile[name]["Hidden"] = false
+local function showFrameOptions(profile, frames)
+  for _, frameOptions in ipairs(frames) do
+    if profile[frameOptions.name] then
+      profile[frameOptions.name]["Hidden"] = false
     end
   end
 end
 
-local function hideFrameOptions(profile, frameNames)
-  for _, name in ipairs(frameNames) do
-    if profile[name] then
-      profile[name]["Hidden"] = true
+local function hideFrameOptions(profile, frames)
+  for _, frameOptions in ipairs(frames) do
+    if profile[frameOptions.name] then
+      profile[frameOptions.name]["Hidden"] = true
     end
   end
 end
 
-local additionalFrameNames = {"MicroButtonAndBagsBarMovable", "EditModeExpandedBackpackBar", "DurabilityFrame", "VehicleSeatIndicator"}
+local additionalFrameNames = {
+  {
+    name = "MicroButtonAndBagsBarMovable",
+    frame = MicroButtonAndBagsBarMovable
+  },
+  {
+    name = "EditModeExpandedBackpackBar",
+    frame = EditModeExpandedBackpackBar
+  }
+}
 local function updateFramesForLoadedAddons(profile)
   ensureFrameOptions(profile, "EditModeExpanded", additionalFrameNames)
 
-  if IsAddOnLoaded("EditModeExpanded") then
-    frameMapping["MicroButtonAndBagsBarMovable"] = MicroButtonAndBagsBarMovable
-    frameMapping["EditModeExpandedBackpackBar"] = EditModeExpandedBackpackBar
-    frameMapping["DurabilityFrame"] = DurabilityFrame
-    frameMapping["VehicleSeatIndicator"] = VehicleSeatIndicator
+  local EditModeExpanded
 
-    hideFrameOptions(profile, {"MicroButtonAndBagsBar"})
-    showFrameOptions(profile, additionalFrameNames)
+  if LibStub then
+    EditModeExpanded = LibStub:GetLibrary("EditModeExpanded-1.0", true)
+  end
+
+  if EditModeExpanded then -- and EditModeExpanded.IsRegistered
+    addon:Print("EditModeExpaneded found. Adding additional frames.")
+    for _, frameOptions in ipairs(additionalFrameNames) do
+      if frameOptions.frame then
+        if frameOptions.frame then --EditModeExpanded:IsRegistered(frameOptions.frame)
+          frameMapping[frameOptions.name] = frameOptions.frame
+          if profile[frameOptions.name] then
+            profile[frameOptions.name]["Hidden"] = false
+          end
+        end
+      end
+    end
+    hideFrameOptions(profile, {name = "MicroButtonAndBagsBar"})
   else
-    showFrameOptions(profile, {"MicroButtonAndBagsBar"})
+    showFrameOptions(profile, {name = "MicroButtonAndBagsBar"})
     hideFrameOptions(profile, additionalFrameNames)
   end
+end
+
+local function cleanupNonsense(profile)
+  -- Make durabilityFrame and VehicleFrame accessable everytime not only when EME is loaded
+  showFrameOptions(profile, {{name = "DurabilityFrame"}, {name = "VehicleSeatIndicator"}})
+  profile["DuarbilityFrame"] = nil
+  profile["FloatingChatFrame"] = nil
+  profile["DurabilityFrame"].description = nil
+  profile["DurabilityFrame"].displayName = "Durability Frame"
+  profile["VehicleSeatIndicator"].description = nil
+  profile["VehicleSeatIndicator"].displayName = "Vehicle Seat Frame"
 end
 
 -------------------------------------------------------------------------------
@@ -263,6 +345,12 @@ function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, false)
   updateFramesForLoadedAddons(self.db.profile)
 
+  cleanupNonsense(self.db.profile)
+
+  -- Initialize Minimap Icon
+  local dbIconData = getBlizzHUDTweaksLibDbIconData(self.db)
+  LibDBIcon:Register("BlizzHUDTweaks", dbIconData, self.db.global.minimap)
+
   self.db.RegisterCallback(self, "OnProfileChanged", "LoadProfile")
   self.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
   self.db.RegisterCallback(self, "OnProfileReset", "LoadProfile")
@@ -286,10 +374,11 @@ function addon:OnInitialize()
 
   QueueStatusButton:SetParent(UIParent)
 
-  -- TODO: Maybe let the user decide how often it should be updated
-  -- NOTE: HookScript would be the better option with OnEnter and OnLeave but it does not trigger for
-  -- action bars when the action buttons are mouseovered directly
   addon:InitializeUpdateTicker()
+end
+
+function addon:RefreshOptions()
+  AC:RegisterOptionsTable("BlizzHUDTweaks_options", addon:GetAceOptions(self.db))
 end
 
 function addon:OpenOptions()
