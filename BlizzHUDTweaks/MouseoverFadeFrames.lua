@@ -157,22 +157,24 @@ function addon:RefreshMouseoverFrameAlphas()
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
     local frameOptions = self.db.profile[frameName]
-    local isMouseover = frame:IsMouseOver()
-    local currentAlpha = getNormalizedFrameAlpha(frame)
-    local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
+    if frameOptions.Enabled then
+      local isMouseover = frame:IsMouseOver()
+      local currentAlpha = getNormalizedFrameAlpha(frame)
+      local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
 
-    if isMouseover and not mouseoverFrames[frameName] then
-      if not inCombat then
-        addon:Fade(frame, currentAlpha, 1, fadeDuration)
-      elseif (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat) then
-        addon:Fade(frame, currentAlpha, 1, fadeDuration)
+      if isMouseover and not mouseoverFrames[frameName] then
+        if not inCombat then
+          addon:Fade(frame, currentAlpha, 1, fadeDuration)
+        elseif (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat) then
+          addon:Fade(frame, currentAlpha, 1, fadeDuration)
+        end
+      elseif not isMouseover and mouseoverFrames[frameName] then
+        local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+        addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
       end
-    elseif not isMouseover and mouseoverFrames[frameName] then
-      local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
-      addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
-    end
 
-    mouseoverFrames[frameName] = isMouseover
+      mouseoverFrames[frameName] = isMouseover
+    end
   end
 end
 
@@ -181,17 +183,18 @@ function addon:RefreshFrameAlphas(useFadeDelay)
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
     local frameOptions = self.db.profile[frameName]
+    if frameOptions.Enabled then
+      local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
+      local currentAlpha = getNormalizedFrameAlpha(frame)
+      local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
 
-    local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
-    local currentAlpha = getNormalizedFrameAlpha(frame)
-    local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
-
-    if targetAlpha and targetAlpha ~= currentAlpha then
-      local fadeDelay = 0
-      if useFadeDelay then
-        fadeDelay = determineFadeDelay(globalOptions, frameOptions)
+      if targetAlpha and targetAlpha ~= currentAlpha then
+        local fadeDelay = 0
+        if useFadeDelay then
+          fadeDelay = determineFadeDelay(globalOptions, frameOptions)
+        end
+        addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
       end
-      addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
     end
   end
 end

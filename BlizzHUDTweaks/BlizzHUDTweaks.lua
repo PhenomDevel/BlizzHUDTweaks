@@ -385,11 +385,17 @@ function addon:OpenOptions()
   InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
 end
 
+function addon:ResetFrame(frame)
+  if frame then
+    frame:SetAlpha(1)
+  end
+end
+
 function addon:DisableAll()
   addon:Print("Disabled fading for all action bars and frames.")
   addon:ClearUpdateTicker()
   for _, frame in pairs(addon:GetFrameMapping()) do
-    frame:SetAlpha(1)
+    addon:ResetFrame(frame)
   end
 end
 

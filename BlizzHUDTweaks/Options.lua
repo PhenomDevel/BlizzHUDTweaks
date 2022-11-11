@@ -56,6 +56,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       set = function(info, value)
         addon:SetValue(info, value)
         addon:RefreshOptions()
+        addon:ResetFrame(addon:GetFrameMapping()[frameName])
       end,
       arg = frameName
     }
