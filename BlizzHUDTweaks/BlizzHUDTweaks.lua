@@ -2,10 +2,10 @@ local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0", "AceConsole-3.0")
 local AC = LibStub("AceConfig-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
-local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", false)
+local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
 local function getBlizzHUDTweaksLibDbIconData(db)
-  local LibDataBroker = LibStub:GetLibrary("LibDataBroker-1.1", false)
+  local LibDataBroker = LibStub:GetLibrary("LibDataBroker-1.1", true)
   if LibDBIcon and LibDataBroker then
     return LibDataBroker:NewDataObject(
       "BlizzHUDTweaks",
