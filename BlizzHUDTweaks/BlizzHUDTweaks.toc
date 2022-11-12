@@ -25,4 +25,4 @@ Libs\LibDBIcon\lib.xml
 BlizzHUDTweaks.lua
 Util.lua
 Options.lua
-MouseoverFadeFrames.lua
+MouseoverFadeFrames.luaClassResourcePosition.lua

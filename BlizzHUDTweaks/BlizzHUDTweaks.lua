@@ -50,7 +50,7 @@ local defaultConfig = {
   ["global"] = {
     ["version"] = "@project-version@",
     ["minimap"] = {
-      ["hide"] = true
+      ["hide"] = false
     }
   },
   ["profile"] = {
@@ -363,22 +363,14 @@ function addon:OnInitialize()
   self.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
   self.db.RegisterCallback(self, "OnProfileReset", "LoadProfile")
 
-  AC:RegisterOptionsTable("BlizzHUDTweaks_options", addon:GetAceOptions(self.db))
-  self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
-
-  local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-  AC:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
-  ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
-
   self:RegisterChatCommand("blizzhudtweaks", "ExecuteChatCommand")
   self:RegisterChatCommand("bht", "ExecuteChatCommand")
 
   addon:HideGCDFlash()
-  addon:RegisterEvent("PLAYER_REGEN_ENABLED")
-  addon:RegisterEvent("PLAYER_REGEN_DISABLED")
-  addon:RegisterEvent("PLAYER_UPDATE_RESTING")
-  addon:RegisterEvent("PLAYER_TARGET_CHANGED")
-  addon:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+  addon:RegisterEvents(
+    {"PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "PLAYER_UPDATE_RESTING", "PLAYER_TARGET_CHANGED", "PLAYER_ENTERING_WORLD", "PLAYER_TOTEM_UPDATE"}
+  )
 
   QueueStatusButton:SetParent(UIParent)
 
@@ -417,52 +409,8 @@ function addon:IsEnabled()
   return self.db.profile["enabled"]
 end
 
-function addon:PLAYER_REGEN_ENABLED()
-  BlizzHUDTweaks.inCombat = false
-
-  if addon:IsEnabled() then
-    addon:RefreshFrameAlphas(true)
-  end
-end
-
-function addon:PLAYER_REGEN_DISABLED()
-  BlizzHUDTweaks.inCombat = true
-
-  if addon:IsEnabled() then
-    addon:RefreshFrameAlphas()
-  end
-end
-
-function addon:PLAYER_UPDATE_RESTING()
-  BlizzHUDTweaks.isResting = IsResting("player")
-
-  if addon:IsEnabled() then
-    addon:RefreshFrameAlphas()
-  end
-end
-
-function addon:PLAYER_TARGET_CHANGED()
-  BlizzHUDTweaks.hasTarget = UnitExists("target")
-
-  if addon:IsEnabled() then
-    if BlizzHUDTweaks.hasTarget then
-      addon:RefreshFrameAlphas()
-    else
-      addon:RefreshFrameAlphas(true)
-    end
-  end
-end
-
-function addon:PLAYER_ENTERING_WORLD()
-  BlizzHUDTweaks.isResting = IsResting("player")
-
-  if addon:IsEnabled() then
-    addon:RefreshFrameAlphas()
-  end
-end
-
 function addon:ToggleMinimapIcon()
-  if self.db.global.minimap.hide then
+  if not self.db.global.minimap.hide then
     LibDBIcon:Hide("BlizzHUDTweaks")
   else
     LibDBIcon:Show("BlizzHUDTweaks")
