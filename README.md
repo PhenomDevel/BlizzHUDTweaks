@@ -6,6 +6,9 @@ A simple add-on which will provide some tweaks to the newly introduced Blizzard 
 # Usage
 Open the options via the ingame options menu or by typing `/bht` or `/blizzhudtweaks`.
 
+## Chat commands
+- Toggle minimap icon: `/bht minimap`
+
 # Features
 ## Mouseover Fade (action bars, frames)
 You can fade out most of the actions bars and frames for different scenarios. You can set different alpha values for `In Combat`, `Out of Combat`, and `In Resting Area`. You also can set the options globally and use them for each action bar/frame.

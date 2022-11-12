@@ -24,6 +24,10 @@ local function getBlizzHUDTweaksLibDbIconData(db)
               db.profile["enabled"] = true
               addon:EnableAll()
             end
+          elseif button == "MiddleButton" then
+            db.global.minimap.hide = true
+            LibDBIcon:Hide("BlizzHUDTweaks")
+            addon:Print("Minimap icon is now hidden. If you want to show it again use /bht minimap")
           end
         end,
         OnEnter = function()
@@ -31,6 +35,7 @@ local function getBlizzHUDTweaksLibDbIconData(db)
           GameTooltip:AddDoubleLine("|cFF69CCF0BlizzHUDTweaks|r", "v" .. db.global.version)
           GameTooltip:AddDoubleLine("|cFFdcabffLeft-Click|r", "Open Options")
           GameTooltip:AddDoubleLine("|cFFdcabffRight-Click|r", "Toggle Addon")
+          GameTooltip:AddDoubleLine("|cFFdcabffMiddle-Click|r", "Hide minimap icon")
           GameTooltip:Show()
         end,
         OnLeave = function()
@@ -43,7 +48,10 @@ end
 
 local defaultConfig = {
   ["global"] = {
-    ["version"] = "@project-version@"
+    ["version"] = "@project-version@",
+    ["minimap"] = {
+      ["hide"] = true
+    }
   },
   ["profile"] = {
     ["*Global*"] = {
@@ -362,8 +370,8 @@ function addon:OnInitialize()
   AC:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
   ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
 
-  self:RegisterChatCommand("blizzhudtweaks", "OpenOptions")
-  self:RegisterChatCommand("bht", "OpenOptions")
+  self:RegisterChatCommand("blizzhudtweaks", "ExecuteChatCommand")
+  self:RegisterChatCommand("bht", "ExecuteChatCommand")
 
   addon:HideGCDFlash()
   addon:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -450,5 +458,22 @@ function addon:PLAYER_ENTERING_WORLD()
 
   if addon:IsEnabled() then
     addon:RefreshFrameAlphas()
+  end
+end
+
+function addon:ToggleMinimapIcon()
+  if self.db.global.minimap.hide then
+    LibDBIcon:Hide("BlizzHUDTweaks")
+  else
+    LibDBIcon:Show("BlizzHUDTweaks")
+  end
+  self.db.global.minimap.hide = not self.db.global.minimap.hide
+end
+
+function addon:ExecuteChatCommand(input)
+  if input == "" or input == nil then
+    addon:OpenOptions()
+  elseif input == "minimap" then
+    addon:ToggleMinimapIcon()
   end
 end
