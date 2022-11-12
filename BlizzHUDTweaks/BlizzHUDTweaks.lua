@@ -408,10 +408,10 @@ function addon:IsEnabled()
 end
 
 function addon:ToggleMinimapIcon()
-  if not self.db.global.minimap.hide then
-    LibDBIcon:Hide("BlizzHUDTweaks")
-  else
+  if self.db.global.minimap.hide then
     LibDBIcon:Show("BlizzHUDTweaks")
+  else
+    LibDBIcon:Hide("BlizzHUDTweaks")
   end
   self.db.global.minimap.hide = not self.db.global.minimap.hide
 end
