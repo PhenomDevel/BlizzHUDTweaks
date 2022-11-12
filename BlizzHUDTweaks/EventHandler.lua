@@ -77,9 +77,8 @@ function addon:PLAYER_ENTERING_WORLD()
   if addon:IsEnabled() then
     addon:RefreshFrameAlphas()
   end
-
-  addon:RestorePosition(self.db.profile)
 end
+
 function addon:PLAYER_LOGIN()
   AC:RegisterOptionsTable("BlizzHUDTweaks_options", addon:GetAceOptions(self.db))
   self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
