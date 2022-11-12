@@ -10,7 +10,6 @@ local registeredEvents = {}
 
 function addon:RegisterEvents(events)
   for _, event in ipairs(events) do
-    addon:Print("Register event", event)
     addon:RegisterEvent(event)
     registeredEvents[event] = true
   end
