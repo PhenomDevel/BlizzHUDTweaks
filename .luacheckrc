@@ -108,6 +108,10 @@ globals = {
   "PlayerFrameBottomManagedFramesContainer",
   "UnitClassBase",
   "TotemFrame",
+  "CompactPartyFrame",
+  "PartyFrame",
+  "CompactRaidFrameContainer",
+  "MainMenuBarVehicleLeaveButton",
   -- Locals
   "L"
 }

@@ -1,12 +1,13 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0", "AceConsole-3.0")
+
+local AC = LibStub("AceConfig-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
 
 local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local ClassResource = addon:NewModule("ClassResource")
 
-local AC = LibStub("AceConfig-3.0")
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
 local function getBlizzHUDTweaksLibDbIconData(db)
@@ -143,6 +144,15 @@ local defaultConfig = {
     },
     ["VehicleSeatIndicator"] = {
       displayName = "Vehicle Seats Frame"
+    },
+    ["PartyFrame"] = {
+      displayName = "Party Frame"
+    },
+    ["CompactRaidFrameContainer"] = {
+      displayName = "Raid Frame"
+    },
+    ["MainMenuBarVehicleLeaveButton"] = {
+      displayName = "Vehicle Leave Button"
     }
   }
 }
@@ -174,7 +184,10 @@ local frameMapping = {
   ["PetFrame"] = PetFrame,
   ["QueueStatusButton"] = QueueStatusButton,
   ["DurabilityFrame"] = DurabilityFrame,
-  ["VehicleSeatIndicator"] = VehicleSeatIndicator
+  ["VehicleSeatIndicator"] = VehicleSeatIndicator,
+  ["PartyFrame"] = PartyFrame,
+  ["CompactRaidFrameContainer"] = CompactRaidFrameContainer,
+  ["MainMenuBarVehicleLeaveButton"] = MainMenuBarVehicleLeaveButton
 }
 
 local function setFrameDefaultOptions(frameOptions)
@@ -274,9 +287,9 @@ local function updateFramesForLoadedAddons(profile)
         end
       end
     end
-    hideFrameOptions(profile, {name = "MicroButtonAndBagsBar"})
+    hideFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
   else
-    showFrameOptions(profile, {name = "MicroButtonAndBagsBar"})
+    showFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
     hideFrameOptions(profile, additionalFrameNames)
   end
 end
@@ -373,9 +386,7 @@ function addon:OnInitialize()
 
   addon:HideGCDFlash()
 
-  addon:RegisterEvents(
-    {"PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "PLAYER_UPDATE_RESTING", "PLAYER_TARGET_CHANGED", "PLAYER_ENTERING_WORLD", "PLAYER_TOTEM_UPDATE"}
-  )
+  addon:RegisterEvents({"PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "PLAYER_UPDATE_RESTING", "PLAYER_TARGET_CHANGED", "PLAYER_ENTERING_WORLD"})
 
   QueueStatusButton:SetParent(UIParent)
 
@@ -434,10 +445,10 @@ function addon:IsEnabled()
 end
 
 function addon:ToggleMinimapIcon()
-  if not self.db.global.minimap.hide then
-    LibDBIcon:Hide("BlizzHUDTweaks")
-  else
+  if self.db.global.minimap.hide then
     LibDBIcon:Show("BlizzHUDTweaks")
+  else
+    LibDBIcon:Hide("BlizzHUDTweaks")
   end
   self.db.global.minimap.hide = not self.db.global.minimap.hide
 end

@@ -1,5 +1,7 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
+local AC = LibStub("AceConfig-3.0")
+local ACD = LibStub("AceConfigDialog-3.0")
 
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 local ClassResource = addon:GetModule("ClassResource")
@@ -77,9 +79,13 @@ function addon:PLAYER_ENTERING_WORLD()
   if addon:IsEnabled() then
     MouseoverFrameFading:RefreshFrameAlphas()
   end
-
   ClassResource:Restore(self.db.profile)
   ClassResource:RestoreTotemFrame(self.db.profile)
+end
+
+function addon:PLAYER_LOGIN()
+  AC:RegisterOptionsTable("BlizzHUDTweaks_options", addon:GetAceOptions(self.db))
+  self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
 end
 
 function addon:PLAYER_TOTEM_UPDATE()
