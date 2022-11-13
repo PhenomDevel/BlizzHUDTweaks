@@ -320,7 +320,7 @@ function MouseoverFrameFading:GetMouseoverFrameFadingOptions(profile)
   local withUseGlobal
 
   for frameName, frameOptions in pairs(profile) do
-    if type(frameOptions) == "table" then
+    if type(frameOptions) == "table" and frameOptions.displayName then
       if frameName ~= "*Global*" then
         withUseGlobal = true
       else
