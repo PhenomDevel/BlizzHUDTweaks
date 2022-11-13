@@ -24,10 +24,10 @@ local function getBlizzHUDTweaksLibDbIconData(db)
             addon:OpenOptions()
           elseif button == "RightButton" then
             if addon:IsEnabled() then
-              db.profile["enabled"] = false
+              db.profile["Enabled"] = false
               addon:DisableAll()
             else
-              db.profile["enabled"] = true
+              db.profile["Enabled"] = true
               addon:EnableAll()
             end
           elseif button == "MiddleButton" then
@@ -207,7 +207,7 @@ local function setFrameDefaultOptions(frameOptions)
 end
 
 do
-  defaultConfig.profile["enabled"] = true
+  defaultConfig.profile["Enabled"] = true
 
   for frameName, frameOptions in pairs(defaultConfig.profile) do
     if type(frameOptions) == "table" then
@@ -362,7 +362,7 @@ function addon:RefreshUpdateTicker(interval)
   end
 end
 function addon:InitializeUpdateTicker()
-  if self.db.profile["enabled"] then
+  if self.db.profile["Enabled"] then
     addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
   end
 end
@@ -455,7 +455,7 @@ function addon:EnableAll()
 end
 
 function addon:IsEnabled()
-  return self.db.profile["enabled"]
+  return self.db.profile["Enabled"]
 end
 
 function addon:ToggleMinimapIcon()

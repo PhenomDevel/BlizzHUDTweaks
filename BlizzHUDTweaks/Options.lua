@@ -12,7 +12,7 @@ local aceOptions = {
 
 local function getGlobalOptions(profile)
   return {
-    ["enabled"] = {
+    ["Enabled"] = {
       order = 0,
       name = "Enabled",
       width = "full",
@@ -28,6 +28,13 @@ local function getGlobalOptions(profile)
           addon:EnableAll()
         end
       end
+    },
+    ["Description"] = {
+      order = 1.1,
+      name = addon:ColoredString("\n\nNOTE: ", "eb4034") .. "The actual settings are in sub categories. Please make sure you have expanded BlizzHUDTweaks's options.",
+      width = "full",
+      type = "description",
+      fontSize = "medium"
     }
   }
 end
