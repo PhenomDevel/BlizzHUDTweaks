@@ -280,9 +280,9 @@ local function updateFramesForLoadedAddons(profile)
         end
       end
     end
-    hideFrameOptions(profile, {name = "MicroButtonAndBagsBar"})
+    hideFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
   else
-    showFrameOptions(profile, {name = "MicroButtonAndBagsBar"})
+    showFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
     hideFrameOptions(profile, additionalFrameNames)
   end
 end
