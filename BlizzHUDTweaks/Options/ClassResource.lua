@@ -1,0 +1,173 @@
+local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
+local Options = addon:GetModule("Options")
+local ClassResource = addon:GetModule("ClassResource")
+
+local anchorInverse = {
+  ["TOP"] = "BOTTOM",
+  ["BOTTOM"] = "TOP",
+  ["LEFT"] = "RIGHT",
+  ["RIGHT"] = "LEFT"
+}
+
+local anchors = {
+  ["LEFT"] = "LEFT",
+  ["RIGHT"] = "RIGHT",
+  ["TOP"] = "TOP",
+  ["BOTTOM"] = "BOTTOM"
+}
+
+local function getFramePositionOptions(profile, prefix, name, frame)
+  local t = {}
+  local anchorName = prefix .. "Anchor" .. name
+  local xOffsetName = prefix .. "XOffset" .. name
+  local yOffsetName = prefix .. "YOffset" .. name
+  local scaleName = prefix .. "Scale" .. name
+  local hideName = prefix .. "Hide" .. name
+
+  t[hideName] = {
+    order = 1,
+    name = "Hide",
+    width = "full",
+    type = "toggle",
+    get = "GetValue",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      if frame == TotemFrame then
+        ClassResource:RestoreTotemFrame(profile)
+      else
+        ClassResource:Restore(profile)
+      end
+    end
+  }
+
+  t[anchorName] = {
+    order = 1.1,
+    name = "AnchorTo",
+    width = "normal",
+    type = "select",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      if frame == TotemFrame then
+        ClassResource:RestoreTotemFrame(profile)
+      else
+        ClassResource:Restore(profile)
+      end
+    end,
+    get = "GetValue",
+    values = anchors
+  }
+  t[xOffsetName] = {
+    order = 1.2,
+    name = "X Offset",
+    desc = "",
+    width = "full",
+    type = "range",
+    get = "GetValue",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      if frame == TotemFrame then
+        ClassResource:RestoreTotemFrame(profile)
+      else
+        ClassResource:Restore(profile)
+      end
+    end,
+    min = -100,
+    max = 100,
+    step = 1
+  }
+  t[yOffsetName] = {
+    order = 1.3,
+    name = "Y Offset",
+    desc = "",
+    width = "full",
+    type = "range",
+    get = "GetValue",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      if frame == TotemFrame then
+        ClassResource:RestoreTotemFrame(profile)
+      else
+        ClassResource:Restore(profile)
+      end
+    end,
+    min = -100,
+    max = 100,
+    step = 1
+  }
+  t[scaleName] = {
+    order = 1.4,
+    name = "Scale",
+    desc = "",
+    width = "full",
+    type = "range",
+    get = "GetValue",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      if frame == TotemFrame then
+        ClassResource:RestoreTotemFrame(profile)
+      else
+        ClassResource:Restore(profile)
+      end
+    end,
+    min = 0.2,
+    max = 2,
+    step = 0.05
+  }
+
+  return t
+end
+
+function ClassResource:GetClassResourceOptions(profile)
+  local options = {}
+  local className, normalizedClassName = UnitClass("player")
+
+  for specIndex = 1, GetNumSpecializations() do
+    local specName = select(2, GetSpecializationInfo(specIndex)) or ""
+
+    options["ClassResource_" .. normalizedClassName .. "_" .. specName] = {
+      name = className .. " " .. specName,
+      type = "group",
+      args = getFramePositionOptions(profile, "ClassResourcePosition", "_" .. normalizedClassName .. "_" .. specName)
+    }
+  end
+  local totemFrameArgs = getFramePositionOptions(profile, "TotemFramePosition", "", TotemFrame)
+  totemFrameArgs["TotemFrameDetached"] = {
+    order = 0,
+    name = "Detach from resource",
+    width = "full",
+    type = "toggle",
+    get = "GetValue",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      ClassResource:RestoreTotemFrame(profile)
+    end
+  }
+
+  options["TotemFrame"] = {
+    name = "Totem Frame",
+    type = "group",
+    args = totemFrameArgs
+  }
+
+  return options
+end
+
+-------------------------------------------------------------------------------
+-- Public API
+
+function ClassResource:GetValue(info)
+  return Options:GetValue(info)
+end
+
+function ClassResource:SetValue(info, value)
+  Options:SetValue(info, value)
+end
+
+function ClassResource:GetOptionsTable(profile)
+  return {
+    name = "Class Resource",
+    type = "group",
+    handler = ClassResource,
+    args = ClassResource:GetClassResourceOptions(profile)
+  }
+end

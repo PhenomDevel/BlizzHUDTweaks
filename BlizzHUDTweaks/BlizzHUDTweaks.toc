@@ -23,6 +23,13 @@ Libs\LibDataBroker\LibDataBroker-1.1.lua
 Libs\LibDBIcon\lib.xml
 
 BlizzHUDTweaks.lua
+
+# Modules
+MouseoverFrameFading.lua
+ClassResource.lua
+
 Util.lua
+EventHandler.lua
 Options.lua
-MouseoverFadeFrames.luaClassResourcePosition.luaClassResourcePosition.lua
+Options/ClassResource.lua
+Options/MouseoverFrameFading.lua

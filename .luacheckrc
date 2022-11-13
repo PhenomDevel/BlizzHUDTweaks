@@ -105,6 +105,9 @@ globals = {
   "DurabilityFrame",
   "VehicleSeatIndicator",
   "TargetFrameToT",
+  "PlayerFrameBottomManagedFramesContainer",
+  "UnitClassBase",
+  "TotemFrame",
   -- Locals
   "L"
 }

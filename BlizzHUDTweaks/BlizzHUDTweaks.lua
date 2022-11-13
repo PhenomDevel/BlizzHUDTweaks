@@ -1,7 +1,12 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0", "AceConsole-3.0")
-local AC = LibStub("AceConfig-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
+
+local Options = addon:NewModule("Options")
+local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
+local ClassResource = addon:NewModule("ClassResource")
+
+local AC = LibStub("AceConfig-3.0")
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
 local function getBlizzHUDTweaksLibDbIconData(db)
@@ -311,7 +316,7 @@ end
 function addon:LoadProfile()
   updateFramesForLoadedAddons(self.db.profile)
   if addon:IsEnabled() then
-    addon:RefreshFrameAlphas()
+    MouseoverFrameFading:RefreshFrameAlphas()
     addon:InitializeUpdateTicker()
   end
 end
@@ -327,7 +332,7 @@ function addon:StartUpdateTicker(interval)
     C_Timer.NewTicker(
     math.min(interval, 1),
     function()
-      addon:RefreshMouseoverFrameAlphas()
+      MouseoverFrameFading:RefreshMouseoverFrameAlphas()
     end
   )
 end
@@ -375,10 +380,29 @@ function addon:OnInitialize()
   QueueStatusButton:SetParent(UIParent)
 
   addon:InitializeUpdateTicker()
+  addon:InitializeOptions()
 end
 
-function addon:RefreshOptions()
-  AC:RegisterOptionsTable("BlizzHUDTweaks_options", addon:GetAceOptions(self.db))
+function addon:InitializeOptions()
+  addon:RefreshOptionTables()
+  self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+  self.profileOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
+  self.mouseoverFrameFadingOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
+  self.classResourceOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_ClassResource", "Class Resource", "BlizzHUDTweaks")
+end
+
+function addon:RefreshOptionTables()
+  local globalOptions = Options:GetOptionsTable()
+  AC:RegisterOptionsTable("BlizzHUDTweaks_options", globalOptions)
+
+  local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+  AC:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
+
+  local mouseoverFrameFadingOptions = MouseoverFrameFading:GetOptionsTable(self.db.profile)
+  AC:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
+
+  local classResourceOptions = ClassResource:GetOptionsTable(self.db.profile)
+  AC:RegisterOptionsTable("BlizzHUDTweaks_ClassResource", classResourceOptions)
 end
 
 function addon:OpenOptions()
@@ -402,7 +426,7 @@ end
 function addon:EnableAll()
   addon:Print("Enabled fading of action bars and frames.")
   addon:InitializeUpdateTicker()
-  addon:RefreshFrameAlphas()
+  MouseoverFrameFading:RefreshFrameAlphas()
 end
 
 function addon:IsEnabled()
@@ -424,4 +448,8 @@ function addon:ExecuteChatCommand(input)
   elseif input == "minimap" then
     addon:ToggleMinimapIcon()
   end
+end
+
+function addon:GetProfileDB()
+  return self.db.profile
 end

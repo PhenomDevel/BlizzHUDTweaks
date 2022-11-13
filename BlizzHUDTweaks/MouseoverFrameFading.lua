@@ -1,5 +1,6 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
+local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 
 local function determineFadeDuration(globalOptions, frameOptions)
   local fadeDuration = 0.25
@@ -130,7 +131,7 @@ end
 -------------------------------------------------------------------------------
 -- Public API
 
-function addon:Fade(frame, currentAlpha, targetAlpha, duration, delay)
+function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay)
   if currentAlpha and targetAlpha then
     if not frame.fadeAnimation then
       local animationGroup = frame:CreateAnimationGroup()
@@ -151,12 +152,13 @@ end
 
 local mouseoverFrames = {}
 
-function addon:RefreshMouseoverFrameAlphas()
+function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
+  local profile = addon:GetProfileDB()
   local inCombat = BlizzHUDTweaks.inCombat
-  local globalOptions = self.db.profile["*Global*"]
+  local globalOptions = profile["*Global*"]
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
-    local frameOptions = self.db.profile[frameName]
+    local frameOptions = profile[frameName]
     if frameOptions.Enabled then
       local isMouseover = frame:IsMouseOver()
       local currentAlpha = getNormalizedFrameAlpha(frame)
@@ -164,13 +166,13 @@ function addon:RefreshMouseoverFrameAlphas()
 
       if isMouseover and not mouseoverFrames[frameName] then
         if not inCombat then
-          addon:Fade(frame, currentAlpha, 1, fadeDuration)
+          self:Fade(frame, currentAlpha, 1, fadeDuration)
         elseif (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat) then
-          addon:Fade(frame, currentAlpha, 1, fadeDuration)
+          self:Fade(frame, currentAlpha, 1, fadeDuration)
         end
       elseif not isMouseover and mouseoverFrames[frameName] then
         local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
-        addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
+        self:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
       end
 
       mouseoverFrames[frameName] = isMouseover
@@ -178,11 +180,12 @@ function addon:RefreshMouseoverFrameAlphas()
   end
 end
 
-function addon:RefreshFrameAlphas(useFadeDelay)
-  local globalOptions = self.db.profile["*Global*"]
+function MouseoverFrameFading:RefreshFrameAlphas(useFadeDelay)
+  local profile = addon:GetProfileDB()
+  local globalOptions = addon:GetProfileDB()["*Global*"]
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
-    local frameOptions = self.db.profile[frameName]
+    local frameOptions = profile[frameName]
     if frameOptions.Enabled then
       local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
       local currentAlpha = getNormalizedFrameAlpha(frame)
@@ -193,7 +196,7 @@ function addon:RefreshFrameAlphas(useFadeDelay)
         if useFadeDelay then
           fadeDelay = determineFadeDelay(globalOptions, frameOptions)
         end
-        addon:Fade(frame, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
+        self:Fade(frame, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
       end
     end
   end
