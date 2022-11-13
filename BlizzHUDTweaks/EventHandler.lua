@@ -99,10 +99,6 @@ function addon:PLAYER_TOTEM_UPDATE()
     }
   end
 
-  if self.db.profile["TotemFrameDetached"] then
-    PlayerFrameBottomManagedFramesContainer:SetHeight(PlayerFrameBottomManagedFramesContainer:GetHeight() - TotemFrame:GetHeight())
-  end
-
   ClassResource:Restore(self.db.profile)
   ClassResource:RestoreTotemFrame(self.db.profile)
 end

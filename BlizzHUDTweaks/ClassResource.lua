@@ -39,7 +39,7 @@ function ClassResource:SetPoint(anchor, xOffset, yOffset, frame)
 
     frameToUse:ClearAllPoints()
     frameToUse:SetParent(PlayerFrame)
-    frameToUse:SetPoint(anchorInverse[anchor], PlayerFrame, anchor, xOffset or 0, yOffset or -1)
+    frameToUse:SetPoint(anchor, PlayerFrame, anchor, xOffset or 0, yOffset or -1)
   end
 end
 

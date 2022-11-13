@@ -386,7 +386,17 @@ function addon:OnInitialize()
 
   addon:HideGCDFlash()
 
-  addon:RegisterEvents({"PLAYER_LOGIN", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "PLAYER_UPDATE_RESTING", "PLAYER_TARGET_CHANGED", "PLAYER_ENTERING_WORLD"})
+  addon:RegisterEvents(
+    {
+      "PLAYER_LOGIN",
+      "PLAYER_REGEN_ENABLED",
+      "PLAYER_REGEN_DISABLED",
+      "PLAYER_UPDATE_RESTING",
+      "PLAYER_TARGET_CHANGED",
+      "PLAYER_ENTERING_WORLD",
+      "PLAYER_TOTEM_UPDATE"
+    }
+  )
 
   QueueStatusButton:SetParent(UIParent)
 

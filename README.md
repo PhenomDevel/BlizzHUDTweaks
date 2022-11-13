@@ -60,7 +60,6 @@ The priority of the checks is as follows
 - Durability Frame
 - Vehicle Seat Frame
 
-## More will eventually follow
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
 
@@ -73,6 +72,9 @@ Even though the add-on has to check more or less in a set interval, it is very p
 - Usually this only happens when you mouseover a frame. Mouseover overwrites the fade animation, which has a set delay and will not maintain the delay after you leave the frame.
 ## Fading is setup but nothing happens
 - Make sure you have `Enabled` the fading for the given frame
+
+# Known Issues
+- When reloading the UI while having a target the alpha will only applied once the target changes
 
 # Credits
 The initial impressions came from [Conceal](https://www.curseforge.com/wow/addons/conceal). However, I disliked the design approach and wanted to add missing features. Therefore, I wrote my personal add-on which extends the feature set.
