@@ -1,14 +1,5 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
-local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
-local ClassResource = addon:GetModule("ClassResource")
-
-local aceOptions = {
-  name = "BlizzHUDTweaks",
-  handler = addon,
-  type = "group",
-  args = {}
-}
 
 local function getGlobalOptions(profile)
   return {
