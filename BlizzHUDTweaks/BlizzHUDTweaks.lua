@@ -137,6 +137,15 @@ local defaultConfig = {
     },
     ["VehicleSeatIndicator"] = {
       displayName = "Vehicle Seats Frame"
+    },
+    ["PartyFrame"] = {
+      displayName = "Party Frame"
+    },
+    ["CompactRaidFrameContainer"] = {
+      displayName = "Raid Frame"
+    },
+    ["MainMenuBarVehicleLeaveButton"] = {
+      displayName = "Vehicle Leave Button"
     }
   }
 }
@@ -168,7 +177,10 @@ local frameMapping = {
   ["PetFrame"] = PetFrame,
   ["QueueStatusButton"] = QueueStatusButton,
   ["DurabilityFrame"] = DurabilityFrame,
-  ["VehicleSeatIndicator"] = VehicleSeatIndicator
+  ["VehicleSeatIndicator"] = VehicleSeatIndicator,
+  ["PartyFrame"] = PartyFrame,
+  ["CompactRaidFrameContainer"] = CompactRaidFrameContainer,
+  ["MainMenuBarVehicleLeaveButton"] = MainMenuBarVehicleLeaveButton
 }
 
 local function setFrameDefaultOptions(frameOptions)

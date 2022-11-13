@@ -105,6 +105,13 @@ globals = {
   "DurabilityFrame",
   "VehicleSeatIndicator",
   "TargetFrameToT",
+  "PlayerFrameBottomManagedFramesContainer",
+  "UnitClassBase",
+  "TotemFrame",
+  "CompactPartyFrame",
+  "PartyFrame",
+  "CompactRaidFrameContainer",
+  "MainMenuBarVehicleLeaveButton",
   -- Locals
   "L"
 }
