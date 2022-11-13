@@ -10,6 +10,13 @@ Open the options via the ingame options menu or by typing `/bht` or `/blizzhudtw
 - Toggle minimap icon: `/bht minimap`
 
 # Features
+## Class Resource
+You can
+- Scale the class resources
+- Change position based on Player Frame (Left, Right, Top, Bottom)
+- Hide the class resource
+
+You also can change the settings for the Totem Frame
 ## Mouseover Fade (action bars, frames)
 You can fade out most of the actions bars and frames for different scenarios. You can set different alpha values for `In Combat`, `Out of Combat`, and `In Resting Area`. You also can set the options globally and use them for each action bar/frame.
 
