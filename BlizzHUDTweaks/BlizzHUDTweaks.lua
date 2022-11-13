@@ -437,17 +437,21 @@ function addon:ResetFrame(frame)
 end
 
 function addon:DisableAll()
-  addon:Print("Disabled fading for all action bars and frames.")
+  addon:Print("Disabled. To make sure everything is loaded correctly please /reload the UI")
   addon:ClearUpdateTicker()
   for _, frame in pairs(addon:GetFrameMapping()) do
     addon:ResetFrame(frame)
   end
+  ClassResource:RestoreOriginalTotemFramePosition(self.db.profile)
+  ClassResource:RestorePosition()
 end
 
 function addon:EnableAll()
-  addon:Print("Enabled fading of action bars and frames.")
+  addon:Print("Enabled.")
   addon:InitializeUpdateTicker()
   MouseoverFrameFading:RefreshFrameAlphas()
+  ClassResource:Restore(self.db.profile)
+  ClassResource:RestoreTotemFrame(self.db.profile)
 end
 
 function addon:IsEnabled()

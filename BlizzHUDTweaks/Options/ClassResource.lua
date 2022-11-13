@@ -2,13 +2,6 @@ local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local ClassResource = addon:GetModule("ClassResource")
 
-local anchorInverse = {
-  ["TOP"] = "BOTTOM",
-  ["BOTTOM"] = "TOP",
-  ["LEFT"] = "RIGHT",
-  ["RIGHT"] = "LEFT"
-}
-
 local anchors = {
   ["LEFT"] = "LEFT",
   ["RIGHT"] = "RIGHT",
@@ -23,9 +16,37 @@ local function getFramePositionOptions(profile, prefix, name, frame)
   local yOffsetName = prefix .. "YOffset" .. name
   local scaleName = prefix .. "Scale" .. name
   local hideName = prefix .. "Hide" .. name
+  local enabledName = prefix .. "Enabled" .. name
+  local descriptionName = prefix .. "Description" .. name
+
+  t[enabledName] = {
+    order = 1,
+    name = "Enabled",
+    width = "full",
+    type = "toggle",
+    get = "GetValue",
+    set = function(info, value)
+      ClassResource:SetValue(info, value)
+      if frame == TotemFrame then
+        ClassResource:RestoreOriginalTotemFramePosition(profile)
+        ClassResource:RestoreTotemFrame(profile)
+      else
+        ClassResource:RestorePosition()
+        ClassResource:Restore(profile)
+      end
+    end
+  }
+
+  t[descriptionName] = {
+    order = 1.1,
+    name = addon:ColoredString("\n\nNOTE: ", "eb4034") .. "If enabled please make sure you have set all settings below to make the feature work correctly.",
+    width = "full",
+    type = "description",
+    fontSize = "medium"
+  }
 
   t[hideName] = {
-    order = 1,
+    order = 1.2,
     name = "Hide",
     width = "full",
     type = "toggle",
@@ -41,7 +62,7 @@ local function getFramePositionOptions(profile, prefix, name, frame)
   }
 
   t[anchorName] = {
-    order = 1.1,
+    order = 1.3,
     name = "AnchorTo",
     width = "normal",
     type = "select",
@@ -57,7 +78,7 @@ local function getFramePositionOptions(profile, prefix, name, frame)
     values = anchors
   }
   t[xOffsetName] = {
-    order = 1.2,
+    order = 1.4,
     name = "X Offset",
     desc = "",
     width = "full",
@@ -76,7 +97,7 @@ local function getFramePositionOptions(profile, prefix, name, frame)
     step = 1
   }
   t[yOffsetName] = {
-    order = 1.3,
+    order = 1.5,
     name = "Y Offset",
     desc = "",
     width = "full",
@@ -95,7 +116,7 @@ local function getFramePositionOptions(profile, prefix, name, frame)
     step = 1
   }
   t[scaleName] = {
-    order = 1.4,
+    order = 1.6,
     name = "Scale",
     desc = "",
     width = "full",
