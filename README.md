@@ -13,6 +13,14 @@ Open the options via the in game options menu or by typing `/bht` or `/blizzhudt
 - Toggle minimap icon: `/bht minimap`
 
 # Features
+## Miscellaneous
+- Overwrite your characters name
+- Hide Player level
+- Hide Target level
+- Hide Player name
+- Hide Target name
+- Overwrite Player/Target Health/Mana font size
+
 ## Class Resource
 You can
 - Scale the class resources
