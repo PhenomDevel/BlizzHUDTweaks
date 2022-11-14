@@ -395,7 +395,8 @@ function addon:OnInitialize()
       "PLAYER_UPDATE_RESTING",
       "PLAYER_TARGET_CHANGED",
       "PLAYER_ENTERING_WORLD",
-      "PLAYER_TOTEM_UPDATE"
+      "PLAYER_TOTEM_UPDATE",
+      "UNIT_LEVEL"
     }
   )
 
@@ -428,7 +429,7 @@ function addon:RefreshOptionTables()
   local classResourceOptions = ClassResource:GetOptionsTable(self.db.profile)
   AC:RegisterOptionsTable("BlizzHUDTweaks_ClassResource", classResourceOptions)
 
-  local miscellaneousOptions = Miscellaneous:GetOptionsTable(self.db.profile)
+  local miscellaneousOptions = Miscellaneous:GetOptionsTable()
   AC:RegisterOptionsTable("BlizzHUDTweaks_Miscellaneous", miscellaneousOptions)
 end
 

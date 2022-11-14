@@ -70,7 +70,9 @@ function addon:PLAYER_TARGET_CHANGED()
       MouseoverFrameFading:RefreshFrameAlphas(true)
     end
   end
-  Miscellaneous:Restore(self.db.profile)
+
+  Miscellaneous:RestoreShowHideOptions(self.db.profile)
+  Miscellaneous:RestoreFontSizeOptions(self.db.profile)
 end
 
 function addon:PLAYER_ENTERING_WORLD()
@@ -82,7 +84,7 @@ function addon:PLAYER_ENTERING_WORLD()
   ClassResource:Restore(self.db.profile)
   ClassResource:RestoreTotemFrame(self.db.profile)
 
-  Miscellaneous:Restore(self.db.profile)
+  Miscellaneous:RestoreAll(self.db.profile)
 end
 
 function addon:PLAYER_TOTEM_UPDATE()
@@ -102,4 +104,8 @@ end
 
 function addon:PLAYER_LOGIN()
   addon:RefreshOptionTables()
+end
+
+function addon:UNIT_LEVEL(_, unit)
+  addon:Print("UNIT_LEVEL", unit)
 end

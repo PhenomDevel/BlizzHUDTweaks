@@ -112,6 +112,14 @@ globals = {
   "PartyFrame",
   "CompactRaidFrameContainer",
   "MainMenuBarVehicleLeaveButton",
+  "PlayerName",
+  "PlayerLevelText",
+  "PlayerFrameHealthBarText",
+  "PlayerFrameHealthBarTextLeft",
+  "PlayerFrameHealthBarTextRight",
+  "PlayerFrameManaBarText",
+  "PlayerFrameManaBarTextLeft",
+  "PlayerFrameManaBarTextRight",
   -- Locals
   "L"
 }

@@ -2,46 +2,104 @@ local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local Miscellaneous = addon:GetModule("Miscellaneous")
 
-Miscellaneous.showHideToggableOptions = {
+Miscellaneous.showHideOptions = {
   [1] = {
-    optionName = "MiscellaneousHidePlayerName",
+    optionName = "MiscellaneousShowHidePlayerName",
     displayName = "Hide Player Name",
     frame = PlayerName,
     description = ""
   },
   [2] = {
-    optionName = "MiscellaneousHidePlayerlevel",
+    optionName = "MiscellaneousShowHidePlayerlevel",
     displayName = "Hide Player Level",
     frame = PlayerLevelText,
     description = ""
   },
   [3] = {
-    optionName = "MiscellaneousHideTargetName",
+    optionName = "MiscellaneousShowHideTargetName",
     displayName = "Hide Target Name",
     frame = TargetFrame.TargetFrameContent.TargetFrameContentMain.Name,
     description = ""
   },
   [4] = {
-    optionName = "MiscellaneousHideTargetlevel",
+    optionName = "MiscellaneousShowHideTargetlevel",
     displayName = "Hide Target Level",
     frame = TargetFrame.TargetFrameContent.TargetFrameContentMain.LevelText,
     description = ""
   }
 }
 
-Miscellaneous.textOptions = {
+Miscellaneous.textOverwriteOptions = {
   [1] = {
-    optionName = "MiscellaneousOverwritePlayerName",
+    optionName = "MiscellaneousTextOverwritePlayerName",
     displayName = "Overwrite Player Name",
     frame = PlayerName,
     description = ""
   }
 }
 
-local function addTextOptions(t)
-  local order = 2
+Miscellaneous.fontSizeOverwriteOptions = {
+  [1] = {
+    optionName = "MiscellaneousFontSizeOverwritePlayerHealthBarFontSize",
+    displayName = "Overwrite Player Health Font Size",
+    frames = {PlayerFrameHealthBarText, PlayerFrameHealthBarTextLeft, PlayerFrameHealthBarTextRight},
+    description = ""
+  },
+  [2] = {
+    optionName = "MiscellaneousFontSizeOverwritePlayerManaBarFontSize",
+    displayName = "Overwrite Player Mana Font Size",
+    frames = {PlayerFrameManaBarText, PlayerFrameManaBarTextLeft, PlayerFrameManaBarTextRight},
+    description = ""
+  },
+  [3] = {
+    optionName = "MiscellaneousFontSizeOverwriteTargetHealthBarFontSize",
+    displayName = "Overwrite Target Health Font Size",
+    frames = {TargetFrame.healthbar.HealthBarText, TargetFrame.healthbar.LeftText, TargetFrame.healthbar.RightText},
+    description = ""
+  },
+  [4] = {
+    optionName = "MiscellaneousFontSizeOverwriteTargetManaBarFontSize",
+    displayName = "Overwrite Target Mana Font Size",
+    frames = {TargetFrame.manabar.ManaBarText, TargetFrame.manabar.LeftText, TargetFrame.manabar.RightText},
+    description = ""
+  }
+}
 
-  for _, v in ipairs(Miscellaneous.textOptions) do
+local function addSliderOptions(t)
+  local order = 3
+
+  for _, v in ipairs(Miscellaneous.fontSizeOverwriteOptions) do
+    t[v.optionName] = {
+      order = order,
+      name = v.displayName or v.optionName,
+      width = "double",
+      desc = v.description or "",
+      type = "range",
+      min = 6,
+      max = 36,
+      step = 1,
+      get = "GetValue",
+      set = function(info, value)
+        Options:SetValue(info, value)
+        if value then
+          if v.frames then
+            for _, frame in ipairs(v.frames) do
+              Miscellaneous:UpdateFontSize(frame, value)
+            end
+          else
+            Miscellaneous:UpdateFontSize(v.frame, value)
+          end
+        end
+      end
+    }
+    order = order + 0.1
+  end
+end
+
+local function addTextOptions(t)
+  local order = 1
+
+  for _, v in ipairs(Miscellaneous.textOverwriteOptions) do
     t[v.optionName] = {
       order = order,
       name = v.displayName or v.optionName,
@@ -61,13 +119,13 @@ local function addTextOptions(t)
 end
 
 local function addShowHideToggableOptions(t)
-  local order = 1
+  local order = 2
 
-  for _, v in ipairs(Miscellaneous.showHideToggableOptions) do
+  for _, v in ipairs(Miscellaneous.showHideOptions) do
     t[v.optionName] = {
       order = order,
       name = v.displayName or v.optionName,
-      width = "normal",
+      width = "full",
       desc = v.description or "",
       type = "toggle",
       get = "GetValue",
@@ -95,10 +153,11 @@ function Miscellaneous:SetValue(info, value)
   Options:SetValue(info, value)
 end
 
-function Miscellaneous:GetOptionsTable(profile)
+function Miscellaneous:GetOptionsTable()
   local args = {}
   addShowHideToggableOptions(args)
   addTextOptions(args)
+  addSliderOptions(args)
   return {
     name = "Miscellaneous",
     type = "group",
