@@ -399,6 +399,7 @@ function addon:OnInitialize()
   )
 
   QueueStatusButton:SetParent(UIParent)
+  MainMenuBarVehicleLeaveButton:SetParent(UIParent)
 
   addon:InitializeUpdateTicker()
   addon:InitializeOptions()
