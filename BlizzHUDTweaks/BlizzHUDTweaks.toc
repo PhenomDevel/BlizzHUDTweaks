@@ -27,9 +27,12 @@ BlizzHUDTweaks.lua
 # Modules
 MouseoverFrameFading.lua
 ClassResource.lua
+Miscellaneous.lua
+
 
 Util.lua
 EventHandler.lua
 Options.lua
 Options/ClassResource.lua
 Options/MouseoverFrameFading.lua
+Options/Miscellaneous.lua

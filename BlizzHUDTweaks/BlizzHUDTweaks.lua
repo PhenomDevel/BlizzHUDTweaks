@@ -7,6 +7,7 @@ local ACD = LibStub("AceConfigDialog-3.0")
 local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local ClassResource = addon:NewModule("ClassResource")
+local Miscellaneous = addon:NewModule("Miscellaneous")
 
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
@@ -411,6 +412,7 @@ function addon:InitializeOptions()
   self.profileOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
   self.mouseoverFrameFadingOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
   self.classResourceOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_ClassResource", "Class Resource", "BlizzHUDTweaks")
+  self.miscellaneousOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
 end
 
 function addon:RefreshOptionTables()
@@ -425,6 +427,9 @@ function addon:RefreshOptionTables()
 
   local classResourceOptions = ClassResource:GetOptionsTable(self.db.profile)
   AC:RegisterOptionsTable("BlizzHUDTweaks_ClassResource", classResourceOptions)
+
+  local miscellaneousOptions = Miscellaneous:GetOptionsTable(self.db.profile)
+  AC:RegisterOptionsTable("BlizzHUDTweaks_Miscellaneous", miscellaneousOptions)
 end
 
 function addon:OpenOptions()
