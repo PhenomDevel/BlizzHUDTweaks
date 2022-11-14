@@ -7,6 +7,5 @@ BlizzHUDTweaks/Libs/LibDBIcon*
 BlizzHUDTweaks/Libs/LibData*
 BlizzHUDTweaks/Libs/Callback*
 *.html
-Assets/BlizzHUDTweaksIcon.png
-Assets/BlizzHUDTweaksIcon256x256.png
 SCRATCH.lua
+/Assets
