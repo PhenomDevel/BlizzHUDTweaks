@@ -10,29 +10,37 @@ local Miscellaneous = addon:GetModule("Miscellaneous")
 
 local registeredEvents = {}
 
-function addon:RegisterEvents(events)
-  for _, event in ipairs(events) do
-    addon:RegisterEvent(event)
-    registeredEvents[event] = true
+function addon:RegisterEvents(events, forced)
+  if addon:IsEnabled() or forced then
+    for _, event in ipairs(events) do
+      addon:RegisterEvent(event)
+      registeredEvents[event] = true
+    end
   end
 end
 
-function addon:UnregisterEvent(event)
-  if registeredEvents[event] then
-    addon:UnregisterEvent(event)
-    registeredEvents[event] = false
+function addon:UnregisterEvent(event, forced)
+  if addon:IsEnabled() or forced then
+    if registeredEvents[event] then
+      addon:UnregisterEvent(event)
+      registeredEvents[event] = false
+    end
   end
 end
 
-function addon:UnregisterEvents(events)
-  for _, event in ipairs(events) do
-    addon:UnregisterEvent(event)
+function addon:UnregisterEvents(events, forced)
+  if addon:IsEnabled() or forced then
+    for _, event in ipairs(events) do
+      addon:UnregisterEvent(event)
+    end
   end
 end
 
-function addon:UnregisterAllEvents()
-  for event, _ in pairs(registeredEvents) do
-    addon:UnregisterEvent(event)
+function addon:UnregisterAllEvents(forced)
+  if addon:IsEnabled() or forced then
+    for event, _ in pairs(registeredEvents) do
+      addon:UnregisterEvent(event)
+    end
   end
 end
 
@@ -69,10 +77,10 @@ function addon:PLAYER_TARGET_CHANGED()
     else
       MouseoverFrameFading:RefreshFrameAlphas(true)
     end
-  end
 
-  Miscellaneous:RestoreShowHideOptions(self.db.profile)
-  Miscellaneous:RestoreFontSizeOptions(self.db.profile)
+    Miscellaneous:RestoreShowHideOptions(self.db.profile)
+    Miscellaneous:RestoreFontSizeOptions(self.db.profile)
+  end
 end
 
 function addon:PLAYER_ENTERING_WORLD()
@@ -80,11 +88,12 @@ function addon:PLAYER_ENTERING_WORLD()
 
   if addon:IsEnabled() then
     MouseoverFrameFading:RefreshFrameAlphas()
-  end
-  ClassResource:Restore(self.db.profile)
-  ClassResource:RestoreTotemFrame(self.db.profile)
 
-  Miscellaneous:RestoreAll(self.db.profile)
+    ClassResource:Restore(self.db.profile)
+    ClassResource:RestoreTotemFrame(self.db.profile)
+
+    Miscellaneous:RestoreAll(self.db.profile)
+  end
 end
 
 function addon:PLAYER_TOTEM_UPDATE()
@@ -98,14 +107,21 @@ function addon:PLAYER_TOTEM_UPDATE()
     }
   end
 
-  ClassResource:Restore(self.db.profile)
-  ClassResource:RestoreTotemFrame(self.db.profile)
+  if addon:IsEnabled() then
+    ClassResource:Restore(self.db.profile)
+    ClassResource:RestoreTotemFrame(self.db.profile)
+  end
 end
 
 function addon:PLAYER_LOGIN()
-  addon:RefreshOptionTables()
+  if addon:IsEnabled() then
+    addon:RefreshOptionTables()
+  end
 end
 
-function addon:UNIT_LEVEL(_, unit)
-  addon:Print("UNIT_LEVEL", unit)
+function addon:PLAYER_SPECIALIZATION_CHANGED()
+  if addon:IsEnabled() then
+    ClassResource:Restore(self.db.profile)
+    ClassResource:RestoreTotemFrame(self.db.profile)
+  end
 end

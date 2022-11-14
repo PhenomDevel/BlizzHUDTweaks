@@ -86,8 +86,6 @@ local function addSliderOptions(t)
             for _, frame in ipairs(v.frames) do
               Miscellaneous:UpdateFontSize(frame, value)
             end
-          else
-            Miscellaneous:UpdateFontSize(v.frame, value)
           end
         end
       end

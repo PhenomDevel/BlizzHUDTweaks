@@ -396,7 +396,7 @@ function addon:OnInitialize()
       "PLAYER_TARGET_CHANGED",
       "PLAYER_ENTERING_WORLD",
       "PLAYER_TOTEM_UPDATE",
-      "UNIT_LEVEL"
+      "PLAYER_SPECIALIZATION_CHANGED"
     }
   )
 
@@ -451,6 +451,8 @@ function addon:DisableAll()
   end
   ClassResource:RestoreOriginalTotemFramePosition(self.db.profile)
   ClassResource:RestorePosition()
+  Miscellaneous:RestoreOriginal()
+  addon:UnregisterAllEvents(true)
 end
 
 function addon:EnableAll()
@@ -459,6 +461,7 @@ function addon:EnableAll()
   MouseoverFrameFading:RefreshFrameAlphas()
   ClassResource:Restore(self.db.profile)
   ClassResource:RestoreTotemFrame(self.db.profile)
+  Miscellaneous:RestoreAll(self.db.profile)
 end
 
 function addon:IsEnabled()

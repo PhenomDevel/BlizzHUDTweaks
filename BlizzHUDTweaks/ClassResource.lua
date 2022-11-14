@@ -118,6 +118,8 @@ function ClassResource:Restore(profile)
           PlayerFrameBottomManagedFramesContainer:SetScale(scale)
         end
       end
+    else
+      ClassResource:RestorePosition()
     end
   end
 end
