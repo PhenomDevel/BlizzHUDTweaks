@@ -41,44 +41,118 @@ Miscellaneous.textOverwriteOptions = {
 Miscellaneous.fontSizeOverwriteOptions = {
   [1] = {
     optionName = "MiscellaneousFontSizeOverwritePlayerHealthBarFontSize",
-    displayName = "Overwrite Player Health Font Size",
+    displayName = "Player Health Font Size",
     frames = {PlayerFrameHealthBarText, PlayerFrameHealthBarTextLeft, PlayerFrameHealthBarTextRight},
     description = ""
   },
   [2] = {
     optionName = "MiscellaneousFontSizeOverwritePlayerManaBarFontSize",
-    displayName = "Overwrite Player Mana Font Size",
+    displayName = "Player Mana Font Size",
     frames = {PlayerFrameManaBarText, PlayerFrameManaBarTextLeft, PlayerFrameManaBarTextRight},
     description = ""
   },
   [3] = {
     optionName = "MiscellaneousFontSizeOverwriteTargetHealthBarFontSize",
-    displayName = "Overwrite Target Health Font Size",
+    displayName = "Target Health Font Size",
     frames = {TargetFrame.healthbar.HealthBarText, TargetFrame.healthbar.LeftText, TargetFrame.healthbar.RightText},
     description = ""
   },
   [4] = {
     optionName = "MiscellaneousFontSizeOverwriteTargetManaBarFontSize",
-    displayName = "Overwrite Target Mana Font Size",
+    displayName = "Target Mana Font Size",
     frames = {TargetFrame.manabar.ManaBarText, TargetFrame.manabar.LeftText, TargetFrame.manabar.RightText},
     description = ""
   }
 }
 
-local function addSliderOptions(t)
-  local order = 3
+Miscellaneous.advancedOptions = {
+  [1] = {
+    optionName = "MiscellaneousAlwaysCollapseBuffFrameOnLogin",
+    displayName = "Always collapse buff frame on login",
+    frame = BuffFrame,
+    description = "",
+    type = "toggle",
+    customFunction = function()
+      BuffFrame:SetBuffsExpandedState(false)
+      BuffFrame.CollapseAndExpandButton:UpdateOrientation()
+    end,
+    width = "full"
+  }
+}
 
-  for _, v in ipairs(Miscellaneous.fontSizeOverwriteOptions) do
+local function addTextOverwriteOptions(t)
+  local order = 1
+
+  t["TextOverwriteOptionsHeader"] = {
+    order = order,
+    type = "header",
+    name = "Overwrite texts"
+  }
+
+  for _, v in ipairs(Miscellaneous.textOverwriteOptions) do
+    order = order + 0.1
     t[v.optionName] = {
       order = order,
       name = v.displayName or v.optionName,
-      width = "double",
+      desc = v.description or "",
+      type = "input",
+      set = function(info, value)
+        Options:SetValue(info, value)
+        if value then
+          v.frame:SetText(value)
+        end
+      end
+    }
+  end
+end
+
+local function addShowHideOptions(t)
+  local order = 2
+
+  t["ShowHideOptionsHeader"] = {
+    order = order,
+    type = "header",
+    name = "Show/Hide"
+  }
+
+  for _, v in ipairs(Miscellaneous.showHideOptions) do
+    order = order + 0.1
+    t[v.optionName] = {
+      order = order,
+      name = v.displayName or v.optionName,
+      desc = v.description or "",
+      type = "toggle",
+      set = function(info, value)
+        Options:SetValue(info, value)
+        if value then
+          v.frame:Hide()
+        else
+          v.frame:Show()
+        end
+      end
+    }
+  end
+end
+
+local function addFontSizeOverwriteOptions(t)
+  local order = 3
+
+  t["FontSizeOverwriteOptionsHeader"] = {
+    order = order,
+    type = "header",
+    name = "Overwrite font sizes"
+  }
+
+  for _, v in ipairs(Miscellaneous.fontSizeOverwriteOptions) do
+    order = order + 0.1
+    t[v.optionName] = {
+      order = order,
+      name = v.displayName or v.optionName,
       desc = v.description or "",
       type = "range",
       min = 6,
       max = 36,
       step = 1,
-      get = "GetValue",
       set = function(info, value)
         Options:SetValue(info, value)
         if value then
@@ -90,53 +164,31 @@ local function addSliderOptions(t)
         end
       end
     }
-    order = order + 0.1
   end
 end
 
-local function addTextOptions(t)
-  local order = 1
+local function addAdvancedOptions(t)
+  local order = 4
 
-  for _, v in ipairs(Miscellaneous.textOverwriteOptions) do
+  t["AdvancedOptionsHeader"] = {
+    order = order,
+    type = "header",
+    name = "Advanced options"
+  }
+
+  for _, v in ipairs(Miscellaneous.advancedOptions) do
+    order = order + 0.1
     t[v.optionName] = {
       order = order,
       name = v.displayName or v.optionName,
-      width = "normal",
+      width = v.width or "normal",
       desc = v.description or "",
-      type = "input",
-      get = "GetValue",
+      type = v.type or "toggle",
       set = function(info, value)
         Options:SetValue(info, value)
-        if value then
-          v.frame:SetText(value)
-        end
+        v.customFunction()
       end
     }
-    order = order + 0.1
-  end
-end
-
-local function addShowHideToggableOptions(t)
-  local order = 2
-
-  for _, v in ipairs(Miscellaneous.showHideOptions) do
-    t[v.optionName] = {
-      order = order,
-      name = v.displayName or v.optionName,
-      width = "full",
-      desc = v.description or "",
-      type = "toggle",
-      get = "GetValue",
-      set = function(info, value)
-        Options:SetValue(info, value)
-        if value then
-          v.frame:Hide()
-        else
-          v.frame:Show()
-        end
-      end
-    }
-    order = order + 0.1
   end
 end
 
@@ -153,13 +205,20 @@ end
 
 function Miscellaneous:GetOptionsTable()
   local args = {}
-  addShowHideToggableOptions(args)
-  addTextOptions(args)
-  addSliderOptions(args)
+  addShowHideOptions(args)
+  addTextOverwriteOptions(args)
+  addFontSizeOverwriteOptions(args)
+  addAdvancedOptions(args)
   return {
     name = "Miscellaneous",
     type = "group",
     handler = Miscellaneous,
+    get = function(info)
+      return Options:GetValue(info)
+    end,
+    set = function(info, value)
+      Options:SetValue(info, value)
+    end,
     args = args
   }
 end
