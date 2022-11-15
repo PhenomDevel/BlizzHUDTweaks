@@ -77,22 +77,6 @@ function Miscellaneous:RestoreShowHideOriginal()
   end
 end
 
-function Miscellaneous:RestoreAdvancedOptions()
-  for _, v in ipairs(Miscellaneous.advancedOptions) do
-    if v.frame then
-      if v.frame:IsShown() then
-        if v.customFunction then
-          v.customFunction()
-        end
-      end
-    else
-      if v.customFunction then
-        v.customFunction()
-      end
-    end
-  end
-end
-
 function Miscellaneous:RestoreOriginal()
   Miscellaneous:RestoreShowHideOriginal()
   Miscellaneous:RestoreTextOverwriteOriginal()
@@ -103,5 +87,4 @@ function Miscellaneous:RestoreAll(profile)
   Miscellaneous:RestoreFontSizeOptions(profile)
   Miscellaneous:RestoreTextOverwriteOptions(profile)
   Miscellaneous:RestoreShowHideOptions(profile)
-  -- Miscellaneous:RestoreAdvancedOptions()
 end

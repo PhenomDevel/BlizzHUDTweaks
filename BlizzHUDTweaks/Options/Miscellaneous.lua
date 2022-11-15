@@ -65,18 +65,7 @@ Miscellaneous.fontSizeOverwriteOptions = {
   }
 }
 
-Miscellaneous.advancedOptions = {
-  [1] = {
-    optionName = "MiscellaneousAlwaysCollapseBuffFrameOnLogin",
-    displayName = "Always collapse buff frame on login",
-    frame = BuffFrame,
-    description = "",
-    type = "toggle",
-    customFunction = function()
-    end,
-    width = "full"
-  }
-}
+Miscellaneous.advancedOptions = {}
 
 local function addTextOverwriteOptions(t)
   local order = 1
@@ -165,31 +154,6 @@ local function addFontSizeOverwriteOptions(t)
   end
 end
 
-local function addAdvancedOptions(t)
-  local order = 4
-
-  t["AdvancedOptionsHeader"] = {
-    order = order,
-    type = "header",
-    name = "Advanced options"
-  }
-
-  for _, v in ipairs(Miscellaneous.advancedOptions) do
-    order = order + 0.1
-    t[v.optionName] = {
-      order = order,
-      name = v.displayName or v.optionName,
-      width = v.width or "normal",
-      desc = v.description or "",
-      type = v.type or "toggle",
-      set = function(info, value)
-        Options:SetValue(info, value)
-        v.customFunction()
-      end
-    }
-  end
-end
-
 -------------------------------------------------------------------------------
 -- Public API
 
@@ -206,7 +170,6 @@ function Miscellaneous:GetOptionsTable()
   addShowHideOptions(args)
   addTextOverwriteOptions(args)
   addFontSizeOverwriteOptions(args)
-  -- addAdvancedOptions(args)
   return {
     name = "Miscellaneous",
     type = "group",

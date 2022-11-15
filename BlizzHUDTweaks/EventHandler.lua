@@ -85,12 +85,13 @@ function addon:PLAYER_ENTERING_WORLD()
 
   if addon:IsEnabled() then
     if BlizzHUDTweaks.hasTarget then
+      MouseoverFrameFading:RefreshFrameAlphas()
+    else
+      MouseoverFrameFading:RefreshFrameAlphas(true)
     end
 
     ClassResource:Restore(self.db.profile)
     ClassResource:RestoreTotemFrame(self.db.profile)
-
-  --
   end
 end
 
