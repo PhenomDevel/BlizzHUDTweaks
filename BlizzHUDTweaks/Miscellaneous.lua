@@ -103,5 +103,5 @@ function Miscellaneous:RestoreAll(profile)
   Miscellaneous:RestoreFontSizeOptions(profile)
   Miscellaneous:RestoreTextOverwriteOptions(profile)
   Miscellaneous:RestoreShowHideOptions(profile)
-  Miscellaneous:RestoreAdvancedOptions()
+  -- Miscellaneous:RestoreAdvancedOptions()
 end

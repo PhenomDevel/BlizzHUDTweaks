@@ -13,17 +13,10 @@ local registeredEvents = {}
 function addon:RegisterEvents(events, forced)
   if addon:IsEnabled() or forced then
     for _, event in ipairs(events) do
-      addon:RegisterEvent(event)
-      registeredEvents[event] = true
-    end
-  end
-end
-
-function addon:UnregisterEvent(event, forced)
-  if addon:IsEnabled() or forced then
-    if registeredEvents[event] then
-      addon:UnregisterEvent(event)
-      registeredEvents[event] = false
+      if not registeredEvents[event] then
+        addon:RegisterEvent(event)
+        registeredEvents[event] = true
+      end
     end
   end
 end
@@ -31,15 +24,19 @@ end
 function addon:UnregisterEvents(events, forced)
   if addon:IsEnabled() or forced then
     for _, event in ipairs(events) do
-      addon:UnregisterEvent(event)
+      if registeredEvents[event] then
+        addon:UnregisterEvent(event)
+        registeredEvents[event] = false
+      end
     end
   end
 end
 
-function addon:UnregisterAllEvents(forced)
-  if addon:IsEnabled() or forced then
-    for event, _ in pairs(registeredEvents) do
+function addon:UnregisterAllEvents()
+  for event, registered in pairs(registeredEvents) do
+    if registered then
       addon:UnregisterEvent(event)
+      registeredEvents[event] = false
     end
   end
 end
@@ -87,12 +84,13 @@ function addon:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
 
   if addon:IsEnabled() then
-    MouseoverFrameFading:RefreshFrameAlphas()
+    if BlizzHUDTweaks.hasTarget then
+    end
 
     ClassResource:Restore(self.db.profile)
     ClassResource:RestoreTotemFrame(self.db.profile)
 
-    Miscellaneous:RestoreAll(self.db.profile)
+  --
   end
 end
 
@@ -116,6 +114,7 @@ end
 function addon:PLAYER_LOGIN()
   if addon:IsEnabled() then
     addon:RefreshOptionTables()
+    Miscellaneous:RestoreAll(self.db.profile)
   end
 end
 

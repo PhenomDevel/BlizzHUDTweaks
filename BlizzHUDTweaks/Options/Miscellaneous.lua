@@ -73,8 +73,6 @@ Miscellaneous.advancedOptions = {
     description = "",
     type = "toggle",
     customFunction = function()
-      BuffFrame:SetBuffsExpandedState(false)
-      BuffFrame.CollapseAndExpandButton:UpdateOrientation()
     end,
     width = "full"
   }
@@ -208,7 +206,7 @@ function Miscellaneous:GetOptionsTable()
   addShowHideOptions(args)
   addTextOverwriteOptions(args)
   addFontSizeOverwriteOptions(args)
-  addAdvancedOptions(args)
+  -- addAdvancedOptions(args)
   return {
     name = "Miscellaneous",
     type = "group",

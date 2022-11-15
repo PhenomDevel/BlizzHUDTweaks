@@ -25,10 +25,8 @@ local function getBlizzHUDTweaksLibDbIconData(db)
             addon:OpenOptions()
           elseif button == "RightButton" then
             if addon:IsEnabled() then
-              db.profile["Enabled"] = false
               addon:DisableAll()
             else
-              db.profile["Enabled"] = true
               addon:EnableAll()
             end
           elseif button == "MiddleButton" then
@@ -52,6 +50,17 @@ local function getBlizzHUDTweaksLibDbIconData(db)
     )
   end
 end
+
+local eventsToRegister = {
+  "PLAYER_LOGIN",
+  "PLAYER_REGEN_ENABLED",
+  "PLAYER_REGEN_DISABLED",
+  "PLAYER_UPDATE_RESTING",
+  "PLAYER_TARGET_CHANGED",
+  "PLAYER_ENTERING_WORLD",
+  "PLAYER_TOTEM_UPDATE",
+  "PLAYER_SPECIALIZATION_CHANGED"
+}
 
 local defaultConfig = {
   ["global"] = {
@@ -387,18 +396,7 @@ function addon:OnInitialize()
 
   addon:HideGCDFlash()
 
-  addon:RegisterEvents(
-    {
-      "PLAYER_LOGIN",
-      "PLAYER_REGEN_ENABLED",
-      "PLAYER_REGEN_DISABLED",
-      "PLAYER_UPDATE_RESTING",
-      "PLAYER_TARGET_CHANGED",
-      "PLAYER_ENTERING_WORLD",
-      "PLAYER_TOTEM_UPDATE",
-      "PLAYER_SPECIALIZATION_CHANGED"
-    }
-  )
+  addon:RegisterEvents(eventsToRegister)
 
   QueueStatusButton:SetParent(UIParent)
   MainMenuBarVehicleLeaveButton:SetParent(UIParent)
@@ -446,22 +444,27 @@ end
 function addon:DisableAll()
   addon:Print("Disabled. To make sure everything is loaded correctly please /reload the UI")
   addon:ClearUpdateTicker()
+
   for _, frame in pairs(addon:GetFrameMapping()) do
     addon:ResetFrame(frame)
   end
+
   ClassResource:RestoreOriginalTotemFramePosition(self.db.profile)
   ClassResource:RestorePosition()
   Miscellaneous:RestoreOriginal()
   addon:UnregisterAllEvents(true)
+  self.db.profile["Enabled"] = false
 end
 
 function addon:EnableAll()
+  self.db.profile["Enabled"] = true
   addon:Print("Enabled.")
   addon:InitializeUpdateTicker()
   MouseoverFrameFading:RefreshFrameAlphas()
   ClassResource:Restore(self.db.profile)
   ClassResource:RestoreTotemFrame(self.db.profile)
   Miscellaneous:RestoreAll(self.db.profile)
+  addon:RegisterEvents(eventsToRegister)
 end
 
 function addon:IsEnabled()
