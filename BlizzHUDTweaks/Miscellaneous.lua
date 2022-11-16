@@ -39,16 +39,20 @@ function Miscellaneous:RestoreFontSizeOriginal()
   end
 end
 
+function Miscellaneous:SetFrameText(frame, value, getOriginalValueFn)
+  if frame then
+    if frame:IsShown() and value ~= "" then
+      frame:SetText(value)
+    else
+      frame:SetText(getOriginalValueFn())
+    end
+  end
+end
+
 function Miscellaneous:RestoreTextOverwriteOptions(profile)
   for _, v in ipairs(Miscellaneous.textOverwriteOptions) do
     if profile[v.optionName] then
-      if profile[v.optionName] ~= "" then
-        if v.frame then
-          if v.frame:IsShown() then
-            v.frame:SetText(profile[v.optionName])
-          end
-        end
-      end
+      Miscellaneous:SetFrameText(v.frame, profile[v.optionName], v.getOriginalValueFn)
     end
   end
 end

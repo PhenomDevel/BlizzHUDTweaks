@@ -34,7 +34,10 @@ Miscellaneous.textOverwriteOptions = {
     optionName = "MiscellaneousTextOverwritePlayerName",
     displayName = "Overwrite Player Name",
     frame = PlayerName,
-    description = ""
+    description = "",
+    getOriginalValueFn = function()
+      return UnitName("player")
+    end
   }
 }
 
@@ -94,7 +97,7 @@ local function addTextOverwriteOptions(t)
       set = function(info, value)
         Options:SetValue(info, value)
         if value then
-          v.frame:SetText(value)
+          Miscellaneous:SetFrameText(v.frame, value, v.getOriginalValueFn)
         end
       end
     }
