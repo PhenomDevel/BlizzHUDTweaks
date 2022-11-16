@@ -18,7 +18,7 @@ function Miscellaneous:RestoreFontSizeOptions(profile)
         local value = profile[v.optionName]
 
         if v.frames then
-          for _, frame in ipairs(v.frames) do
+          for _, frame in pairs(v.frames) do
             if frame:IsShown() then
               Miscellaneous:UpdateFontSize(frame, value)
             end

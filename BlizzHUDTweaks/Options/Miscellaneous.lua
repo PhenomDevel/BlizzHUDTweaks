@@ -42,7 +42,15 @@ Miscellaneous.fontSizeOverwriteOptions = {
   [1] = {
     optionName = "MiscellaneousFontSizeOverwritePlayerHealthBarFontSize",
     displayName = "Player Health Font Size",
-    frames = {PlayerFrameHealthBarText, PlayerFrameHealthBarTextLeft, PlayerFrameHealthBarTextRight},
+    frames = {
+      PlayerFrameHealthBarText,
+      PlayerFrameHealthBarTextLeft,
+      PlayerFrameHealthBarTextRight,
+      PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.HealthBarText,
+      PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.TextString,
+      PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.LeftText,
+      PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.RightText
+    },
     description = ""
   },
   [2] = {
@@ -144,7 +152,7 @@ local function addFontSizeOverwriteOptions(t)
         Options:SetValue(info, value)
         if value then
           if v.frames then
-            for _, frame in ipairs(v.frames) do
+            for _, frame in pairs(v.frames) do
               Miscellaneous:UpdateFontSize(frame, value)
             end
           end
