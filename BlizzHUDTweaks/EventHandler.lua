@@ -92,6 +92,8 @@ function addon:PLAYER_ENTERING_WORLD()
 
     ClassResource:Restore(self.db.profile)
     ClassResource:RestoreTotemFrame(self.db.profile)
+
+    Miscellaneous:RestoreAll(self.db.profile)
   end
 end
 
@@ -115,7 +117,6 @@ end
 function addon:PLAYER_LOGIN()
   if addon:IsEnabled() then
     addon:RefreshOptionTables()
-    Miscellaneous:RestoreAll(self.db.profile)
   end
 end
 
