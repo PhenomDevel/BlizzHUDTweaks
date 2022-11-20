@@ -123,6 +123,7 @@ globals = {
   "ActionButton1",
   "QuickKeybindFrame",
   "EditModeManagerFrame",
+  "InCombatLockdown",
   -- Locals
   "L"
 }

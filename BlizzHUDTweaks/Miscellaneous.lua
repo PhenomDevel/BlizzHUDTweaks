@@ -193,7 +193,7 @@ function Miscellaneous:RestoreActionbarSize(profile, options, padding, forced)
   local actionbar = options.frame
   local enabled = overwritePaddingEnabled(profile, options)
 
-  if actionbar and (enabled or forced) then
+  if actionbar and (enabled or forced) and not InCombatLockdown() then
     setActionbarWidth(actionbar, padding)
     setActionbarHeight(actionbar, padding)
   end
@@ -203,7 +203,7 @@ function Miscellaneous:RestoreActionbarPadding(profile, options, padding, forced
   local actionbar = options.frame
   local enabled = overwritePaddingEnabled(profile, options)
 
-  if actionbar and (enabled or forced) then
+  if actionbar and (enabled or forced) and not InCombatLockdown() then
     if actionbar.isHorizontal then
       restoreActionbarButtonHorizontal(options, actionbar, padding)
     else
