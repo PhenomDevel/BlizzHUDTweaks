@@ -261,3 +261,14 @@ function Miscellaneous:RestoreAll(profile)
   Miscellaneous:RestoreShowHideOptions(profile)
   Miscellaneous:RestoreActionbarPaddings(profile, true, true)
 end
+
+function Miscellaneous:InstallHooks()
+  local restore = function()
+    Miscellaneous:RestoreActionbarPaddings(addon:GetProfileDB(), true, true)
+  end
+
+  EditModeManagerFrame:HookScript("OnShow", restore)
+  EditModeManagerFrame:HookScript("OnHide", restore)
+  QuickKeybindFrame:HookScript("OnShow", restore)
+  QuickKeybindFrame:HookScript("OnHide", restore)
+end

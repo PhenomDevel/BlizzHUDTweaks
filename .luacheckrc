@@ -121,6 +121,8 @@ globals = {
   "PlayerFrameManaBarTextLeft",
   "PlayerFrameManaBarTextRight",
   "ActionButton1",
+  "QuickKeybindFrame",
+  "EditModeManagerFrame",
   -- Locals
   "L"
 }

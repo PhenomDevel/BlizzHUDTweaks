@@ -5,6 +5,7 @@ Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
 - Action Bar / Frame Fading until Mouseover
 - Repositioning / Scaling of Class Resources and Totem Bar
   - For example Combo Points, Arcane Charges etc.
+- Overwrite actionbar padding from -4 to +16
 - A lot of small qol
 
 # Usage
@@ -21,6 +22,7 @@ Open the options via the in game options menu or by typing `/bht` or `/blizzhudt
 - Hide Player name
 - Hide Target name
 - Overwrite Player/Target Health/Mana font size
+- Overwrite actionbar padding (-4 to +16)
 
 ## Class Resource
 You can
@@ -92,8 +94,3 @@ Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` si
 
 # Known Issues
 - When reloading the UI while having a target the alpha will only applied once the target changes
-
-# Credits
-The initial impressions came from [Conceal](https://www.curseforge.com/wow/addons/conceal). However, I disliked the design approach and wanted to add missing features. Therefore, I wrote my personal add-on which extends the feature set.
-
-The code is 99% rewritten with the only exception being the [HideGCDFlash](https://www.mmo-champion.com/threads/2414999-How-do-I-disable-the-GCD-flash-on-my-bars) function which initially already came from the linked mmo-champion post.

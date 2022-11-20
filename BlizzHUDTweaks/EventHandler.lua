@@ -117,6 +117,7 @@ end
 function addon:PLAYER_LOGIN()
   if addon:IsEnabled() then
     addon:RefreshOptionTables()
+    Miscellaneous:InstallHooks()
   end
 end
 
