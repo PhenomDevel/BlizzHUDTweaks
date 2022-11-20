@@ -76,6 +76,65 @@ Miscellaneous.fontSizeOverwriteOptions = {
   }
 }
 
+Miscellaneous.actionbarPaddingOverwriteOptions = {
+  [1] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar1",
+    displayName = "Action Bar 1",
+    frame = MainMenuBar,
+    description = "",
+    actionButtonName = "ActionButton"
+  },
+  [2] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar2",
+    displayName = "Action Bar 2",
+    frame = MultiBarBottomLeft,
+    description = "",
+    actionButtonName = "MultiBarBottomLeftButton"
+  },
+  [3] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar3",
+    displayName = "Action Bar 3",
+    frame = MultiBarBottomRight,
+    description = "",
+    actionButtonName = "MultiBarBottomRightButton"
+  },
+  [4] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar4",
+    displayName = "Action Bar 4",
+    frame = MultiBarRight,
+    description = "",
+    actionButtonName = "MultiBarRightButton"
+  },
+  [5] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar5",
+    displayName = "Action Bar 5",
+    frame = MultiBarLeft,
+    description = "",
+    actionButtonName = "MultiBarLeftButton"
+  },
+  [6] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar6",
+    displayName = "Action Bar 6",
+    frame = MultiBar5,
+    description = "",
+    actionButtonName = "MultiBar5Button"
+  },
+  [7] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar7",
+    displayName = "Action Bar 7",
+    frame = MultiBar6,
+    description = "",
+    actionButtonName = "MultiBar6Button"
+  },
+  [8] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteActionbar8",
+    displayName = "Action Bar 8",
+    frame = MultiBar7,
+    description = "",
+    actionButtonName = "MultiBar7Button"
+  }
+}
+
 Miscellaneous.advancedOptions = {}
 
 local function addTextOverwriteOptions(t)
@@ -165,6 +224,60 @@ local function addFontSizeOverwriteOptions(t)
   end
 end
 
+local function addActionbarPaddingOverwriteOptions(t)
+  local order = 4
+
+  t["ActionbarPaddingOverwriteOptionsHeader"] = {
+    order = order,
+    type = "header",
+    name = "Overwrite actionbar padding"
+  }
+
+  for _, v in ipairs(Miscellaneous.actionbarPaddingOverwriteOptions) do
+    order = order + 0.1
+    t[v.optionName .. "Group"] = {
+      name = v.displayName or v.optionName,
+      order = order,
+      type = "group",
+      inline = true,
+      guiInline = true,
+      args = {
+        [v.optionName .. "Enabled"] = {
+          order = order,
+          name = "Enabled",
+          desc = v.description or "",
+          type = "toggle",
+          set = function(info, value)
+            Options:SetValue(info, value)
+            local padding
+            if value then
+              padding = addon:GetProfileDB()[v.optionName] or 2
+            else
+              padding = v.frame.buttonPadding
+            end
+            Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), v, padding, true)
+            Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), v, padding, true)
+          end
+        },
+        [v.optionName] = {
+          order = order,
+          name = "Padding",
+          desc = v.description or "",
+          type = "range",
+          min = -4,
+          max = 18,
+          step = 1,
+          set = function(info, value)
+            Options:SetValue(info, value)
+            Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), v, value)
+            Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), v, value)
+          end
+        }
+      }
+    }
+  end
+end
+
 -------------------------------------------------------------------------------
 -- Public API
 
@@ -181,6 +294,7 @@ function Miscellaneous:GetOptionsTable()
   addShowHideOptions(args)
   addTextOverwriteOptions(args)
   addFontSizeOverwriteOptions(args)
+  addActionbarPaddingOverwriteOptions(args)
   return {
     name = "Miscellaneous",
     type = "group",

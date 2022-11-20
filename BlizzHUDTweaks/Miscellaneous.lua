@@ -81,14 +81,183 @@ function Miscellaneous:RestoreShowHideOriginal()
   end
 end
 
-function Miscellaneous:RestoreOriginal()
+local function setActionbarWidth(actionbar, padding)
+  if actionbar.settingMap then
+    local buttonScale = (actionbar.settingMap[3].displayValue / 100)
+    local newWidth
+
+    if actionbar.isHorizontal then
+      local numberOfButtonsPerRow
+
+      if actionbar.numRows == 1 then
+        numberOfButtonsPerRow = actionbar.numButtonsShowable
+      else
+        numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
+      end
+
+      newWidth = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+    else
+      local numberOfButtonsPerRow
+
+      if actionbar.numRows == 1 then
+        numberOfButtonsPerRow = 1
+      else
+        numberOfButtonsPerRow = actionbar.numRows
+      end
+
+      newWidth = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+    end
+
+    actionbar:SetWidth(newWidth)
+  end
+end
+
+local function setActionbarHeight(actionbar, padding)
+  if actionbar.settingMap then
+    local buttonScale = (actionbar.settingMap[3].displayValue / 100)
+    local newHeight
+
+    if actionbar.isHorizontal then
+      local numberOfButtonsPerRow
+
+      if actionbar.numRows == 1 then
+        return
+      else
+        numberOfButtonsPerRow = actionbar.numRows
+      end
+
+      newHeight = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+    else
+      local numberOfButtonsPerRow
+
+      if actionbar.numRows == 1 then
+        return
+      else
+        numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
+      end
+
+      newHeight = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+    end
+
+    actionbar:SetHeight(newHeight)
+  end
+end
+
+local function restoreActionbarButtonHorizontal(options, actionbar, padding)
+  local numCols = actionbar.numButtonsShowable / actionbar.numRows
+
+  local veryFirstButton = _G[options.actionButtonName .. 1]
+  veryFirstButton:SetParent(actionbar)
+  veryFirstButton:SetPoint("BOTTOMLEFT", actionbar, "BOTTOMLEFT", 0, -0)
+
+  for i = 2, actionbar.numButtonsShowable, 1 do
+    local firstOfRow = math.fmod(i - 1, numCols) == 0
+    local currentButton = _G[options.actionButtonName .. i]
+    local previousButton = _G[options.actionButtonName .. i - 1]
+    if firstOfRow then
+      local firstButtonPreviousRow = _G[options.actionButtonName .. (i - numCols)]
+      currentButton:SetPoint("BOTTOMLEFT", firstButtonPreviousRow, "TOPLEFT", 0, padding)
+    else
+      currentButton:SetPoint("BOTTOMLEFT", previousButton, "BOTTOMRIGHT", padding, 0)
+    end
+  end
+end
+
+local function restoreActionbarButtonVertical(options, actionbar, padding)
+  local numCols = actionbar.numButtonsShowable / actionbar.numRows
+
+  local veryFirstButton = _G[options.actionButtonName .. 1]
+  veryFirstButton:SetParent(actionbar)
+  veryFirstButton:SetPoint("TOPLEFT", actionbar, "TOPLEFT", 0, -0)
+
+  for i = 2, actionbar.numButtonsShowable, 1 do
+    local firstOfRow = math.fmod(i - 1, numCols) == 0
+    local currentButton = _G[options.actionButtonName .. i]
+    local previousButton = _G[options.actionButtonName .. i - 1]
+
+    if firstOfRow then
+      local firstButtonPreviousRow = _G[options.actionButtonName .. (i - numCols)]
+      currentButton:SetPoint("TOPLEFT", firstButtonPreviousRow, "TOPRIGHT", padding, 0)
+    else
+      currentButton:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -padding)
+    end
+  end
+end
+
+local function overwritePaddingEnabled(profile, options)
+  local enabled = profile[options.optionName .. "Enabled"]
+  return enabled
+end
+
+function Miscellaneous:RestoreActionbarSize(profile, options, padding, forced)
+  local actionbar = options.frame
+  local enabled = overwritePaddingEnabled(profile, options)
+
+  if actionbar and (enabled or forced) then
+    setActionbarWidth(actionbar, padding)
+    setActionbarHeight(actionbar, padding)
+  end
+end
+
+function Miscellaneous:RestoreActionbarPadding(profile, options, padding, forced)
+  local actionbar = options.frame
+  local enabled = overwritePaddingEnabled(profile, options)
+
+  if actionbar and (enabled or forced) then
+    if actionbar.isHorizontal then
+      restoreActionbarButtonHorizontal(options, actionbar, padding)
+    else
+      restoreActionbarButtonVertical(options, actionbar, padding)
+    end
+  end
+end
+
+function Miscellaneous:RestoreActionbarPaddings(profile, forcePadding, forceSize)
+  for _, v in ipairs(Miscellaneous.actionbarPaddingOverwriteOptions) do
+    if profile[v.optionName] then
+      local enabled = overwritePaddingEnabled(profile, v)
+      local padding = profile[v.optionName]
+      local actionbar = v.frame
+
+      if actionbar and padding ~= actionbar.buttonPadding and enabled then
+        if not actionbar.BlizzHUDTweaksRestoredPadding or forcePadding then
+          if actionbar:IsShown() then
+            if not actionbar.BlizzHUDTweaksRestoredSize or forceSize then
+              Miscellaneous:RestoreActionbarSize(profile, v, padding)
+              actionbar.BlizzHUDTweaksRestoredSize = true
+            end
+
+            Miscellaneous:RestoreActionbarPadding(profile, v, padding)
+            actionbar.BlizzHUDTweaksRestoredPadding = true
+            actionbar.BlizzHUDTweaksOverwritePadding = padding
+          end
+        end
+      end
+    end
+  end
+end
+
+function Miscellaneous:RestoreActionbarOriginal(profile)
+  for _, v in ipairs(Miscellaneous.actionbarPaddingOverwriteOptions) do
+    local actionbar = v.frame
+    if actionbar:IsShown() then
+      local padding = actionbar.buttonPadding
+      Miscellaneous:RestoreActionbarPadding(profile, v, padding, true)
+      Miscellaneous:RestoreActionbarSize(profile, v, padding, true)
+    end
+  end
+end
+
+function Miscellaneous:RestoreOriginal(profile)
   Miscellaneous:RestoreShowHideOriginal()
   Miscellaneous:RestoreTextOverwriteOriginal()
   Miscellaneous:RestoreFontSizeOriginal()
+  Miscellaneous:RestoreActionbarOriginal(profile)
 end
 
 function Miscellaneous:RestoreAll(profile)
   Miscellaneous:RestoreFontSizeOptions(profile)
   Miscellaneous:RestoreTextOverwriteOptions(profile)
   Miscellaneous:RestoreShowHideOptions(profile)
+  Miscellaneous:RestoreActionbarPaddings(profile, true, true)
 end

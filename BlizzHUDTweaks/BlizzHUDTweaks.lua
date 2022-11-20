@@ -59,7 +59,8 @@ local eventsToRegister = {
   "PLAYER_TARGET_CHANGED",
   "PLAYER_ENTERING_WORLD",
   "PLAYER_TOTEM_UPDATE",
-  "PLAYER_SPECIALIZATION_CHANGED"
+  "PLAYER_SPECIALIZATION_CHANGED",
+  "ACTIONBAR_SLOT_CHANGED"
 }
 
 local defaultConfig = {
@@ -451,7 +452,7 @@ function addon:DisableAll()
 
   ClassResource:RestoreOriginalTotemFramePosition(self.db.profile)
   ClassResource:RestorePosition()
-  Miscellaneous:RestoreOriginal()
+  Miscellaneous:RestoreOriginal(self.db.profile)
   addon:UnregisterAllEvents(true)
   self.db.profile["Enabled"] = false
 end

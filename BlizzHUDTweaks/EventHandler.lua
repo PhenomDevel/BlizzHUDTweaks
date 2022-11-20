@@ -117,7 +117,6 @@ end
 function addon:PLAYER_LOGIN()
   if addon:IsEnabled() then
     addon:RefreshOptionTables()
-    Miscellaneous:RestoreAll(self.db.profile)
   end
 end
 
@@ -126,4 +125,8 @@ function addon:PLAYER_SPECIALIZATION_CHANGED()
     ClassResource:Restore(self.db.profile)
     ClassResource:RestoreTotemFrame(self.db.profile)
   end
+end
+
+function addon:ACTIONBAR_SLOT_CHANGED()
+  Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
 end

@@ -120,6 +120,7 @@ globals = {
   "PlayerFrameManaBarText",
   "PlayerFrameManaBarTextLeft",
   "PlayerFrameManaBarTextRight",
+  "ActionButton1",
   -- Locals
   "L"
 }
