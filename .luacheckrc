@@ -124,6 +124,7 @@ globals = {
   "QuickKeybindFrame",
   "EditModeManagerFrame",
   "InCombatLockdown",
+  "SpellBookFrame",
   -- Locals
   "L"
 }

@@ -339,9 +339,11 @@ end
 
 function addon:LoadProfile()
   updateFramesForLoadedAddons(self.db.profile)
+
   if addon:IsEnabled() then
     MouseoverFrameFading:RefreshFrameAlphas()
     addon:InitializeUpdateTicker()
+    Miscellaneous:RestoreAll(self.db.profile)
   end
 end
 

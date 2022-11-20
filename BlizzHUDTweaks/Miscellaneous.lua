@@ -271,4 +271,6 @@ function Miscellaneous:InstallHooks()
   EditModeManagerFrame:HookScript("OnHide", restore)
   QuickKeybindFrame:HookScript("OnShow", restore)
   QuickKeybindFrame:HookScript("OnHide", restore)
+  SpellBookFrame:HookScript("OnShow", restore)
+  SpellBookFrame:HookScript("OnHide", restore)
 end
