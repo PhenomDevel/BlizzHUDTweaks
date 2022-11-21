@@ -2,11 +2,13 @@
 
 # BlizzHUDTweaks
 Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
+
 - Action Bar / Frame Fading until Mouseover
-- Repositioning / Scaling of Class Resources and Totem Bar
-  - For example Combo Points, Arcane Charges etc.
 - Overwrite actionbar padding from -4 to +16
+- Repositioning / Scaling of Class Resources and Totem Bar (For example Combo Points, Arcane Charges etc.)
 - A lot of small qol
+
+For more details see `Features`.
 
 # Usage
 Open the options via the in game options menu or by typing `/bht` or `/blizzhudtweaks` and navigate through the options. Make sure you expand the options, since each "module" is in its own sub category.
@@ -15,23 +17,6 @@ Open the options via the in game options menu or by typing `/bht` or `/blizzhudt
 - Toggle minimap icon: `/bht minimap`
 
 # Features
-## Miscellaneous
-- Overwrite your characters name
-- Hide Player level
-- Hide Target level
-- Hide Player name
-- Hide Target name
-- Overwrite Player/Target Health/Mana font size
-- Overwrite actionbar padding (-4 to +16)
-
-## Class Resource
-You can
-- Scale the class resources
-- Change position based on Player Frame (Left, Right, Top, Bottom)
-- Hide the class resource
-
-You also can change the settings for the Totem Frame.
-
 ## Mouseover Fade (action bars, frames)
 You can fade out most of the actions bars and frames for different scenarios. You can set different alpha values for `In Combat`, `Out of Combat`, and `In Resting Area`. You also can set the options globally and use them for each action bar/frame.
 
@@ -74,6 +59,24 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 #### [EditModeExpanded](https://www.curseforge.com/wow/addons/edit-mode-expanded)
 - Micro Button Bar
 - Bags Bar
+
+## Miscellaneous
+- Overwrite your characters name
+- Hide Player level
+- Hide Target level
+- Hide Player name
+- Hide Target name
+- Overwrite Player/Target Health/Mana font size
+- Overwrite actionbar padding (-4 to +16)
+
+## Class Resource
+You can
+
+- Scale the class resources
+- Change position based on Player Frame (Left, Right, Top, Bottom)
+- Hide the class resource
+
+You also can change the settings for the Totem Frame.
 
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
