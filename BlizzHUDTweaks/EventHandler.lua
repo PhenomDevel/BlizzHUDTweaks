@@ -65,15 +65,19 @@ function addon:PLAYER_UPDATE_RESTING()
   end
 end
 
+local function restoreMouseoverFade()
+  if BlizzHUDTweaks.hasTarget then
+    MouseoverFrameFading:RefreshFrameAlphas()
+  else
+    MouseoverFrameFading:RefreshFrameAlphas(true)
+  end
+end
+
 function addon:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
 
   if addon:IsEnabled() then
-    if BlizzHUDTweaks.hasTarget then
-      MouseoverFrameFading:RefreshFrameAlphas()
-    else
-      MouseoverFrameFading:RefreshFrameAlphas(true)
-    end
+    restoreMouseoverFade()
 
     Miscellaneous:RestoreShowHideOptions(self.db.profile)
     Miscellaneous:RestoreFontSizeOptions(self.db.profile)
@@ -84,11 +88,7 @@ function addon:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
 
   if addon:IsEnabled() then
-    if BlizzHUDTweaks.hasTarget then
-      MouseoverFrameFading:RefreshFrameAlphas()
-    else
-      MouseoverFrameFading:RefreshFrameAlphas(true)
-    end
+    restoreMouseoverFade()
 
     ClassResource:Restore(self.db.profile)
     ClassResource:RestoreTotemFrame(self.db.profile)
@@ -130,4 +130,13 @@ end
 
 function addon:ACTIONBAR_SLOT_CHANGED()
   Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
+end
+
+function addon:UNIT_PET(_, unit)
+  if unit == "player" then
+    if addon:IsEnabled() then
+      restoreMouseoverFade()
+      Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
+    end
+  end
 end

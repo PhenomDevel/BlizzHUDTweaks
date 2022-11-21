@@ -60,7 +60,8 @@ local eventsToRegister = {
   "PLAYER_ENTERING_WORLD",
   "PLAYER_TOTEM_UPDATE",
   "PLAYER_SPECIALIZATION_CHANGED",
-  "ACTIONBAR_SLOT_CHANGED"
+  "ACTIONBAR_SLOT_CHANGED",
+  "UNIT_PET"
 }
 
 local defaultConfig = {
@@ -327,7 +328,6 @@ local frameTable
 
 function addon:GetFrameTable()
   if not frameTable then
-    addon:Print("addon:GetFrameTable")
     frameTable = {}
     for frameName, frameOptions in pairs(self.db.profile) do
       if type(frameOptions) == "table" then

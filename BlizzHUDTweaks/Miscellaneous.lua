@@ -81,8 +81,17 @@ function Miscellaneous:RestoreShowHideOriginal()
   end
 end
 
+local function getButtonSizeForActionbar(actionbar)
+  if actionbar == PetActionBar then
+    return PetActionButton1:GetWidth()
+  else
+    return ActionButton1:GetWidth()
+  end
+end
+
 local function setActionbarWidth(actionbar, padding)
   if actionbar.settingMap then
+    local buttonSize = getButtonSizeForActionbar(actionbar)
     local buttonScale = (actionbar.settingMap[3].displayValue / 100)
     local newWidth
 
@@ -95,7 +104,7 @@ local function setActionbarWidth(actionbar, padding)
         numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
       end
 
-      newWidth = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+      newWidth = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
     else
       local numberOfButtonsPerRow
 
@@ -105,7 +114,7 @@ local function setActionbarWidth(actionbar, padding)
         numberOfButtonsPerRow = actionbar.numRows
       end
 
-      newWidth = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+      newWidth = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
     end
 
     actionbar:SetWidth(newWidth)
@@ -114,6 +123,7 @@ end
 
 local function setActionbarHeight(actionbar, padding)
   if actionbar.settingMap then
+    local buttonSize = getButtonSizeForActionbar(actionbar)
     local buttonScale = (actionbar.settingMap[3].displayValue / 100)
     local newHeight
 
@@ -126,7 +136,7 @@ local function setActionbarHeight(actionbar, padding)
         numberOfButtonsPerRow = actionbar.numRows
       end
 
-      newHeight = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+      newHeight = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
     else
       local numberOfButtonsPerRow
 
@@ -136,7 +146,7 @@ local function setActionbarHeight(actionbar, padding)
         numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
       end
 
-      newHeight = ((numberOfButtonsPerRow * ActionButton1:GetWidth()) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
+      newHeight = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
     end
 
     actionbar:SetHeight(newHeight)

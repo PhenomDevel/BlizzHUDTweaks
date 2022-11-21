@@ -132,6 +132,13 @@ Miscellaneous.actionbarPaddingOverwriteOptions = {
     frame = MultiBar7,
     description = "",
     actionButtonName = "MultiBar7Button"
+  },
+  [9] = {
+    optionName = "MiscellaneousActionbarPaddingOverwritePetActionBar",
+    displayName = "Pet Action Bar",
+    frame = PetActionBar,
+    description = "",
+    actionButtonName = "PetActionButton"
   }
 }
 
