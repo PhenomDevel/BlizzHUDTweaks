@@ -125,6 +125,8 @@ globals = {
   "EditModeManagerFrame",
   "InCombatLockdown",
   "SpellBookFrame",
+  "PetActionButton1",
+  "StanceButton1",
   -- Locals
   "L"
 }

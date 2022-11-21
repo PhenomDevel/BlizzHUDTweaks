@@ -84,6 +84,8 @@ end
 local function getButtonSizeForActionbar(actionbar)
   if actionbar == PetActionBar then
     return PetActionButton1:GetWidth()
+  elseif actionbar == StanceBar then
+    return StanceButton1:GetWidth()
   else
     return ActionButton1:GetWidth()
   end
@@ -99,9 +101,9 @@ local function setActionbarWidth(actionbar, padding)
       local numberOfButtonsPerRow
 
       if actionbar.numRows == 1 then
-        numberOfButtonsPerRow = actionbar.numButtonsShowable
+        numberOfButtonsPerRow = actionbar.numShowingButtonsOrSpacers
       else
-        numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
+        numberOfButtonsPerRow = actionbar.numShowingButtonsOrSpacers / actionbar.numRows
       end
 
       newWidth = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
@@ -143,7 +145,7 @@ local function setActionbarHeight(actionbar, padding)
       if actionbar.numRows == 1 then
         return
       else
-        numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
+        numberOfButtonsPerRow = actionbar.numShowingButtonsOrSpacers / actionbar.numRows
       end
 
       newHeight = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
@@ -154,13 +156,13 @@ local function setActionbarHeight(actionbar, padding)
 end
 
 local function restoreActionbarButtonHorizontal(options, actionbar, padding)
-  local numCols = actionbar.numButtonsShowable / actionbar.numRows
+  local numCols = actionbar.numShowingButtonsOrSpacers / actionbar.numRows
 
   local veryFirstButton = _G[options.actionButtonName .. 1]
   veryFirstButton:SetParent(actionbar)
   veryFirstButton:SetPoint("BOTTOMLEFT", actionbar, "BOTTOMLEFT", 0, -0)
 
-  for i = 2, actionbar.numButtonsShowable, 1 do
+  for i = 2, actionbar.numShowingButtonsOrSpacers, 1 do
     local firstOfRow = math.fmod(i - 1, numCols) == 0
     local currentButton = _G[options.actionButtonName .. i]
     local previousButton = _G[options.actionButtonName .. i - 1]
@@ -174,13 +176,13 @@ local function restoreActionbarButtonHorizontal(options, actionbar, padding)
 end
 
 local function restoreActionbarButtonVertical(options, actionbar, padding)
-  local numCols = actionbar.numButtonsShowable / actionbar.numRows
+  local numCols = actionbar.numShowingButtonsOrSpacers / actionbar.numRows
 
   local veryFirstButton = _G[options.actionButtonName .. 1]
   veryFirstButton:SetParent(actionbar)
   veryFirstButton:SetPoint("TOPLEFT", actionbar, "TOPLEFT", 0, -0)
 
-  for i = 2, actionbar.numButtonsShowable, 1 do
+  for i = 2, actionbar.numShowingButtonsOrSpacers, 1 do
     local firstOfRow = math.fmod(i - 1, numCols) == 0
     local currentButton = _G[options.actionButtonName .. i]
     local previousButton = _G[options.actionButtonName .. i - 1]

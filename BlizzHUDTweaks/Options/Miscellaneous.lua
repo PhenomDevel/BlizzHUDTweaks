@@ -139,6 +139,13 @@ Miscellaneous.actionbarPaddingOverwriteOptions = {
     frame = PetActionBar,
     description = "",
     actionButtonName = "PetActionButton"
+  },
+  [10] = {
+    optionName = "MiscellaneousActionbarPaddingOverwriteStanceBar",
+    displayName = "Stance Bar",
+    frame = StanceBar,
+    description = "",
+    actionButtonName = "StanceButton"
   }
 }
 
