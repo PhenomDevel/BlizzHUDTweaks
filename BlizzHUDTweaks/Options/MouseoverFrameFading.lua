@@ -171,7 +171,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     set = "SetFadeSliderValue",
     min = 0,
     max = 100,
-    step = 1,
+    softMin = 0,
+    softMax = 100,
+    step = 5,
     disabled = "GetUseGlobalFrameOptions",
     arg = frameName
   }
@@ -204,7 +206,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     set = "SetFadeSliderValue",
     min = 0,
     max = 100,
-    step = 1,
+    softMin = 0,
+    softMax = 100,
+    step = 5,
     disabled = "GetUseGlobalFrameOptions",
     arg = frameName
   }
@@ -255,7 +259,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     set = "SetFadeSliderValue",
     min = 0,
     max = 100,
-    step = 1,
+    softMin = 0,
+    softMax = 100,
+    step = 5,
     disabled = "GetUseGlobalFrameOptions",
     arg = frameName
   }
