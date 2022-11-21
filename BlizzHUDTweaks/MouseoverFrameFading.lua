@@ -132,7 +132,7 @@ end
 -- Public API
 
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay)
-  if currentAlpha and targetAlpha then
+  if currentAlpha and targetAlpha and frame:IsShown() then
     if not frame.fadeAnimation then
       local animationGroup = frame:CreateAnimationGroup()
       animationGroup:SetToFinalAlpha(true)
