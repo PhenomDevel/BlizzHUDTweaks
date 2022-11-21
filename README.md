@@ -1,4 +1,4 @@
-[![Build](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml)
+[![Build](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml) [![Discord General](https://img.shields.io/discord/596662921753526275?label=discord)](https://discord.gg/4fSVKCVJWy)
 
 # BlizzHUDTweaks
 Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
@@ -81,19 +81,23 @@ You also can change the settings for the Totem Frame.
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
 
-# FAQ
-## Frame not showing even though it should
+# Help
+## Discord
+If you have any question and want fast answers, please check the [Discord](https://discord.gg/4fSVKCVJWy). I made it for another add-on, but there is a sub category to ask your questions. The link should already point to the corresponding channel.
+
+## FAQ
+### Frame not showing even though it should
 Please ensure you have enabled the wanted option for the given action bar or frame. Also, make sure you haven't set the `Bar Visible` option in the Blizzard Edit Mode to something else than `Always visible`
 - If set to `Out of Combat` you might be missing the frame or can't mouseover it since the blizzard option overwrites everything else
 
-## Frame fading out when fade delay is set
+### Frame fading out when fade delay is set
 Usually this only happens when you mouseover a frame. Mouseover overwrites the fade animation, which has a set delay and will not maintain the delay after you leave the frame.
 
-## Fading is setup but nothing happens
+### Fading is setup but nothing happens
 Make sure you have `Enabled` the fading for the given frame
 
-## I have setup the position of class resources but it won't move
+### I have setup the position of class resources but it won't move
 Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` since any combination is needed to actually move the resource frame.
 
-# Known Issues
+## Known Issues
 - When reloading the UI while having a target the alpha will only applied once the target changes
