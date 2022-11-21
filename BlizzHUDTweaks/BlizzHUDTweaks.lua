@@ -323,18 +323,22 @@ function addon:GetFrameMapping()
   return frameMapping
 end
 
-function addon:GetFrameTable()
-  local t = {}
+local frameTable
 
-  for frameName, frameOptions in pairs(self.db.profile) do
-    if type(frameOptions) == "table" then
-      if not frameOptions.Hidden and frameName ~= "*Global*" then
-        t[frameName] = frameOptions.displayName or frameName
+function addon:GetFrameTable()
+  if not frameTable then
+    addon:Print("addon:GetFrameTable")
+    frameTable = {}
+    for frameName, frameOptions in pairs(self.db.profile) do
+      if type(frameOptions) == "table" then
+        if not frameOptions.Hidden and frameName ~= "*Global*" then
+          frameTable[frameName] = frameOptions.displayName or frameName
+        end
       end
     end
   end
 
-  return t
+  return frameTable
 end
 
 function addon:LoadProfile()
@@ -344,6 +348,7 @@ function addon:LoadProfile()
     MouseoverFrameFading:RefreshFrameAlphas()
     addon:InitializeUpdateTicker()
     Miscellaneous:RestoreAll(self.db.profile)
+    addon:RefreshOptionTables()
   end
 end
 
