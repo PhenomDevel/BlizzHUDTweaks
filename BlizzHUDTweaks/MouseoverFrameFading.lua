@@ -211,12 +211,16 @@ function MouseoverFrameFading:Disable()
   for _, frame in pairs(addon:GetFrameMapping()) do
     addon:ResetFrame(frame)
   end
-  addon:Print("Disabled MouseoverFrameFading")
+  --@debug@
+  addon:Print("Disabled Module", addon:ColoredString("MouseoverFrameFading", "fcba03")) --@end-debug@
+  --@end-debug@
 end
 
 function MouseoverFrameFading:Enable()
   MouseoverFrameFading:RefreshFrameAlphas(true, false)
-  addon:Print("Enabled MouseoverFrameFading")
+  --@debug@
+  addon:Print("Enabled Module", addon:ColoredString("MouseoverFrameFading", "fcba03")) --@end-debug@
+  --@end-debug@
 end
 
 function MouseoverFrameFading:Toggle()
@@ -229,8 +233,9 @@ function MouseoverFrameFading:Toggle()
     profile["GlobalOptionsMouseoverFrameFadingEnabled"] = true
     MouseoverFrameFading:Enable()
   end
-
-  addon:Print("Toggle MouseoverFrameFading")
+  --@debug@
+  addon:Print("Toggle Module", addon:ColoredString("MouseoverFrameFading", "fcba03")) --@end-debug@
+  --@end-debug@
 end
 
 function MouseoverFrameFading:IsEnabled()

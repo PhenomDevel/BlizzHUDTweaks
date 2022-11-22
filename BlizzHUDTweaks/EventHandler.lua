@@ -33,8 +33,13 @@ local function installKeyDownHandler()
   end
 end
 
--------------------------------------------------------------------------------
--- Public API
+local function restoreMouseoverFade()
+  if BlizzHUDTweaks.hasTarget then
+    MouseoverFrameFading:RefreshFrameAlphas(true)
+  else
+    MouseoverFrameFading:RefreshFrameAlphas(true, true)
+  end
+end
 
 local eventsToRegister = {
   "PLAYER_LOGIN",
@@ -52,11 +57,14 @@ local eventsToRegister = {
 
 local registeredEvents = {}
 
+-------------------------------------------------------------------------------
+-- Public API
+
 function EventHandler:RegisterEvents(forced)
   if addon:IsEnabled() or forced then
     for _, event in ipairs(eventsToRegister) do
       if not registeredEvents[event] then
-        addon:RegisterEvent(event)
+        EventHandler:RegisterEvent(event)
         registeredEvents[event] = true
       end
     end
@@ -67,14 +75,14 @@ function EventHandler:UnregisterEvents(forced)
   if addon:IsEnabled() or forced then
     for _, event in ipairs(eventsToRegister) do
       if registeredEvents[event] then
-        addon:UnregisterEvent(event)
+        EventHandler:UnregisterEvent(event)
         registeredEvents[event] = false
       end
     end
   end
 end
 
-function addon:PLAYER_REGEN_ENABLED()
+function EventHandler:PLAYER_REGEN_ENABLED()
   BlizzHUDTweaks.inCombat = false
 
   if addon:IsEnabled() then
@@ -82,7 +90,7 @@ function addon:PLAYER_REGEN_ENABLED()
   end
 end
 
-function addon:PLAYER_REGEN_DISABLED()
+function EventHandler:PLAYER_REGEN_DISABLED()
   BlizzHUDTweaks.inCombat = true
 
   if addon:IsEnabled() then
@@ -90,7 +98,7 @@ function addon:PLAYER_REGEN_DISABLED()
   end
 end
 
-function addon:PLAYER_UPDATE_RESTING()
+function EventHandler:PLAYER_UPDATE_RESTING()
   BlizzHUDTweaks.isResting = IsResting("player")
 
   if addon:IsEnabled() then
@@ -98,43 +106,38 @@ function addon:PLAYER_UPDATE_RESTING()
   end
 end
 
-local function restoreMouseoverFade()
-  if BlizzHUDTweaks.hasTarget then
-    MouseoverFrameFading:RefreshFrameAlphas(true)
-  else
-    MouseoverFrameFading:RefreshFrameAlphas(true, true)
-  end
-end
-
-function addon:PLAYER_TARGET_CHANGED()
+function EventHandler:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
 
   if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
     restoreMouseoverFade()
 
-    Miscellaneous:RestoreShowHideOptions(self.db.profile)
-    Miscellaneous:RestoreFontSizeOptions(self.db.profile)
+    Miscellaneous:RestoreShowHideOptions(profile)
+    Miscellaneous:RestoreFontSizeOptions(profile)
   end
 end
 
-function addon:PLAYER_ENTERING_WORLD()
+function EventHandler:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
 
   if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
     restoreMouseoverFade()
 
-    ClassResource:Restore(self.db.profile)
-    ClassResource:RestoreTotemFrame(self.db.profile)
-
-    Miscellaneous:RestoreAll(self.db.profile)
+    ClassResource:Restore(profile)
+    ClassResource:RestoreTotemFrame(profile)
+    Miscellaneous:RestoreAll(profile)
     installKeyDownHandler()
   end
 end
 
-function addon:PLAYER_TOTEM_UPDATE()
-  if not self.db.profile["TotemFrameOriginalPoint"] then
+function EventHandler:PLAYER_TOTEM_UPDATE()
+  local profile = addon:GetProfileDB()
+
+  if not profile["TotemFrameOriginalPoint"] then
     local orgAnchor, _, orgRelativeAnchor, orgXOffset, orgYOffset = TotemFrame:GetPoint()
-    self.db.profile["TotemFrameOriginalPoint"] = {
+    profile["TotemFrameOriginalPoint"] = {
       ["Anchor"] = orgAnchor,
       ["RelativeAnchor"] = orgRelativeAnchor,
       ["XOffset"] = orgXOffset,
@@ -143,38 +146,46 @@ function addon:PLAYER_TOTEM_UPDATE()
   end
 
   if addon:IsEnabled() then
-    ClassResource:Restore(self.db.profile)
-    ClassResource:RestoreTotemFrame(self.db.profile)
+    ClassResource:Restore(profile)
+    ClassResource:RestoreTotemFrame(profile)
   end
 end
 
-function addon:PLAYER_LOGIN()
+function EventHandler:PLAYER_LOGIN()
   if addon:IsEnabled() then
     addon:RefreshOptionTables()
     Miscellaneous:InstallHooks()
   end
 end
 
-function addon:PLAYER_SPECIALIZATION_CHANGED()
+function EventHandler:PLAYER_SPECIALIZATION_CHANGED()
   if addon:IsEnabled() then
-    ClassResource:Restore(self.db.profile)
-    ClassResource:RestoreTotemFrame(self.db.profile)
+    local profile = addon:GetProfileDB()
+
+    ClassResource:Restore(profile)
+    ClassResource:RestoreTotemFrame(profile)
   end
 end
 
-function addon:ACTIONBAR_SLOT_CHANGED()
-  Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
+function EventHandler:ACTIONBAR_SLOT_CHANGED()
+  local profile = addon:GetProfileDB()
+
+  Miscellaneous:RestoreActionbarPaddings(profile, true, true)
 end
 
-function addon:ACTIONBAR_SHOWGRID()
-  Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
+function EventHandler:ACTIONBAR_SHOWGRID()
+  local profile = addon:GetProfileDB()
+
+  Miscellaneous:RestoreActionbarPaddings(profile, true, true)
 end
 
-function addon:UNIT_PET(_, unit)
+function EventHandler:UNIT_PET(_, unit)
   if unit == "player" then
     if addon:IsEnabled() then
+      local profile = addon:GetProfileDB()
+
       restoreMouseoverFade()
-      Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
+      Miscellaneous:RestoreActionbarPaddings(profile, true, true)
     end
   end
 end

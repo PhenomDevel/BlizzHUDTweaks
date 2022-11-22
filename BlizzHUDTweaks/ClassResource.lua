@@ -130,7 +130,9 @@ function ClassResource:Disable()
 
   ClassResource:RestoreOriginalTotemFramePosition(profile)
   ClassResource:RestorePosition()
-  addon:Print("Disabled ClassResource")
+  --@debug@
+  addon:Print("Disabled Module", addon:ColoredString("ClassResource", "fcba03"))
+  --@end-debug@
 end
 
 function ClassResource:Enable()
@@ -138,7 +140,8 @@ function ClassResource:Enable()
 
   ClassResource:Restore(profile)
   ClassResource:RestoreTotemFrame(profile)
-  addon:Print("Enabled ClassResource")
+  --@debug@
+  addon:Print("Enabled Module", addon:ColoredString("ClassResource", "fcba03")) --@end-debug@
 end
 
 function ClassResource:IsEnabled()
