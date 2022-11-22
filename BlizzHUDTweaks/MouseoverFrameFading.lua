@@ -180,18 +180,19 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
   end
 end
 
-function MouseoverFrameFading:RefreshFrameAlphas(useFadeDelay)
+function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
   local profile = addon:GetProfileDB()
   local globalOptions = addon:GetProfileDB()["*Global*"]
 
   for frameName, frame in pairs(addon:GetFrameMapping()) do
     local frameOptions = profile[frameName]
+
     if frameOptions.Enabled then
       local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
       local currentAlpha = getNormalizedFrameAlpha(frame)
       local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
 
-      if targetAlpha and targetAlpha ~= currentAlpha then
+      if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
         local fadeDelay = 0
         if useFadeDelay then
           fadeDelay = determineFadeDelay(globalOptions, frameOptions)

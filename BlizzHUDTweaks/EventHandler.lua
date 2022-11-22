@@ -45,7 +45,7 @@ function addon:PLAYER_REGEN_ENABLED()
   BlizzHUDTweaks.inCombat = false
 
   if addon:IsEnabled() then
-    MouseoverFrameFading:RefreshFrameAlphas(true)
+    MouseoverFrameFading:RefreshFrameAlphas(true, true)
   end
 end
 
@@ -67,9 +67,9 @@ end
 
 local function restoreMouseoverFade()
   if BlizzHUDTweaks.hasTarget then
-    MouseoverFrameFading:RefreshFrameAlphas()
-  else
     MouseoverFrameFading:RefreshFrameAlphas(true)
+  else
+    MouseoverFrameFading:RefreshFrameAlphas(true, true)
   end
 end
 
