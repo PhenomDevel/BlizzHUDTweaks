@@ -1,18 +1,60 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 
+local EventHandler = addon:GetModule("EventHandler")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 local ClassResource = addon:GetModule("ClassResource")
 local Miscellaneous = addon:GetModule("Miscellaneous")
 
+local blizzHUDTweaksFrame = CreateFrame("Frame", "BlizzHUDTweaks", UIParent)
+
+local function installKeyDownHandler()
+  if not blizzHUDTweaksFrame.OnKeyDown then
+    blizzHUDTweaksFrame:SetPropagateKeyboardInput(true)
+    blizzHUDTweaksFrame:SetScript(
+      "OnKeyDown",
+      function(_, pressedKey)
+        local profile = addon:GetProfileDB()
+        local keybind = profile["GlobalOptionsMouseoverFrameFadingToggleKeybind"]
+        local shiftDown = IsShiftKeyDown()
+        local ctrlDown = IsControlKeyDown()
+        local altDown = IsAltKeyDown()
+
+        if keybind and keybind ~= "" then
+          if string.find(keybind, pressedKey) then
+            if (string.find(keybind, "SHIFT") and not shiftDown) or (string.find(keybind, "CTRL") and not ctrlDown) or (string.find(keybind, "ALT") and not altDown) then
+              return
+            end
+            MouseoverFrameFading:Toggle()
+          end
+        end
+      end
+    )
+  end
+end
+
 -------------------------------------------------------------------------------
 -- Public API
 
+local eventsToRegister = {
+  "PLAYER_LOGIN",
+  "PLAYER_REGEN_ENABLED",
+  "PLAYER_REGEN_DISABLED",
+  "PLAYER_UPDATE_RESTING",
+  "PLAYER_TARGET_CHANGED",
+  "PLAYER_ENTERING_WORLD",
+  "PLAYER_TOTEM_UPDATE",
+  "PLAYER_SPECIALIZATION_CHANGED",
+  "ACTIONBAR_SLOT_CHANGED",
+  "UNIT_PET",
+  "ACTIONBAR_SHOWGRID"
+}
+
 local registeredEvents = {}
 
-function addon:RegisterEvents(events, forced)
+function EventHandler:RegisterEvents(forced)
   if addon:IsEnabled() or forced then
-    for _, event in ipairs(events) do
+    for _, event in ipairs(eventsToRegister) do
       if not registeredEvents[event] then
         addon:RegisterEvent(event)
         registeredEvents[event] = true
@@ -21,22 +63,13 @@ function addon:RegisterEvents(events, forced)
   end
 end
 
-function addon:UnregisterEvents(events, forced)
+function EventHandler:UnregisterEvents(forced)
   if addon:IsEnabled() or forced then
-    for _, event in ipairs(events) do
+    for _, event in ipairs(eventsToRegister) do
       if registeredEvents[event] then
         addon:UnregisterEvent(event)
         registeredEvents[event] = false
       end
-    end
-  end
-end
-
-function addon:UnregisterAllEvents()
-  for event, registered in pairs(registeredEvents) do
-    if registered then
-      addon:UnregisterEvent(event)
-      registeredEvents[event] = false
     end
   end
 end
@@ -94,6 +127,7 @@ function addon:PLAYER_ENTERING_WORLD()
     ClassResource:RestoreTotemFrame(self.db.profile)
 
     Miscellaneous:RestoreAll(self.db.profile)
+    installKeyDownHandler()
   end
 end
 

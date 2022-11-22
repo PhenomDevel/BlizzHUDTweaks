@@ -286,3 +286,20 @@ function Miscellaneous:InstallHooks()
   SpellBookFrame:HookScript("OnShow", restore)
   SpellBookFrame:HookScript("OnHide", restore)
 end
+
+function Miscellaneous:Disable()
+  local profile = addon:GetProfileDB()
+  Miscellaneous:RestoreOriginal(profile)
+  addon:Print("Disabled Miscellaneous")
+end
+
+function Miscellaneous:Enable()
+  local profile = addon:GetProfileDB()
+  Miscellaneous:RestoreAll(profile)
+  addon:Print("Enabled Miscellaneous")
+end
+
+function Miscellaneous:IsEnabled()
+  local enabled = addon:GetProfileDB()["GlobalOptionsMiscellaneousEnabled"] or false
+  return enabled
+end

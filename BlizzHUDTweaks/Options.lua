@@ -1,31 +1,128 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
+local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
+local ClassResource = addon:GetModule("ClassResource")
+local Miscellaneous = addon:GetModule("Miscellaneous")
+local EventHandler = addon:GetModule("EventHandler")
 
-local function getGlobalOptions(profile)
+local eventsToRegister = {
+  "PLAYER_LOGIN",
+  "PLAYER_REGEN_ENABLED",
+  "PLAYER_REGEN_DISABLED",
+  "PLAYER_UPDATE_RESTING",
+  "PLAYER_TARGET_CHANGED",
+  "PLAYER_ENTERING_WORLD",
+  "PLAYER_TOTEM_UPDATE",
+  "PLAYER_SPECIALIZATION_CHANGED",
+  "ACTIONBAR_SLOT_CHANGED",
+  "UNIT_PET",
+  "ACTIONBAR_SHOWGRID"
+}
+
+local function getGlobalOptions()
   return {
     ["Enabled"] = {
-      order = 0,
+      order = 1,
       name = "Enabled",
+      desc = "Enables or disables the whole addon and all of it's sub modules.",
       width = "full",
       type = "toggle",
-      get = function(info)
-        return profile[info[#info]]
-      end,
+      get = "GetValue",
       set = function(info, value)
-        profile[info[#info]] = value
+        Options:SetValue(info, value)
         if not value then
-          addon:DisableAll()
+          Options:DisableAll()
         else
-          addon:EnableAll()
+          Options:EnableAll()
         end
       end
     },
     ["Description"] = {
-      order = 1.1,
+      order = 2,
       name = addon:ColoredString("\n\nNOTE: ", "eb4034") .. "The actual settings are in sub categories. Please make sure you have expanded BlizzHUDTweaks's options.",
       width = "full",
       type = "description",
       fontSize = "medium"
+    },
+    ["GlobalOptionsMouseoverFrameFading"] = {
+      name = "Mouseover Frame Fading",
+      order = 3,
+      type = "group",
+      guiInline = true,
+      args = {
+        ["GlobalOptionsMouseoverFrameFadingEnabled"] = {
+          order = 0,
+          name = "Enabled",
+          desc = "TODO",
+          width = "double",
+          type = "toggle",
+          get = "GetValue",
+          set = function(info, value)
+            Options:SetValue(info, value)
+            if not value then
+              MouseoverFrameFading:Disable()
+            else
+              MouseoverFrameFading:Enable()
+            end
+          end
+        },
+        ["GlobalOptionsMouseoverFrameFadingToggleKeybind"] = {
+          order = 0,
+          name = "Toggle Keybind",
+          width = "normal",
+          type = "keybinding",
+          get = "GetValue",
+          set = "SetValue"
+        }
+      }
+    },
+    ["GlobalOptionsClassResource"] = {
+      name = "Class Resource",
+      order = 4,
+      type = "group",
+      guiInline = true,
+      args = {
+        ["GlobalOptionsClassResourceEnabled"] = {
+          order = 0,
+          name = "Enabled",
+          desc = "TODO",
+          width = "double",
+          type = "toggle",
+          get = "GetValue",
+          set = function(info, value)
+            Options:SetValue(info, value)
+            if not value then
+              ClassResource:Disable()
+            else
+              ClassResource:Enable()
+            end
+          end
+        }
+      }
+    },
+    ["GlobalOptionsMiscellaneous"] = {
+      name = "Miscellaneous",
+      order = 5,
+      type = "group",
+      guiInline = true,
+      args = {
+        ["GlobalOptionsMiscellaneousEnabled"] = {
+          order = 0,
+          name = "Enabled",
+          desc = "TODO",
+          width = "double",
+          type = "toggle",
+          get = "GetValue",
+          set = function(info, value)
+            Options:SetValue(info, value)
+            if not value then
+              Miscellaneous:Disable()
+            else
+              Miscellaneous:Enable()
+            end
+          end
+        }
+      }
     }
   }
 end
@@ -53,7 +150,34 @@ function Options:GetOptionsTable()
   local options = {
     name = "BlizzHUDTweaks",
     type = "group",
-    args = getGlobalOptions(addon:GetProfileDB())
+    handler = Options,
+    args = getGlobalOptions()
   }
   return options
+end
+
+function Options:DisableAll()
+  EventHandler:UnregisterEvents(true)
+
+  MouseoverFrameFading:Disable()
+  ClassResource:Disable()
+  Miscellaneous:Disable()
+
+  addon:ClearUpdateTicker()
+  addon:Disable()
+
+  addon:Print("Disabled. To make sure everything is loaded correctly please /reload the UI")
+end
+
+function Options:EnableAll()
+  EventHandler:RegisterEvents(eventsToRegister)
+
+  addon:Enable()
+  addon:InitializeUpdateTicker()
+
+  MouseoverFrameFading:Enable()
+  ClassResource:Enable()
+  Miscellaneous:Enable()
+
+  addon:Print("Enabled")
 end

@@ -61,7 +61,8 @@ end
 
 function ClassResource:RestoreTotemFrame(profile)
   local enabled = profile["TotemFramePositionEnabled"]
-  if addon:IsEnabled() and enabled then
+
+  if addon:IsEnabled() and ClassResource:IsEnabled() and enabled then
     if profile["TotemFrameDetached"] then
       local anchor = profile["TotemFramePositionAnchor"]
       local xOffset = profile["TotemFramePositionXOffset"]
@@ -88,7 +89,7 @@ function ClassResource:RestoreTotemFrame(profile)
 end
 
 function ClassResource:Restore(profile)
-  if addon:IsEnabled() then
+  if addon:IsEnabled() and ClassResource:IsEnabled() then
     local class = UnitClassBase("player")
 
     local currentSpec = GetSpecialization()
@@ -122,4 +123,25 @@ function ClassResource:Restore(profile)
       ClassResource:RestorePosition()
     end
   end
+end
+
+function ClassResource:Disable()
+  local profile = addon:GetProfileDB()
+
+  ClassResource:RestoreOriginalTotemFramePosition(profile)
+  ClassResource:RestorePosition()
+  addon:Print("Disabled ClassResource")
+end
+
+function ClassResource:Enable()
+  local profile = addon:GetProfileDB()
+
+  ClassResource:Restore(profile)
+  ClassResource:RestoreTotemFrame(profile)
+  addon:Print("Enabled ClassResource")
+end
+
+function ClassResource:IsEnabled()
+  local enabled = addon:GetProfileDB()["GlobalOptionsClassResourceEnabled"] or false
+  return enabled
 end

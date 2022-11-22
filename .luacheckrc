@@ -127,6 +127,9 @@ globals = {
   "SpellBookFrame",
   "PetActionButton1",
   "StanceButton1",
+  "IsShiftKeyDown",
+  "IsControlKeyDown",
+  "IsAltKeyDown",
   -- Locals
   "L"
 }

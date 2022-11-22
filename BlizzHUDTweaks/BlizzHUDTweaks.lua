@@ -4,6 +4,7 @@ local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0",
 local AC = LibStub("AceConfig-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
 
+local EventHandler = addon:NewModule("EventHandler")
 local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local ClassResource = addon:NewModule("ClassResource")
@@ -51,20 +52,6 @@ local function getBlizzHUDTweaksLibDbIconData(db)
   end
 end
 
-local eventsToRegister = {
-  "PLAYER_LOGIN",
-  "PLAYER_REGEN_ENABLED",
-  "PLAYER_REGEN_DISABLED",
-  "PLAYER_UPDATE_RESTING",
-  "PLAYER_TARGET_CHANGED",
-  "PLAYER_ENTERING_WORLD",
-  "PLAYER_TOTEM_UPDATE",
-  "PLAYER_SPECIALIZATION_CHANGED",
-  "ACTIONBAR_SLOT_CHANGED",
-  "UNIT_PET",
-  "ACTIONBAR_SHOWGRID"
-}
-
 local defaultConfig = {
   ["global"] = {
     ["version"] = "@project-version@",
@@ -73,6 +60,10 @@ local defaultConfig = {
     }
   },
   ["profile"] = {
+    ["GlobalOptionsMouseoverFrameFadingEnabled"] = true,
+    ["GlobalOptionsClassResourceEnabled"] = true,
+    ["GlobalOptionsMiscellaneousEnabled"] = true,
+    ["Enabled"] = true,
     ["*Global*"] = {
       displayName = "* |T134063:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Global Settings|r",
       description = "You can set global values which can be activated for each frame."
@@ -350,6 +341,8 @@ function addon:LoadProfile()
     addon:InitializeUpdateTicker()
     Miscellaneous:RestoreAll(self.db.profile)
     addon:RefreshOptionTables()
+    Options:DisableAll()
+    Options:EnableAll()
   end
 end
 
@@ -381,7 +374,7 @@ function addon:RefreshUpdateTicker(interval)
   end
 end
 function addon:InitializeUpdateTicker()
-  if self.db.profile["Enabled"] then
+  if addon:IsEnabled() then
     addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
   end
 end
@@ -405,7 +398,9 @@ function addon:OnInitialize()
 
   addon:HideGCDFlash()
 
-  addon:RegisterEvents(eventsToRegister)
+  EventHandler:RegisterEvents()
+
+  BlizzHUDTweaks.mouseoverFrameFadingEnabled = true
 
   QueueStatusButton:SetParent(UIParent)
   MainMenuBarVehicleLeaveButton:SetParent(UIParent)
@@ -448,32 +443,6 @@ function addon:ResetFrame(frame)
   if frame then
     frame:SetAlpha(1)
   end
-end
-
-function addon:DisableAll()
-  addon:Print("Disabled. To make sure everything is loaded correctly please /reload the UI")
-  addon:ClearUpdateTicker()
-
-  for _, frame in pairs(addon:GetFrameMapping()) do
-    addon:ResetFrame(frame)
-  end
-
-  ClassResource:RestoreOriginalTotemFramePosition(self.db.profile)
-  ClassResource:RestorePosition()
-  Miscellaneous:RestoreOriginal(self.db.profile)
-  addon:UnregisterAllEvents(true)
-  self.db.profile["Enabled"] = false
-end
-
-function addon:EnableAll()
-  self.db.profile["Enabled"] = true
-  addon:Print("Enabled.")
-  addon:InitializeUpdateTicker()
-  MouseoverFrameFading:RefreshFrameAlphas()
-  ClassResource:Restore(self.db.profile)
-  ClassResource:RestoreTotemFrame(self.db.profile)
-  Miscellaneous:RestoreAll(self.db.profile)
-  addon:RegisterEvents(eventsToRegister)
 end
 
 function addon:IsEnabled()
