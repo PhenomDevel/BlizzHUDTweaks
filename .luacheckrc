@@ -130,6 +130,7 @@ globals = {
   "IsShiftKeyDown",
   "IsControlKeyDown",
   "IsAltKeyDown",
+  "UnitCanAttack",
   -- Locals
   "L"
 }
