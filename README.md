@@ -3,10 +3,12 @@
 # BlizzHUDTweaks
 Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
 
-- Action Bar / Frame Fading until Mouseover
-- Overwrite actionbar padding from -4 to +16
-- Repositioning / Scaling of Class Resources and Totem Bar (For example Combo Points, Arcane Charges etc.)
-- A lot of small qol
+- Out of combat fading for action bars / frames
+- Rested area fading for action bars / frames
+- In combat fading for action bars / frames
+- Action bar padding below blizzard minimum of 2
+- Repositioning / Scaling of class resources and totem bar (For example combo points, arcane charges etc.)
+- Small quality of life improvements
 
 For more details see `Features`.
 
@@ -101,3 +103,6 @@ Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` si
 
 ## Known Issues
 - When reloading the UI while having a target the alpha will only applied once the target changes
+
+# Support
+If you'd like to support me just leave a star on Github :)
