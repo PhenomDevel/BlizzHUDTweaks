@@ -281,7 +281,7 @@ local function updateFramesForLoadedAddons(profile)
   end
 
   if EditModeExpanded then -- and EditModeExpanded.IsRegistered
-    addon:Print("EditModeExpaneded found. Adding additional frames.")
+    addon:Print("EditModeExpanded found. Adding additional frames.")
     for _, frameOptions in ipairs(additionalFrameNames) do
       if frameOptions.frame then
         if frameOptions.frame then --EditModeExpanded:IsRegistered(frameOptions.frame)
