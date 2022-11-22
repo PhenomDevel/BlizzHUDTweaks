@@ -7,14 +7,10 @@ assignees: PhenomDevel
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Idea
+> Please describe the idea you have as precise as possible
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+## Solution
+> Try to describe the solution you are aiming for
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+## Optional Context (e.g. Screenshots, Scribbles ...)

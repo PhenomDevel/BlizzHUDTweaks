@@ -7,21 +7,16 @@ assignees: PhenomDevel
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Description
+> Please describe what the problem is as precise as possible
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+## Reproduce
+> What steps are needed to reproduce it?
+1. Do this
+2. Do that
+3. Boom
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Expected Behaviour
+> What did you expect what should have happend?
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Additional context**
-Add any other context about the problem here.
+## Optional Context (e.g. Screenshots)
