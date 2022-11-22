@@ -26,9 +26,9 @@ local function getBlizzHUDTweaksLibDbIconData(db)
             addon:OpenOptions()
           elseif button == "RightButton" then
             if addon:IsEnabled() then
-              addon:DisableAll()
+              addon:Disable()
             else
-              addon:EnableAll()
+              addon:Enable()
             end
           elseif button == "MiddleButton" then
             db.global.minimap.hide = true
@@ -448,6 +448,16 @@ end
 
 function addon:IsEnabled()
   return self.db.profile["Enabled"]
+end
+
+function addon:Disable()
+  self.db.profile["Enabled"] = false
+  Options:DisableAll()
+end
+
+function addon:Enable()
+  self.db.profile["Enabled"] = true
+  Options:EnableAll()
 end
 
 function addon:ToggleMinimapIcon()

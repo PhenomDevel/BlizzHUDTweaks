@@ -157,14 +157,13 @@ function Options:GetOptionsTable()
 end
 
 function Options:DisableAll()
-  EventHandler:UnregisterEvents(true)
+  -- EventHandler:UnregisterEvents(true)
 
   MouseoverFrameFading:Disable()
   ClassResource:Disable()
   Miscellaneous:Disable()
 
   addon:ClearUpdateTicker()
-  addon:Disable()
 
   addon:Print("Disabled. To make sure everything is loaded correctly please /reload the UI")
 end
@@ -172,7 +171,6 @@ end
 function Options:EnableAll()
   EventHandler:RegisterEvents(eventsToRegister)
 
-  addon:Enable()
   addon:InitializeUpdateTicker()
 
   MouseoverFrameFading:Enable()
