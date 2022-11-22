@@ -1,10 +1,10 @@
 local _, BlizzHUDTweaks = ...
-local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceEvent-3.0", "AceConsole-3.0")
+local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
-local AC = LibStub("AceConfig-3.0")
-local ACD = LibStub("AceConfigDialog-3.0")
+local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
-local EventHandler = addon:NewModule("EventHandler")
+local EventHandler = addon:NewModule("EventHandler", "AceEvent-3.0")
 local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local ClassResource = addon:NewModule("ClassResource")
@@ -222,6 +222,7 @@ do
       else
         frameOptions["UpdateInterval"] = 0.1
         frameOptions["TreatTargetLikeInCombat"] = true
+        frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
       end
 
       if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
@@ -373,6 +374,7 @@ function addon:RefreshUpdateTicker(interval)
     addon:StartUpdateTicker(interval)
   end
 end
+
 function addon:InitializeUpdateTicker()
   if addon:IsEnabled() then
     addon:RefreshUpdateTicker(self.db.profile["*Global*"].UpdateInterval or 0.1)
@@ -383,6 +385,7 @@ function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, false)
   updateFramesForLoadedAddons(self.db.profile)
 
+  -- Remove in the future
   cleanupNonsense(self.db.profile)
 
   -- Initialize Minimap Icon
@@ -400,8 +403,6 @@ function addon:OnInitialize()
 
   EventHandler:RegisterEvents()
 
-  BlizzHUDTweaks.mouseoverFrameFadingEnabled = true
-
   QueueStatusButton:SetParent(UIParent)
   MainMenuBarVehicleLeaveButton:SetParent(UIParent)
 
@@ -411,28 +412,28 @@ end
 
 function addon:InitializeOptions()
   addon:RefreshOptionTables()
-  self.optionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
-  self.profileOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
-  self.mouseoverFrameFadingOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
-  self.classResourceOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_ClassResource", "Class Resource", "BlizzHUDTweaks")
-  self.miscellaneousOptionsFrame = ACD:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
+  self.optionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+  self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
+  self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
+  self.classResourceOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_ClassResource", "Class Resource", "BlizzHUDTweaks")
+  self.miscellaneousOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
 end
 
 function addon:RefreshOptionTables()
   local globalOptions = Options:GetOptionsTable()
-  AC:RegisterOptionsTable("BlizzHUDTweaks_options", globalOptions)
+  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_options", globalOptions)
 
   local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-  AC:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
+  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
 
   local mouseoverFrameFadingOptions = MouseoverFrameFading:GetOptionsTable(self.db.profile)
-  AC:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
+  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
 
   local classResourceOptions = ClassResource:GetOptionsTable(self.db.profile)
-  AC:RegisterOptionsTable("BlizzHUDTweaks_ClassResource", classResourceOptions)
+  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_ClassResource", classResourceOptions)
 
   local miscellaneousOptions = Miscellaneous:GetOptionsTable()
-  AC:RegisterOptionsTable("BlizzHUDTweaks_Miscellaneous", miscellaneousOptions)
+  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Miscellaneous", miscellaneousOptions)
 end
 
 function addon:OpenOptions()
