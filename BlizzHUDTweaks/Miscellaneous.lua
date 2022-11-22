@@ -290,14 +290,16 @@ end
 function Miscellaneous:Disable()
   local profile = addon:GetProfileDB()
   Miscellaneous:RestoreOriginal(profile)
-  addon:Print("Disabled Module", addon:ColoredString("Miscellaneous", "fcba03")) --@end-debug@
+  --@debug@
+  addon:Print("Disabled Module", addon:ColoredString("Miscellaneous", "fcba03"))
   --@end-debug@
 end
 
 function Miscellaneous:Enable()
   local profile = addon:GetProfileDB()
   Miscellaneous:RestoreAll(profile)
-  addon:Print("Enabled Module", addon:ColoredString("Miscellaneous", "fcba03")) --@end-debug@
+  --@debug@
+  addon:Print("Enabled Module", addon:ColoredString("Miscellaneous", "fcba03"))
   --@end-debug@
 end
 
