@@ -132,6 +132,10 @@ function addon:ACTIONBAR_SLOT_CHANGED()
   Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
 end
 
+function addon:ACTIONBAR_SHOWGRID()
+  Miscellaneous:RestoreActionbarPaddings(self.db.profile, true, true)
+end
+
 function addon:UNIT_PET(_, unit)
   if unit == "player" then
     if addon:IsEnabled() then

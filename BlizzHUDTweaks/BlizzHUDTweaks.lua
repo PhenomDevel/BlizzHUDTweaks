@@ -61,7 +61,8 @@ local eventsToRegister = {
   "PLAYER_TOTEM_UPDATE",
   "PLAYER_SPECIALIZATION_CHANGED",
   "ACTIONBAR_SLOT_CHANGED",
-  "UNIT_PET"
+  "UNIT_PET",
+  "ACTIONBAR_SHOWGRID"
 }
 
 local defaultConfig = {
