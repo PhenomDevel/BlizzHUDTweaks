@@ -52,7 +52,8 @@ local eventsToRegister = {
   "PLAYER_SPECIALIZATION_CHANGED",
   "ACTIONBAR_SLOT_CHANGED",
   "UNIT_PET",
-  "ACTIONBAR_SHOWGRID"
+  "ACTIONBAR_SHOWGRID",
+  "ACTIONBAR_HIDEGRID"
 }
 
 local registeredEvents = {}
@@ -168,15 +169,27 @@ function EventHandler:PLAYER_SPECIALIZATION_CHANGED()
 end
 
 function EventHandler:ACTIONBAR_SLOT_CHANGED()
-  local profile = addon:GetProfileDB()
+  if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
 
-  Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+    Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+  end
 end
 
 function EventHandler:ACTIONBAR_SHOWGRID()
-  local profile = addon:GetProfileDB()
+  if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
 
-  Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+    Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+  end
+end
+
+function EventHandler:ACTIONBAR_HIDEGRID()
+  if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
+
+    Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+  end
 end
 
 function EventHandler:UNIT_PET(_, unit)
