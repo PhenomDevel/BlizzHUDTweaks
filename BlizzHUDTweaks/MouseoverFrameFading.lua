@@ -71,8 +71,26 @@ local function inCombatFadeActive(globalOptions, frameOptions)
   end
 end
 
-local function treatTargetFadeActive(globalOptions)
-  if globalOptions.TreatTargetLikeInCombat then
+local function treatTargetTypeMatches(options)
+  if options.TreatTargetLikeInCombatTargetType == "friendly" then
+    if UnitExists("target") and not UnitCanAttack("player", "target") then
+      return true
+    end
+  elseif options.TreatTargetLikeInCombatTargetType == "hostile" then
+    if UnitExists("target") and UnitCanAttack("player", "target") then
+      return true
+    end
+  else
+    return true
+  end
+end
+
+local function treatTargetFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.TreatTargetLikeInCombat and treatTargetTypeMatches(globalOptions) then
+      return true
+    end
+  elseif frameOptions.TreatTargetLikeInCombat and treatTargetTypeMatches(frameOptions) then
     return true
   end
 end
@@ -96,7 +114,7 @@ local function determineTargetAlpha(globalOptions, frameOptions)
 
   if inCombat and inCombatFadeActive(globalOptions, frameOptions) then
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
-  elseif not inCombat and hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions) then
+  elseif not inCombat and hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
   elseif not inCombat and isResting and restedAreaFadeActive(globalOptions, frameOptions) then
     alpha = restedAreaAlphaValue(globalOptions, frameOptions)

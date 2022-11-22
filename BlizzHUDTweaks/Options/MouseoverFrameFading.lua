@@ -100,11 +100,24 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     subOptions["TreatTargetLikeInCombat"] = {
       order = order,
       name = "Treat target as in combat",
-      desc = "When active the fade will change to the in combat fade when you have a target.",
-      width = "full",
+      desc = "When active the fade will change to the in combat fade when you have a target of the corresponding target type (friendly, harmful, or both).",
+      width = "normal",
       type = "toggle",
       get = "GetValue",
       set = "SetValue",
+      disabled = "GetUseGlobalFrameOptions",
+      arg = frameName
+    }
+    order = order + 0.1
+    subOptions["TreatTargetLikeInCombatTargetType"] = {
+      order = order,
+      name = "Target type",
+      width = "normal",
+      type = "select",
+      set = "SetValue",
+      get = "GetValue",
+      values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
+      disabled = "GetUseGlobalFrameOptions",
       arg = frameName
     }
     order = order + 0.1
