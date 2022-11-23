@@ -102,7 +102,7 @@ end
 function EventHandler:PLAYER_UPDATE_RESTING()
   BlizzHUDTweaks.isResting = IsResting("player")
 
-  if addon:IsEnabled() then
+  if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
     MouseoverFrameFading:RefreshFrameAlphas()
   end
 end
@@ -110,12 +110,8 @@ end
 function EventHandler:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
 
-  if addon:IsEnabled() then
-    local profile = addon:GetProfileDB()
+  if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
     restoreMouseoverFade()
-
-    Miscellaneous:RestoreShowHideOptions(profile)
-    Miscellaneous:RestoreFontSizeOptions(profile)
   end
 end
 
