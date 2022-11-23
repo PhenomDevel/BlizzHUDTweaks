@@ -30,6 +30,8 @@ local function generateFrameOptionName(frameOptions, frameName)
   return name
 end
 
+local fadeOrderDescription = addon:ColoredString("\n\nFading Order", "fcba03") .. ": InCombat > HasTarget > InstancedArea > RestedArea > OutOfCombat"
+
 local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   local subOptions = {}
 
@@ -86,7 +88,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   order = order + 0.1
   subOptions["MouseOverInCombat"] = {
     order = order,
-    name = "Allow mouseover in combat",
+    name = "Allow mouseover fade in combat",
     desc = "When activated you can mouseover action bars and frames while within combat to show the frame with full alpha.",
     width = "full",
     type = "toggle",
@@ -95,31 +97,22 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     disabled = "GetUseGlobalFrameOptions",
     arg = frameName
   }
+  order = order + 0.1
+  subOptions["FadeDuration"] = {
+    order = order,
+    name = "Fade Duration",
+    desc = "The duration how long the fade should take (fade in and out).",
+    width = 0.8,
+    type = "range",
+    get = "GetValue",
+    set = "SetValue",
+    min = 0.05,
+    max = 2,
+    step = 0.05,
+    disabled = "GetUseGlobalFrameOptions",
+    arg = frameName
+  }
   if not withUseGlobal then
-    order = order + 0.1
-    subOptions["TreatTargetLikeInCombat"] = {
-      order = order,
-      name = "Treat target as in combat",
-      desc = "When active the fade will change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both).",
-      width = "normal",
-      type = "toggle",
-      get = "GetValue",
-      set = "SetValue",
-      disabled = "GetUseGlobalFrameOptions",
-      arg = frameName
-    }
-    order = order + 0.1
-    subOptions["TreatTargetLikeInCombatTargetType"] = {
-      order = order,
-      name = "Target type",
-      width = "normal",
-      type = "select",
-      set = "SetValue",
-      get = "GetValue",
-      values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
-      disabled = "GetUseGlobalFrameOptions",
-      arg = frameName
-    }
     order = order + 0.1
     subOptions["UpdateInterval"] = {
       order = order,
@@ -138,145 +131,205 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       step = 0.01,
       arg = frameName
     }
+    order = order + 0.1
+    subOptions["TreatTargetAsInCombatGroup"] = {
+      order = order,
+      type = "group",
+      guiInline = true,
+      name = "Treat target as in combat",
+      args = {
+        ["TreatTargetLikeInCombat"] = {
+          order = 1,
+          name = "Enabled",
+          desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." ..
+            fadeOrderDescription,
+          width = "normal",
+          type = "toggle",
+          get = "GetValue",
+          set = "SetValue",
+          disabled = "GetUseGlobalFrameOptions",
+          arg = frameName
+        },
+        ["TreatTargetLikeInCombatTargetType"] = {
+          order = 2,
+          name = "Target type",
+          desc = "Choose the target type for which `Treat target as in combat` should be applied.",
+          width = "normal",
+          type = "select",
+          set = "SetValue",
+          get = "GetValue",
+          values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
+          disabled = "GetUseGlobalFrameOptions",
+          arg = frameName
+        }
+      }
+    }
   end
 
   order = order + 0.1
-  subOptions["FadeDuration"] = {
+  subOptions["InCombatGroup"] = {
     order = order,
-    name = "Fade Duration",
-    desc = "The duration how long the fade should take (fade in and out).",
-    width = 0.8,
-    type = "range",
-    get = "GetValue",
-    set = "SetValue",
-    min = 0.05,
-    max = 2,
-    step = 0.05,
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
-  }
-  order = order + 0.1
-  subOptions["InCombatFade"] = {
-    order = order,
+    type = "group",
+    guiInline = true,
     name = "In Combat Fade",
-    width = "full",
-    type = "header"
+    args = {
+      ["FadeInCombat"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade value will be applied when you're in combat." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["InCombatAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame when within combat.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      }
+    }
   }
+
   order = order + 0.1
-  subOptions["FadeInCombat"] = {
+  subOptions["InstancedAreaFadeGroup"] = {
     order = order,
-    name = "Enabled",
-    width = 0.6,
-    type = "toggle",
-    get = "GetValue",
-    set = "SetValue",
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
+    type = "group",
+    guiInline = true,
+    name = "Instanced Area Fade",
+    args = {
+      ["FadeInInstancedArea"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active this fade will be applied if you're in an instanced area and *not* in combat." ..
+          "\n\nIf `Treat target as in combat` is active and you have a target selected those fade values will be applied first." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["InstancedAreaAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame when in an instanced area (e.g. dungeons or raids).",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      }
+    }
   }
+
   order = order + 0.1
-  subOptions["InCombatAlpha"] = {
+  subOptions["OutOfCombatGroup"] = {
     order = order,
-    name = "Alpha",
-    desc = "Set the alpha value of the frame when within combat.",
-    width = 0.8,
-    type = "range",
-    get = "GetFadeSliderValue",
-    set = "SetFadeSliderValue",
-    min = 0,
-    max = 100,
-    softMin = 0,
-    softMax = 100,
-    step = 5,
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
-  }
-  order = order + 0.1
-  subOptions["OutOfCombatFade"] = {
-    order = order,
+    type = "group",
+    guiInline = true,
     name = "Out of Combat Fade",
-    width = "full",
-    type = "header"
+    args = {
+      ["FadeOutOfCombat"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade value will be applied when you're not in combat." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["OutOfCombatAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame when not in combat.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["OutOfCombatFadeDelay"] = {
+        order = 3,
+        name = "Fade Delay",
+        desc = "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha." ..
+          "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing`" ..
+            " action bars or frames when entering/leaving combat fast, e.g. while questing." ..
+              addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
+        width = 0.8,
+        type = "range",
+        get = "GetValue",
+        set = "SetValue",
+        min = 0,
+        max = 60,
+        step = 0.5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      }
+    }
   }
+
   order = order + 0.1
-  subOptions["FadeOutOfCombat"] = {
+  subOptions["RestedAreaGroup"] = {
     order = order,
-    name = "Enabled",
-    width = 0.6,
-    type = "toggle",
-    get = "GetValue",
-    set = "SetValue",
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
-  }
-  order = order + 0.1
-  subOptions["OutOfCombatAlpha"] = {
-    order = order,
-    name = "Alpha",
-    desc = "Set the alpha value of the frame when not in combat.",
-    width = 0.8,
-    type = "range",
-    get = "GetFadeSliderValue",
-    set = "SetFadeSliderValue",
-    min = 0,
-    max = 100,
-    softMin = 0,
-    softMax = 100,
-    step = 5,
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
-  }
-  order = order + 0.1
-  subOptions["OutOfCombatFadeDelay"] = {
-    order = order,
-    name = "Fade Delay",
-    desc = "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha." ..
-      "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing`" ..
-        " action bars or frames when entering/leaving combat fast, e.g. while questing." ..
-          addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
-    width = 0.8,
-    type = "range",
-    get = "GetValue",
-    set = "SetValue",
-    min = 0,
-    max = 60,
-    step = 0.5,
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
-  }
-  order = order + 0.1
-  subOptions["RestedAreaFade"] = {
-    order = order,
+    type = "group",
+    guiInline = true,
     name = "Rested Area Fade",
-    width = "full",
-    type = "header"
-  }
-  order = order + 0.1
-  subOptions["FadeInRestedArea"] = {
-    order = order,
-    name = "Enabled",
-    width = 0.6,
-    type = "toggle",
-    get = "GetValue",
-    set = "SetValue",
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
-  }
-  order = order + 0.1
-  subOptions["RestedAreaAlpha"] = {
-    order = order,
-    name = "Alpha",
-    desc = "Set the alpha value of the frame while in a rested area.",
-    width = 0.8,
-    type = "range",
-    get = "GetFadeSliderValue",
-    set = "SetFadeSliderValue",
-    min = 0,
-    max = 100,
-    softMin = 0,
-    softMax = 100,
-    step = 5,
-    disabled = "GetUseGlobalFrameOptions",
-    arg = frameName
+    args = {
+      ["FadeInRestedArea"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active this fade will be applied when you're in a rested area." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["RestedAreaAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame while in a rested area.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      }
+    }
   }
 end
 

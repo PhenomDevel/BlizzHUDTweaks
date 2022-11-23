@@ -202,6 +202,9 @@ local function setFrameDefaultOptions(frameOptions)
   frameOptions["FadeInCombat"] = true
   frameOptions["InCombatAlpha"] = 1
 
+  frameOptions["FadeInInstancedArea"] = false
+  frameOptions["InstancedAreaAlpha"] = 1
+
   frameOptions["FadeOutOfCombat"] = true
   frameOptions["OutOfCombatAlpha"] = 0.6
   frameOptions["OutOfCombatFadeDelay"] = 0
