@@ -2,8 +2,8 @@
 name: Usability problem
 about: Report an usability issue
 title: "[USABILITY]"
-labels: ''
-assignees: ''
+labels: usability
+assignees: PhenomDevel
 
 ---
 
