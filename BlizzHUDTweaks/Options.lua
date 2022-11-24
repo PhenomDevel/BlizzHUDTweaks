@@ -53,7 +53,7 @@ local function getGlobalOptions()
         ["GlobalOptionsMouseoverFrameFadingEnabled"] = {
           order = 0,
           name = "Enabled",
-          desc = "Disables all mouseover fading options.",
+          desc = "Enable/Disable this sub module",
           width = "double",
           type = "toggle",
           get = "GetValue",
@@ -85,7 +85,7 @@ local function getGlobalOptions()
         ["GlobalOptionsClassResourceEnabled"] = {
           order = 0,
           name = "Enabled",
-          desc = "Disables all class resource options.",
+          desc = "Enable/Disable this sub module",
           width = "double",
           type = "toggle",
           get = "GetValue",
@@ -109,7 +109,7 @@ local function getGlobalOptions()
         ["GlobalOptionsMiscellaneousEnabled"] = {
           order = 0,
           name = "Enabled",
-          desc = "Disables all misc options.",
+          desc = "Enable/Disable this sub module",
           width = "double",
           type = "toggle",
           get = "GetValue",
