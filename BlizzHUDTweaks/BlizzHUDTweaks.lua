@@ -157,6 +157,9 @@ local defaultConfig = {
     },
     ["MainMenuBarVehicleLeaveButton"] = {
       displayName = "Vehicle Leave Button"
+    },
+    ["FocusFrameToT"] = {
+      displayName = "Target of Focus Target"
     }
   }
 }
@@ -191,7 +194,8 @@ local frameMapping = {
   ["VehicleSeatIndicator"] = VehicleSeatIndicator,
   ["PartyFrame"] = PartyFrame,
   ["CompactRaidFrameContainer"] = CompactRaidFrameContainer,
-  ["MainMenuBarVehicleLeaveButton"] = MainMenuBarVehicleLeaveButton
+  ["MainMenuBarVehicleLeaveButton"] = MainMenuBarVehicleLeaveButton,
+  ["FocusFrameToT"] = FocusFrameToT
 }
 
 local function setFrameDefaultOptions(frameOptions)

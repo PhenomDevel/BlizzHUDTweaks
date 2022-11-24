@@ -131,6 +131,7 @@ globals = {
   "IsControlKeyDown",
   "IsAltKeyDown",
   "UnitCanAttack",
+  "FocusFrameToT",
   -- Locals
   "L"
 }
