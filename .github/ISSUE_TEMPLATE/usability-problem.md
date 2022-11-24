@@ -1,6 +1,6 @@
 ---
 name: Usability problem
-about: Suggest an idea for this project
+about: Report an usability issue
 title: "[USABILITY]"
 labels: ''
 assignees: ''
