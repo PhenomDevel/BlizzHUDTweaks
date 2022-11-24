@@ -26,6 +26,24 @@ Miscellaneous.showHideOptions = {
     displayName = "Hide Target Level",
     frame = TargetFrame.TargetFrameContent.TargetFrameContentMain.LevelText,
     description = ""
+  },
+  [5] = {
+    optionName = "MiscellaneousShowHideFocusName",
+    displayName = "Hide Focus Name",
+    frame = FocusFrame.TargetFrameContent.TargetFrameContentMain.Name,
+    description = ""
+  },
+  [6] = {
+    optionName = "MiscellaneousShowHideFocuslevel",
+    displayName = "Hide Focus Level",
+    frame = FocusFrame.TargetFrameContent.TargetFrameContentMain.LevelText,
+    description = ""
+  },
+  [7] = {
+    optionName = "MiscellaneousShowHideTargetOfTargetlevel",
+    displayName = "Hide Target of Target Name",
+    frame = TargetFrameToT.Name,
+    description = ""
   }
 }
 
