@@ -142,18 +142,11 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
           " > " ..
             addon:ColoredString("Has Target", "b8c91c") ..
               " > " ..
-                addon:ColoredString("Instanced Area", "d69e0b") .. " > " .. addon:ColoredString("Rested Area", "df7330") .. " > " .. addon:ColoredString("Out Of Combat", "d24d4d"),
+                addon:ColoredString("Instanced Area", "d69e0b") ..
+                  " > " .. addon:ColoredString("Rested Area", "df7330") .. " > " .. addon:ColoredString("Out Of Combat", "d24d4d") .. "\n\n",
     width = "full",
     type = "description",
     fontSize = "medium"
-  }
-  order = order + 0.1
-  subOptions["SpacerAfterFadeOrderDescription"] = {
-    order = order,
-    name = "\n",
-    width = "full",
-    type = "description",
-    fontSize = "large"
   }
 
   order = order + 0.1
