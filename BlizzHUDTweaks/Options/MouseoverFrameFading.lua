@@ -131,40 +131,39 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       step = 0.01,
       arg = frameName
     }
-    order = order + 0.1
-    subOptions["TreatTargetAsInCombatGroup"] = {
-      order = order,
-      type = "group",
-      guiInline = true,
-      name = "Treat target as in combat",
-      args = {
-        ["TreatTargetLikeInCombat"] = {
-          order = 1,
-          name = "Enabled",
-          desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." ..
-            fadeOrderDescription,
-          width = "normal",
-          type = "toggle",
-          get = "GetValue",
-          set = "SetValue",
-          disabled = "GetUseGlobalFrameOptions",
-          arg = frameName
-        },
-        ["TreatTargetLikeInCombatTargetType"] = {
-          order = 2,
-          name = "Target type",
-          desc = "Choose the target type for which `Treat target as in combat` should be applied.",
-          width = "normal",
-          type = "select",
-          set = "SetValue",
-          get = "GetValue",
-          values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
-          disabled = "GetUseGlobalFrameOptions",
-          arg = frameName
-        }
+  end
+  order = order + 0.1
+  subOptions["TreatTargetAsInCombatGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Treat target as in combat",
+    args = {
+      ["TreatTargetLikeInCombat"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." .. fadeOrderDescription,
+        width = "normal",
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["TreatTargetLikeInCombatTargetType"] = {
+        order = 2,
+        name = "Target type",
+        desc = "Choose the target type for which `Treat target as in combat` should be applied.",
+        width = "normal",
+        type = "select",
+        set = "SetValue",
+        get = "GetValue",
+        values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
       }
     }
-  end
+  }
 
   order = order + 0.1
   subOptions["InCombatGroup"] = {
@@ -342,6 +341,7 @@ function MouseoverFrameFading:CopyFrom(info, value)
   if fromFrameOptions then
     local copy = addon:tClone(fromFrameOptions)
     copy.displayName = addon:GetProfileDB()[info.arg].displayName
+    copy.UseGlobalOptions = false
     addon:GetProfileDB()[info.arg] = copy
     MouseoverFrameFading:RefreshFrameAlphas()
   end
