@@ -132,6 +132,7 @@ globals = {
   "IsAltKeyDown",
   "UnitCanAttack",
   "FocusFrameToT",
+  "PetName",
   -- Locals
   "L"
 }

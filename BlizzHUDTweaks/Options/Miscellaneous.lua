@@ -7,43 +7,49 @@ Miscellaneous.showHideOptions = {
     optionName = "MiscellaneousShowHidePlayerName",
     displayName = "Hide Player Name",
     frame = PlayerName,
-    description = ""
+    description = "Hides the player name when active"
   },
   [2] = {
-    optionName = "MiscellaneousShowHidePlayerlevel",
+    optionName = "MiscellaneousShowHidePlayerLevel",
     displayName = "Hide Player Level",
     frame = PlayerLevelText,
-    description = ""
+    description = "Hides the player level when active"
   },
   [3] = {
     optionName = "MiscellaneousShowHideTargetName",
     displayName = "Hide Target Name",
     frame = TargetFrame.TargetFrameContent.TargetFrameContentMain.Name,
-    description = ""
+    description = "Hides the target name when active"
   },
   [4] = {
-    optionName = "MiscellaneousShowHideTargetlevel",
+    optionName = "MiscellaneousShowHideTargetLevel",
     displayName = "Hide Target Level",
     frame = TargetFrame.TargetFrameContent.TargetFrameContentMain.LevelText,
-    description = ""
+    description = "Hides the target level when active"
   },
   [5] = {
     optionName = "MiscellaneousShowHideFocusName",
     displayName = "Hide Focus Name",
     frame = FocusFrame.TargetFrameContent.TargetFrameContentMain.Name,
-    description = ""
+    description = "Hides the focus name when active"
   },
   [6] = {
-    optionName = "MiscellaneousShowHideFocuslevel",
+    optionName = "MiscellaneousShowHideFocusLevel",
     displayName = "Hide Focus Level",
     frame = FocusFrame.TargetFrameContent.TargetFrameContentMain.LevelText,
-    description = ""
+    description = "Hides the focus level when active"
   },
   [7] = {
-    optionName = "MiscellaneousShowHideTargetOfTargetlevel",
+    optionName = "MiscellaneousShowHideTargetOfTargetName",
     displayName = "Hide Target of Target Name",
     frame = TargetFrameToT.Name,
-    description = ""
+    description = "Hides the target of target name when active"
+  },
+  [8] = {
+    optionName = "MiscellaneousShowHidePetlevel",
+    displayName = "Hide Pet Name",
+    frame = PetName,
+    description = "Hides the pet name when active"
   }
 }
 
