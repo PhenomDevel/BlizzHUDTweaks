@@ -85,6 +85,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       arg = frameName
     }
   end
+
   order = order + 0.1
   subOptions["MouseOverInCombat"] = {
     order = order,
@@ -133,36 +134,26 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     }
   end
   order = order + 0.1
-  subOptions["TreatTargetAsInCombatGroup"] = {
+  subOptions["FadeOrderDescription"] = {
     order = order,
-    type = "group",
-    guiInline = true,
-    name = "Treat target as in combat",
-    args = {
-      ["TreatTargetLikeInCombat"] = {
-        order = 1,
-        name = "Enabled",
-        desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." .. fadeOrderDescription,
-        width = "normal",
-        type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
-        arg = frameName
-      },
-      ["TreatTargetLikeInCombatTargetType"] = {
-        order = 2,
-        name = "Target type",
-        desc = "Choose the target type for which `Treat target as in combat` should be applied.",
-        width = "normal",
-        type = "select",
-        set = "SetValue",
-        get = "GetValue",
-        values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
-        disabled = "GetUseGlobalFrameOptions",
-        arg = frameName
-      }
-    }
+    name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
+      "The fade settings will be applied in the following order:\n" ..
+        addon:ColoredString("In Combat", "7af15f") ..
+          " > " ..
+            addon:ColoredString("Has Target", "b8c91c") ..
+              " > " ..
+                addon:ColoredString("Instanced Area", "d69e0b") .. " > " .. addon:ColoredString("Rested Area", "df7330") .. " > " .. addon:ColoredString("Out Of Combat", "d24d4d"),
+    width = "full",
+    type = "description",
+    fontSize = "medium"
+  }
+  order = order + 0.1
+  subOptions["SpacerAfterFadeOrderDescription"] = {
+    order = order,
+    name = "\n",
+    width = "full",
+    type = "description",
+    fontSize = "large"
   }
 
   order = order + 0.1
@@ -196,6 +187,39 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         softMin = 0,
         softMax = 100,
         step = 5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      }
+    }
+  }
+
+  order = order + 0.1
+  subOptions["TreatTargetAsInCombatGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Treat target as in combat",
+    args = {
+      ["TreatTargetLikeInCombat"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." .. fadeOrderDescription,
+        width = "normal",
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["TreatTargetLikeInCombatTargetType"] = {
+        order = 2,
+        name = "Target type",
+        desc = "Choose the target type for which `Treat target as in combat` should be applied.",
+        width = "normal",
+        type = "select",
+        set = "SetValue",
+        get = "GetValue",
+        values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
         disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
@@ -240,6 +264,42 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     }
   }
 
+  order = order + 0.1
+  subOptions["RestedAreaGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Rested Area Fade",
+    args = {
+      ["FadeInRestedArea"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active this fade will be applied when you're in a rested area." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        get = "GetValue",
+        set = "SetValue",
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      },
+      ["RestedAreaAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame while in a rested area.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        disabled = "GetUseGlobalFrameOptions",
+        arg = frameName
+      }
+    }
+  }
   order = order + 0.1
   subOptions["OutOfCombatGroup"] = {
     order = order,
@@ -288,43 +348,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         min = 0,
         max = 60,
         step = 0.5,
-        disabled = "GetUseGlobalFrameOptions",
-        arg = frameName
-      }
-    }
-  }
-
-  order = order + 0.1
-  subOptions["RestedAreaGroup"] = {
-    order = order,
-    type = "group",
-    guiInline = true,
-    name = "Rested Area Fade",
-    args = {
-      ["FadeInRestedArea"] = {
-        order = 1,
-        name = "Enabled",
-        desc = "When active this fade will be applied when you're in a rested area." .. fadeOrderDescription,
-        width = 0.6,
-        type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
-        arg = frameName
-      },
-      ["RestedAreaAlpha"] = {
-        order = 2,
-        name = "Alpha",
-        desc = "Set the alpha value of the frame while in a rested area.",
-        width = 0.8,
-        type = "range",
-        get = "GetFadeSliderValue",
-        set = "SetFadeSliderValue",
-        min = 0,
-        max = 100,
-        softMin = 0,
-        softMax = 100,
-        step = 5,
         disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
