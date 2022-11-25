@@ -295,7 +295,7 @@ local function updateFramesForLoadedAddons(profile)
     for _, frameOptions in ipairs(additionalFrameNames) do
       if frameOptions.frame then
         if frameOptions.frame then --EditModeExpanded:IsRegistered(frameOptions.frame)
-          frameMapping[frameOptions.name] = frameOptions.frame
+          frameMapping[frameOptions.name] = {mainFrame = frameOptions.frame}
           if profile[frameOptions.name] then
             profile[frameOptions.name]["Hidden"] = false
           end
