@@ -243,83 +243,6 @@ do
   end
 end
 
-local function ensureFrameOptions(profile, addonName, frames)
-  for _, frameOptions in ipairs(frames) do
-    if not profile[frameOptions.name] then
-      profile[frameOptions.name] = {
-        displayName = frameOptions.name .. " (" .. addonName .. ")",
-        description = "This frame is added because you have `" .. addonName .. "` loaded",
-        Enabled = true
-      }
-    end
-  end
-end
-
-local function showFrameOptions(profile, frames)
-  for _, frameOptions in ipairs(frames) do
-    if profile[frameOptions.name] then
-      profile[frameOptions.name]["Hidden"] = false
-    end
-  end
-end
-
-local function hideFrameOptions(profile, frames)
-  for _, frameOptions in ipairs(frames) do
-    if profile[frameOptions.name] then
-      profile[frameOptions.name]["Hidden"] = true
-    end
-  end
-end
-
-local additionalFrameNames = {
-  {
-    name = "MicroButtonAndBagsBarMovable",
-    frame = MicroButtonAndBagsBarMovable
-  },
-  {
-    name = "EditModeExpandedBackpackBar",
-    frame = EditModeExpandedBackpackBar
-  }
-}
-local function updateFramesForLoadedAddons(profile)
-  ensureFrameOptions(profile, "EditModeExpanded", additionalFrameNames)
-
-  local EditModeExpanded
-
-  if LibStub then
-    EditModeExpanded = LibStub:GetLibrary("EditModeExpanded-1.0", true)
-  end
-
-  if EditModeExpanded then -- and EditModeExpanded.IsRegistered
-    addon:Print("EditModeExpanded found. Adding additional frames.")
-    for _, frameOptions in ipairs(additionalFrameNames) do
-      if frameOptions.frame then
-        if frameOptions.frame then --EditModeExpanded:IsRegistered(frameOptions.frame)
-          frameMapping[frameOptions.name] = frameOptions.frame
-          if profile[frameOptions.name] then
-            profile[frameOptions.name]["Hidden"] = false
-          end
-        end
-      end
-    end
-    hideFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
-  else
-    showFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
-    hideFrameOptions(profile, additionalFrameNames)
-  end
-end
-
-local function cleanupNonsense(profile)
-  -- Make durabilityFrame and VehicleFrame accessable everytime not only when EME is loaded
-  showFrameOptions(profile, {{name = "DurabilityFrame"}, {name = "VehicleSeatIndicator"}})
-  profile["DuarbilityFrame"] = nil
-  profile["FloatingChatFrame"] = nil
-  profile["DurabilityFrame"].description = nil
-  profile["DurabilityFrame"].displayName = "Durability Frame"
-  profile["VehicleSeatIndicator"].description = nil
-  profile["VehicleSeatIndicator"].displayName = "Vehicle Seat Frame"
-end
-
 -------------------------------------------------------------------------------
 -- Public API
 
@@ -410,8 +333,6 @@ function addon:GetFrameTable()
 end
 
 function addon:LoadProfile()
-  updateFramesForLoadedAddons(self.db.profile)
-
   if addon:IsEnabled() then
     MouseoverFrameFading:RefreshFrameAlphas()
     addon:InitializeUpdateTicker()
@@ -458,10 +379,6 @@ end
 
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, "Default")
-  updateFramesForLoadedAddons(self.db.profile)
-
-  -- Remove in the future
-  cleanupNonsense(self.db.profile)
 
   -- Initialize Minimap Icon
   local dbIconData = getBlizzHUDTweaksLibDbIconData(self.db)
