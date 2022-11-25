@@ -215,6 +215,9 @@ local function setFrameDefaultOptions(frameOptions)
 
   frameOptions["FadeInRestedArea"] = false
   frameOptions["RestedAreaAlpha"] = 0.3
+
+  frameOptions["TreatTargetLikeInCombat"] = true
+  frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
 end
 
 do
@@ -228,8 +231,6 @@ do
         frameOptions["UseGlobalOptions"] = true
       else
         frameOptions["UpdateInterval"] = 0.1
-        frameOptions["TreatTargetLikeInCombat"] = true
-        frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
       end
 
       if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then
