@@ -205,7 +205,7 @@ end
 function EventHandler:GROUP_ROSTER_UPDATE()
   if IsInGroup() then
     local frameMapping = addon:GetFrameMapping()
-    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"] then
+    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"].Enabled then
       addon:InitializePartyAndRaidSubFrames(true)
       restoreMouseoverFade()
     end
