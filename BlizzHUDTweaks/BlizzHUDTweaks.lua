@@ -150,10 +150,12 @@ local defaultConfig = {
       displayName = "Vehicle Seats Frame"
     },
     ["PartyFrame"] = {
-      displayName = "Party Frame"
+      displayName = "Party Frame",
+      description = "|cFFeb4034NOTE: |rThis frame has a lot of sub frames which will also be faded. Depending on your settings this may cause lag."
     },
     ["CompactRaidFrameContainer"] = {
-      displayName = "Raid Frame"
+      displayName = "Raid Frame",
+      description = "|cFFeb4034NOTE: |rThis frame has a lot of sub frames which will also be faded. Depending on your settings this may cause lag."
     },
     ["MainMenuBarVehicleLeaveButton"] = {
       displayName = "Vehicle Leave Button"
