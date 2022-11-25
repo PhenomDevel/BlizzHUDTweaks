@@ -455,7 +455,7 @@ function addon:InitializeUpdateTicker()
 end
 
 function addon:OnInitialize()
-  self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, false)
+  self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, "Default")
   updateFramesForLoadedAddons(self.db.profile)
 
   -- Remove in the future
