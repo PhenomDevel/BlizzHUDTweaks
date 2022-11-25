@@ -165,37 +165,37 @@ local defaultConfig = {
 }
 
 local frameMapping = {
-  ["PlayerFrame"] = PlayerFrame,
-  ["TargetFrame"] = TargetFrame,
-  ["TargetFrameToT"] = TargetFrameToT,
-  ["FocusFrame"] = FocusFrame,
-  ["ActionBar1"] = MainMenuBar,
-  ["ActionBar2"] = MultiBarBottomLeft,
-  ["ActionBar3"] = MultiBarBottomRight,
-  ["ActionBar4"] = MultiBarRight,
-  ["ActionBar5"] = MultiBarLeft,
-  ["ActionBar6"] = MultiBar5,
-  ["ActionBar7"] = MultiBar6,
-  ["ActionBar8"] = MultiBar7,
-  ["PetActionBar"] = PetActionBar,
-  ["StanceBar"] = StanceBar,
-  ["MicroButtonAndBagsBar"] = MicroButtonAndBagsBar,
-  ["ObjectiveTrackerFrame"] = ObjectiveTrackerFrame,
-  ["BuffFrame"] = BuffFrame,
-  ["DebuffFrame"] = DebuffFrame,
-  ["ZoneAbilityFrame"] = ZoneAbilityFrame,
-  ["MinimapCluster"] = MinimapCluster,
-  ["StatusTrackingBarManager"] = StatusTrackingBarManager,
-  ["PlayerCastingBarFrame"] = PlayerCastingBarFrame,
-  ["ExtraActionButtonFrame"] = ExtraActionButtonFrame,
-  ["PetFrame"] = PetFrame,
-  ["QueueStatusButton"] = QueueStatusButton,
-  ["DurabilityFrame"] = DurabilityFrame,
-  ["VehicleSeatIndicator"] = VehicleSeatIndicator,
-  ["PartyFrame"] = PartyFrame,
-  ["CompactRaidFrameContainer"] = CompactRaidFrameContainer,
-  ["MainMenuBarVehicleLeaveButton"] = MainMenuBarVehicleLeaveButton,
-  ["FocusFrameToT"] = FocusFrameToT
+  ["PlayerFrame"] = {mainFrame = PlayerFrame},
+  ["TargetFrame"] = {mainFrame = TargetFrame},
+  ["TargetFrameToT"] = {mainFrame = TargetFrameToT},
+  ["FocusFrame"] = {mainFrame = FocusFrame},
+  ["ActionBar1"] = {mainFrame = MainMenuBar},
+  ["ActionBar2"] = {mainFrame = MultiBarBottomLeft},
+  ["ActionBar3"] = {mainFrame = MultiBarBottomRight},
+  ["ActionBar4"] = {mainFrame = MultiBarRight},
+  ["ActionBar5"] = {mainFrame = MultiBarLeft},
+  ["ActionBar6"] = {mainFrame = MultiBar5},
+  ["ActionBar7"] = {mainFrame = MultiBar6},
+  ["ActionBar8"] = {mainFrame = MultiBar7},
+  ["PetActionBar"] = {mainFrame = PetActionBar},
+  ["StanceBar"] = {mainFrame = StanceBar},
+  ["MicroButtonAndBagsBar"] = {mainFrame = MicroButtonAndBagsBar},
+  ["ObjectiveTrackerFrame"] = {mainFrame = ObjectiveTrackerFrame},
+  ["BuffFrame"] = {mainFrame = BuffFrame},
+  ["DebuffFrame"] = {mainFrame = DebuffFrame},
+  ["ZoneAbilityFrame"] = {mainFrame = ZoneAbilityFrame},
+  ["MinimapCluster"] = {mainFrame = MinimapCluster},
+  ["StatusTrackingBarManager"] = {mainFrame = StatusTrackingBarManager},
+  ["PlayerCastingBarFrame"] = {mainFrame = PlayerCastingBarFrame},
+  ["ExtraActionButtonFrame"] = {mainFrame = ExtraActionButtonFrame},
+  ["PetFrame"] = {mainFrame = PetFrame},
+  ["QueueStatusButton"] = {mainFrame = QueueStatusButton},
+  ["DurabilityFrame"] = {mainFrame = DurabilityFrame},
+  ["VehicleSeatIndicator"] = {mainFrame = VehicleSeatIndicator},
+  ["PartyFrame"] = {mainFrame = PartyFrame},
+  ["CompactRaidFrameContainer"] = {mainFrame = CompactRaidFrameContainer},
+  ["MainMenuBarVehicleLeaveButton"] = {mainFrame = MainMenuBarVehicleLeaveButton},
+  ["FocusFrameToT"] = {mainFrame = FocusFrameToT}
 }
 
 local function setFrameDefaultOptions(frameOptions)
@@ -320,6 +320,71 @@ end
 
 -------------------------------------------------------------------------------
 -- Public API
+
+function addon:ClearPartyAndRaidSubFrames()
+  frameMapping["PartyFrame"].subFrames = nil
+  frameMapping["CompactRaidFrameContainer"].subFrames = nil
+end
+
+function addon:InitializePartyAndRaidSubFrames()
+  local partyFrameSubFrames = {}
+  frameMapping["PartyFrame"].subFrames = partyFrameSubFrames
+  for memberIndex = 1, 5 do
+    local backgroundFrame = _G["CompactPartyFrameMember" .. memberIndex .. "Background"]
+
+    if backgroundFrame then
+      local horizBottomBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "HorizBottomBorder"]
+      local horizTopBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "HorizTopBorder"]
+      local vertLeftBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "VertLeftBorder"]
+      local vertRightBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "VertRightBorder"]
+
+      tinsert(partyFrameSubFrames, backgroundFrame)
+      tinsert(partyFrameSubFrames, horizBottomBorderFrame)
+      tinsert(partyFrameSubFrames, horizTopBorderFrame)
+      tinsert(partyFrameSubFrames, vertLeftBorderFrame)
+      tinsert(partyFrameSubFrames, vertRightBorderFrame)
+    end
+  end
+
+  local raidFrameSubFrames = {}
+  frameMapping["CompactRaidFrameContainer"].subFrames = raidFrameSubFrames
+
+  for groupIndex = 1, 8 do
+    for groupMemberIndex = 1, 5 do
+      local backgroundFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "Background"]
+
+      if backgroundFrame then
+        local horizBottomBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "HorizBottomBorder"]
+        local horizTopBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "HorizTopBorder"]
+        local vertLeftBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "VertLeftBorder"]
+        local vertRightBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "VertRightBorder"]
+
+        tinsert(raidFrameSubFrames, backgroundFrame)
+        tinsert(raidFrameSubFrames, horizBottomBorderFrame)
+        tinsert(raidFrameSubFrames, horizTopBorderFrame)
+        tinsert(raidFrameSubFrames, vertLeftBorderFrame)
+        tinsert(raidFrameSubFrames, vertRightBorderFrame)
+      end
+    end
+  end
+
+  for memberIndex = 1, 40 do
+    local backgroundFrame = _G["CompactRaidFrame" .. memberIndex .. "Background"]
+
+    if backgroundFrame then
+      local horizBottomBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "HorizBottomBorder"]
+      local horizTopBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "HorizTopBorder"]
+      local vertLeftBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "VertLeftBorder"]
+      local vertRightBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "VertRightBorder"]
+
+      tinsert(raidFrameSubFrames, backgroundFrame)
+      tinsert(raidFrameSubFrames, horizBottomBorderFrame)
+      tinsert(raidFrameSubFrames, horizTopBorderFrame)
+      tinsert(raidFrameSubFrames, vertLeftBorderFrame)
+      tinsert(raidFrameSubFrames, vertRightBorderFrame)
+    end
+  end
+end
 
 function addon:GetFrameMapping()
   return frameMapping
@@ -451,6 +516,15 @@ end
 function addon:ResetFrame(frame)
   if frame then
     frame:SetAlpha(1)
+  end
+end
+
+function addon:ResetFrameByMappingOptions(frameMappingOptions)
+  addon:ResetFrame(frameMappingOptions.mainFrame)
+  if frameMappingOptions.subFrames then
+    for _, subFrame in ipairs(frameMappingOptions.subFrames) do
+      addon:ResetFrame(subFrame)
+    end
   end
 end
 

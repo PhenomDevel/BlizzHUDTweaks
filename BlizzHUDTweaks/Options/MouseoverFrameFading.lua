@@ -53,7 +53,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       set = function(info, value)
         Options:SetValue(info, value)
         addon:RefreshOptionTables()
-        addon:ResetFrame(addon:GetFrameMapping()[frameName])
+        addon:ResetFrameByMappingOptions(addon:GetFrameMapping()[frameName])
         MouseoverFrameFading:RefreshFrameAlphas()
       end,
       arg = frameName

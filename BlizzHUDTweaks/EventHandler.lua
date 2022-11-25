@@ -53,7 +53,9 @@ local eventsToRegister = {
   "ACTIONBAR_SLOT_CHANGED",
   "UNIT_PET",
   "ACTIONBAR_SHOWGRID",
-  "ACTIONBAR_HIDEGRID"
+  "ACTIONBAR_HIDEGRID",
+  "GROUP_ROSTER_UPDATE",
+  "GROUP_LEFT"
 }
 
 local registeredEvents = {}
@@ -150,6 +152,7 @@ end
 
 function EventHandler:PLAYER_LOGIN()
   if addon:IsEnabled() then
+    addon:InitializePartyAndRaidSubFrames()
     addon:RefreshOptionTables()
     Miscellaneous:InstallHooks()
   end
@@ -197,4 +200,18 @@ function EventHandler:UNIT_PET(_, unit)
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
     end
   end
+end
+
+function EventHandler:GROUP_ROSTER_UPDATE()
+  if IsInGroup() then
+    local frameMapping = addon:GetFrameMapping()
+    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"] then
+      addon:InitializePartyAndRaidSubFrames(true)
+      restoreMouseoverFade()
+    end
+  end
+end
+
+function EventHandler:GROUP_LEFT()
+  addon:ClearPartyAndRaidSubFrames()
 end

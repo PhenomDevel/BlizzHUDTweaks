@@ -133,6 +133,7 @@ globals = {
   "UnitCanAttack",
   "FocusFrameToT",
   "PetName",
+  "IsInGroup",
   -- Locals
   "L"
 }
