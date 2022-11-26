@@ -218,7 +218,7 @@ local function setFrameDefaultOptions(frameOptions)
   frameOptions["FadeInRestedArea"] = false
   frameOptions["RestedAreaAlpha"] = 0.3
 
-  frameOptions["TreatTargetLikeInCombat"] = true
+  frameOptions["TreatTargetLikeInCombat"] = false
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
 end
 
