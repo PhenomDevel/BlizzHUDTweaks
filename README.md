@@ -70,6 +70,7 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 - Hide Target name
 - Overwrite Player/Target Health/Mana font size
 - Overwrite actionbar padding (-4 to +16)
+- Hide Actionbar1 unused buttons
 
 ## Class Resource
 You can
