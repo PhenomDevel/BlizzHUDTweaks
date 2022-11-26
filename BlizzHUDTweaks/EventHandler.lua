@@ -135,7 +135,6 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
-    restoreMouseoverFade()
 
     if ClassResource:IsEnabled() then
       ClassResource:Restore(profile)
@@ -144,14 +143,9 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:RestoreAll(profile)
-
-      C_Timer.After(
-        0.5,
-        function()
-          Miscellaneous:UpdateActionbar1UnusedButtons()
-        end
-      )
     end
+    Miscellaneous:UpdateActionbar1UnusedButtons()
+    restoreMouseoverFade()
 
     installKeyDownHandler()
   end

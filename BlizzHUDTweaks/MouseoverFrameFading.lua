@@ -174,7 +174,7 @@ end
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay, forced)
   if currentAlpha and targetAlpha and frame:IsShown() then
     if not frame.BlizzHUDTweaksForceFaded then
-      if currentAlpha ~= targetAlpha or forced then
+      if (currentAlpha ~= targetAlpha) or forced then
         if not frame.BlizzHUDTweaksAnimationGroup then
           local animationGroup = frame:CreateAnimationGroup()
           animationGroup:SetToFinalAlpha(true)
