@@ -243,7 +243,7 @@ Miscellaneous.options = {
     options = {
       {
         optionName = "MiscellaneousActionbar1HideUnbindActionbuttons",
-        displayName = "Hide unbound action buttons",
+        displayName = "Hide unused action bar 1 buttons",
         frame = MainMenuBar,
         actionButtonName = "ActionButton",
         type = "toggle",
