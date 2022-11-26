@@ -25,7 +25,11 @@ local function installKeyDownHandler()
             if (string.find(keybind, "SHIFT") and not shiftDown) or (string.find(keybind, "CTRL") and not ctrlDown) or (string.find(keybind, "ALT") and not altDown) then
               return
             end
-            MouseoverFrameFading:Toggle()
+
+            local normalizedKeybind = keybind:gsub("SHIFT", ""):gsub("ALT", ""):gsub("CTRL", ""):gsub("-", "")
+            if string.len(normalizedKeybind) == string.len(pressedKey) then
+              MouseoverFrameFading:Toggle()
+            end
           end
         end
       end
