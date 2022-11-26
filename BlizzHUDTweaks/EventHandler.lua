@@ -62,7 +62,8 @@ local eventsToRegister = {
   "ACTIONBAR_HIDEGRID",
   "GROUP_ROSTER_UPDATE",
   "GROUP_LEFT",
-  "UNIT_QUEST_LOG_CHANGED"
+  "UNIT_QUEST_LOG_CHANGED",
+  "UPDATE_SHAPESHIFT_COOLDOWN"
 }
 
 local registeredEvents = {}
@@ -200,7 +201,6 @@ function EventHandler:ACTIONBAR_SLOT_CHANGED()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -259,4 +259,8 @@ function EventHandler:UNIT_QUEST_LOG_CHANGED()
     local profile = addon:GetProfileDB()
     Miscellaneous:FlashObjectiveTracker(profile)
   end
+end
+
+function EventHandler:UPDATE_SHAPESHIFT_COOLDOWN()
+  Miscellaneous:UpdateActionbar1UnusedButtons()
 end
