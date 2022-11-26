@@ -144,6 +144,13 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:RestoreAll(profile)
+
+      C_Timer.After(
+        0.5,
+        function()
+          Miscellaneous:UpdateActionbar1UnusedButtons()
+        end
+      )
     end
 
     installKeyDownHandler()
@@ -199,6 +206,7 @@ function EventHandler:ACTIONBAR_SLOT_CHANGED()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end

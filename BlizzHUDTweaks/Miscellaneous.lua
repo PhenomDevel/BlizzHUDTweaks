@@ -222,6 +222,31 @@ function Miscellaneous:FlashObjectiveTracker(profile)
   end
 end
 
+function Miscellaneous:UpdateActionbar1UnusedButtons()
+  local buttons = MainMenuBar.numButtonsShowable
+
+  for i = 1, buttons do
+    local buttonName = "ActionButton" .. i
+    local button = _G[buttonName]
+
+    if MainMenuBar.ShowAllButtons then
+      if button:GetAlpha() ~= 1 then
+        button:SetAlpha(1)
+      end
+    else
+      if button:HasAction() then
+        button:SetAlpha(1)
+      else
+        if addon:GetProfileDB()["MiscellaneousActionbar1HideUnbindActionbuttons"] then
+          button:SetAlpha(0)
+        else
+          button:SetAlpha(1)
+        end
+      end
+    end
+  end
+end
+
 function Miscellaneous:RestoreOriginal()
   for _, groupOptions in pairs(Miscellaneous.options) do
     for _, option in ipairs(groupOptions.options) do
@@ -230,10 +255,15 @@ function Miscellaneous:RestoreOriginal()
       end
     end
   end
+  Miscellaneous:UpdateActionbar1UnusedButtons()
 end
 
 function Miscellaneous:RestoreAll(profile)
   if Miscellaneous:IsEnabled() then
+  if addon:IsEnabled() and Miscellaneous:IsEnabled() then
+    if profile["MiscellaneousActionbar1HideUnbindActionbuttons"] then
+      Miscellaneous:UpdateActionbar1UnusedButtons()
+    end
     for _, groupOptions in pairs(Miscellaneous.options) do
       for _, option in ipairs(groupOptions.options) do
         local value = profile[option.optionName]

@@ -235,6 +235,10 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas(forced)
         mouseoverFrames[frameMappingOptions.mainFrame] = isMouseover
       end
     end
+
+    if MainMenuBar:IsMouseOver() and MainMenuBar:IsShown() then
+      Miscellaneous:UpdateActionbar1UnusedButtons(profile)
+    end
   end
 end
 
