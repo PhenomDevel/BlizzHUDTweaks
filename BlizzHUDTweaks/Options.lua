@@ -173,9 +173,9 @@ function Options:EnableAll()
 
   addon:InitializeUpdateTicker()
 
-  MouseoverFrameFading:Enable()
   ClassResource:Enable()
   Miscellaneous:Enable()
+  MouseoverFrameFading:Enable()
 
   addon:Print("Enabled")
 end

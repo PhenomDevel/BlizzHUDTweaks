@@ -222,7 +222,7 @@ function Miscellaneous:FlashObjectiveTracker(profile)
   end
 end
 
-function Miscellaneous:UpdateActionbar1UnusedButtons()
+function Miscellaneous:UpdateActionbar1UnusedButtons(forcedAlpha)
   local buttons = MainMenuBar.numButtonsShowable
 
   if MainMenuBar.BlizzHUDTweaksAnimationGroup then
@@ -233,7 +233,9 @@ function Miscellaneous:UpdateActionbar1UnusedButtons()
     local buttonName = "ActionButton" .. i
     local button = _G[buttonName]
 
-    if MainMenuBar.ShowAllButtons then
+    if forcedAlpha then
+      button:SetAlpha(forcedAlpha)
+    elseif MainMenuBar.ShowAllButtons then
       if button:GetAlpha() ~= 1 then
         button:SetAlpha(1)
       end
@@ -300,6 +302,7 @@ end
 function Miscellaneous:Disable()
   local profile = addon:GetProfileDB()
   Miscellaneous:RestoreOriginal(profile)
+  Miscellaneous:UpdateActionbar1UnusedButtons(1)
   --@debug@
   addon:Print("Disabled Module", addon:ColoredString("Miscellaneous", "fcba03"))
   --@end-debug@
