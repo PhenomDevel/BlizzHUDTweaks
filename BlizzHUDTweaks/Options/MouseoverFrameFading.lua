@@ -229,8 +229,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       ["FadeInInstancedArea"] = {
         order = 1,
         name = "Enabled",
-        desc = "When active this fade will be applied if you're in an instanced area and *not* in combat." ..
-          "\n\nIf `Treat target as in combat` is active and you have a target selected those fade values will be applied first." .. fadeOrderDescription,
+        desc = "When active this fade will be applied if you're in an instanced area and *not* in combat." .. fadeOrderDescription,
         width = 0.6,
         type = "toggle",
         get = "GetValue",
