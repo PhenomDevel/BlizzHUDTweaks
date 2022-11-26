@@ -397,7 +397,7 @@ local frameTable
 function addon:GetFrameTable()
   if not frameTable then
     frameTable = {}
-    for frameName, _ in pairs(frameMapping) do
+    for frameName, _ in pairs(defaultConfig.profile) do
       local frameOptions = self.db.profile[frameName]
       if type(frameOptions) == "table" then
         if not frameOptions.Hidden then
@@ -405,7 +405,6 @@ function addon:GetFrameTable()
         end
       end
     end
-    frameTable["*Global*"] = self.db.profile["*Global*"].displayName
   end
 
   return frameTable
