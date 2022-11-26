@@ -2,22 +2,6 @@ local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 
-local function determineFadeDuration(globalOptions, frameOptions)
-  local fadeDuration = 0.25
-
-  if frameOptions.UseGlobalOptions then
-    if globalOptions.FadeDuration then
-      fadeDuration = globalOptions.FadeDuration
-    end
-  else
-    if frameOptions.FadeDuration then
-      fadeDuration = frameOptions.FadeDuration
-    end
-  end
-
-  return fadeDuration
-end
-
 local function inCombatAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     if globalOptions.FadeInCombat then
@@ -170,23 +154,41 @@ end
 -------------------------------------------------------------------------------
 -- Public API
 
+function MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+  local fadeDuration = 0.25
+
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeDuration then
+      fadeDuration = globalOptions.FadeDuration
+    end
+  else
+    if frameOptions.FadeDuration then
+      fadeDuration = frameOptions.FadeDuration
+    end
+  end
+
+  return fadeDuration
+end
+
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay, forced)
   if currentAlpha and targetAlpha and frame:IsShown() then
-    if currentAlpha ~= targetAlpha or forced then
-      if not frame.BlizzHUDTweaksAnimationGroup then
-        local animationGroup = frame:CreateAnimationGroup()
-        animationGroup:SetToFinalAlpha(true)
+    if not frame.BlizzHUDTweaksForceFaded then
+      if currentAlpha ~= targetAlpha or forced then
+        if not frame.BlizzHUDTweaksAnimationGroup then
+          local animationGroup = frame:CreateAnimationGroup()
+          animationGroup:SetToFinalAlpha(true)
 
-        frame.BlizzHUDTweaksAnimationGroup = animationGroup
-        frame.BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
+          frame.BlizzHUDTweaksAnimationGroup = animationGroup
+          frame.BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
+        end
+
+        frame.BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
+        frame.BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
+        frame.BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
+        frame.BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
+
+        frame.BlizzHUDTweaksAnimationGroup:Restart()
       end
-
-      frame.BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
-      frame.BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
-      frame.BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
-      frame.BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
-
-      frame.BlizzHUDTweaksAnimationGroup:Restart()
     end
   end
 end
@@ -214,7 +216,7 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas(forced)
       if frameOptions.Enabled and frameMappingOptions.mainFrame then
         local isMouseover = frameMappingOptions.mainFrame:IsMouseOver()
         local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
-        local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
+        local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
 
         if isMouseover and not mouseoverFrames[frameMappingOptions.mainFrame] then
           if not inCombat then
@@ -245,7 +247,7 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
       local frameOptions = profile[frameName]
 
       if frameOptions.Enabled and frameMappingOptions.mainFrame then
-        local fadeDuration = determineFadeDuration(globalOptions, frameOptions)
+        local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
         local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
         local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
 

@@ -518,12 +518,16 @@ end
 
 function addon:ResetFrame(frame)
   if frame then
+    if frame.BlizzHUDTweaksAnimationGroup then
+      frame.BlizzHUDTweaksAnimationGroup:Stop()
+    end
     frame:SetAlpha(1)
   end
 end
 
 function addon:ResetFrameByMappingOptions(frameMappingOptions)
   addon:ResetFrame(frameMappingOptions.mainFrame)
+
   if frameMappingOptions.subFrames then
     for _, subFrame in ipairs(frameMappingOptions.subFrames) do
       addon:ResetFrame(subFrame)
