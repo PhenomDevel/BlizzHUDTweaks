@@ -260,20 +260,21 @@ end
 
 function Miscellaneous:RestoreAll(profile)
   if Miscellaneous:IsEnabled() then
-  if addon:IsEnabled() and Miscellaneous:IsEnabled() then
-    if profile["MiscellaneousActionbar1HideUnbindActionbuttons"] then
-      Miscellaneous:UpdateActionbar1UnusedButtons()
-    end
-    for _, groupOptions in pairs(Miscellaneous.options) do
-      for _, option in ipairs(groupOptions.options) do
-        local value = profile[option.optionName]
+    if addon:IsEnabled() and Miscellaneous:IsEnabled() then
+      if profile["MiscellaneousActionbar1HideUnbindActionbuttons"] then
+        Miscellaneous:UpdateActionbar1UnusedButtons()
+      end
+      for _, groupOptions in pairs(Miscellaneous.options) do
+        for _, option in ipairs(groupOptions.options) do
+          local value = profile[option.optionName]
 
-        if option.type == "actionbarpaddinggroup" then
-          Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), option, value)
-          Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), option, value)
-        else
-          if option.setFn then
-            option.setFn(option, nil, value)
+          if option.type == "actionbarpaddinggroup" then
+            Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), option, value)
+            Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), option, value)
+          else
+            if option.setFn then
+              option.setFn(option, nil, value)
+            end
           end
         end
       end
