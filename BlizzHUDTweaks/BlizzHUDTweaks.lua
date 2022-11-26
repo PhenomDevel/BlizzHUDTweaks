@@ -399,7 +399,7 @@ function addon:GetFrameTable()
     frameTable = {}
     for frameName, frameOptions in pairs(self.db.profile) do
       if type(frameOptions) == "table" then
-        if not frameOptions.Hidden and frameName ~= "*Global*" then
+        if not frameOptions.Hidden then
           frameTable[frameName] = frameOptions.displayName or frameName
         end
       end
