@@ -225,10 +225,6 @@ end
 function Miscellaneous:UpdateActionbar1UnusedButtons(forcedAlpha)
   local buttons = MainMenuBar.numButtonsShowable
 
-  if MainMenuBar.BlizzHUDTweaksAnimationGroup then
-    MainMenuBar.BlizzHUDTweaksAnimationGroup:Stop()
-  end
-
   for i = 1, buttons do
     local buttonName = "ActionButton" .. i
     local button = _G[buttonName]
