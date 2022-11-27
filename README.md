@@ -105,6 +105,7 @@ Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` si
 ## Known Issues
 - When reloading the UI while having a target the alpha will only applied once the target changes
 - When using `Minimap` fading the textures do not get loaded by blizzard for indoors maps
+- When moving an ability when in combat, the actionbar padding will *not* be applied since it would use protected functions while in combat
 
 # Support
 If you'd like to support me just leave a star on Github :)

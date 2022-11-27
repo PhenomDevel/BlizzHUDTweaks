@@ -37,8 +37,19 @@ local function installKeyDownHandler()
   end
 end
 
+local function updatePartyAndRaidFrame()
+  if IsInGroup() then
+    local frameMapping = addon:GetFrameMapping()
+    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"].Enabled then
+      addon:InitializePartyAndRaidSubFrames(true)
+    end
+  end
+end
+
 local function restoreMouseoverFade()
   if MouseoverFrameFading:IsEnabled() then
+    updatePartyAndRaidFrame()
+
     if BlizzHUDTweaks.hasTarget then
       MouseoverFrameFading:RefreshFrameAlphas(true)
     else
@@ -131,16 +142,6 @@ function EventHandler:PLAYER_TARGET_CHANGED()
   end
 end
 
-local function updatePartyAndRaidFrame()
-  if IsInGroup() then
-    local frameMapping = addon:GetFrameMapping()
-    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"].Enabled then
-      addon:InitializePartyAndRaidSubFrames(true)
-      restoreMouseoverFade()
-    end
-  end
-end
-
 function EventHandler:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
 
@@ -154,12 +155,11 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:RestoreAll(profile)
+      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
-    Miscellaneous:UpdateActionbar1UnusedButtons()
-    restoreMouseoverFade()
 
+    restoreMouseoverFade()
     installKeyDownHandler()
-    updatePartyAndRaidFrame()
   end
 end
 
@@ -248,7 +248,6 @@ function EventHandler:UNIT_PET(_, unit)
 
       if Miscellaneous:IsEnabled() then
         Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-        Miscellaneous:UpdateActionbar1UnusedButtons()
       end
     end
   end
