@@ -1,7 +1,6 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
-local Miscellaneous = addon:GetModule("Miscellaneous")
 
 local function inCombatAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
