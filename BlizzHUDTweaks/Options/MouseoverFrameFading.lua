@@ -321,6 +321,100 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   }
 end
 
+local function resetAllFrameLinks(profile)
+  for frameName, _ in pairs(profile) do
+    profile[frameName .. "LinkedFrames"] = {}
+  end
+end
+
+local function addMouseoverFrameLinkOptions(t, profile)
+  local args = {}
+
+  args["FrameLinksResetAll"] = {
+    order = 0,
+    type = "execute",
+    name = "Reset All Links",
+    func = function()
+      resetAllFrameLinks(profile)
+    end
+  }
+  args["FrameLinksDescription"] = {
+    order = 1,
+    name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
+      "You can specify if frames should be faded together if you mouseover one of them. Each link will act like you mouseover all of the frames at the same time.\n\n",
+    width = "full",
+    type = "description",
+    fontSize = "medium"
+  }
+
+  local selectValues = addon:GetFrameTable()
+  selectValues["*Global*"] = nil
+
+  for frameName, frameOptions in pairs(profile) do
+    if type(frameOptions) == "table" and frameOptions.displayName then
+      if not frameOptions.Hidden and frameName ~= "*Global*" then
+        local selectValuesForFrame = addon:tClone(selectValues)
+        selectValuesForFrame[frameName] = nil
+        args[frameName .. "LinkedFramesOptions"] = {
+          type = "group",
+          order = 3,
+          name = frameOptions.displayName or frameName,
+          args = {
+            [frameName .. "ResetLinkedFrames"] = {
+              order = 1,
+              type = "execute",
+              name = "Reset " .. frameOptions.displayName or frameName .. " links",
+              func = function()
+                profile[frameName .. "LinkedFrames"] = {}
+              end
+            },
+            [frameName .. "LinkedFrames"] = {
+              order = 2,
+              name = frameName .. " Links",
+              type = "multiselect",
+              values = selectValuesForFrame,
+              set = "SetMultiselectValue",
+              get = "GetMultiselectValue",
+              arg = frameName
+            }
+          }
+        }
+      end
+    end
+  end
+
+  t["FrameLinks"] = {
+    type = "group",
+    childGroups = "select",
+    name = "! |T517160:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Frame Links|r",
+    args = args
+  }
+end
+
+local function getMouseoverFrameFadingOptions(profile)
+  local options = {}
+
+  local order = 1
+  local withUseGlobal
+
+  for frameName, frameOptions in pairs(profile) do
+    if type(frameOptions) == "table" and frameOptions.displayName then
+      if frameName ~= "*Global*" then
+        withUseGlobal = true
+      else
+        withUseGlobal = false
+      end
+
+      if not frameOptions.Hidden then
+        addFrameOptions(order, options, frameName, frameOptions, withUseGlobal)
+        order = order + 1
+      end
+    end
+  end
+
+  return options
+end
+
 -------------------------------------------------------------------------------
 -- Public API
 
@@ -344,6 +438,25 @@ function MouseoverFrameFading:SetFadeSliderValue(info, value)
   local normalizedValue = (value or 1) / 100
   Options:SetValue(info, normalizedValue)
   MouseoverFrameFading:RefreshFrameAlphas()
+end
+
+function MouseoverFrameFading:SetMultiselectValue(info, selectedValue, value)
+  if not addon:GetProfileDB()[info[#info]] then
+    addon:GetProfileDB()[info[#info]] = {}
+  end
+
+  if not addon:GetProfileDB()[selectedValue .. "LinkedFrames"] then
+    addon:GetProfileDB()[selectedValue .. "LinkedFrames"] = {}
+  end
+
+  addon:GetProfileDB()[info[#info]][selectedValue] = value
+  addon:GetProfileDB()[selectedValue .. "LinkedFrames"][info.arg] = value
+end
+
+function MouseoverFrameFading:GetMultiselectValue(info, value)
+  if addon:GetProfileDB()[info[#info]] then
+    return addon:GetProfileDB()[info[#info]][value]
+  end
 end
 
 function MouseoverFrameFading:GetUpdateTickerValue(info)
@@ -374,37 +487,16 @@ function MouseoverFrameFading:SetValue(info, value)
   MouseoverFrameFading:RefreshFrameAlphas()
 end
 
-function MouseoverFrameFading:GetMouseoverFrameFadingOptions(profile)
-  local options = {}
-
-  local order = 1
-  local withUseGlobal
-
-  for frameName, frameOptions in pairs(profile) do
-    if type(frameOptions) == "table" and frameOptions.displayName then
-      if frameName ~= "*Global*" then
-        withUseGlobal = true
-      else
-        withUseGlobal = false
-      end
-
-      if not frameOptions.Hidden then
-        addFrameOptions(order, options, frameName, frameOptions, withUseGlobal)
-        order = order + 1
-      end
-    end
-  end
-
-  return options
-end
-
 function MouseoverFrameFading:GetOptionsTable(profile)
+  local args = getMouseoverFrameFadingOptions(profile)
+  addMouseoverFrameLinkOptions(args, profile)
+
   return {
     name = "Mouseover Fading",
     type = "group",
     set = "SetValue",
     get = "GetValue",
     handler = MouseoverFrameFading,
-    args = MouseoverFrameFading:GetMouseoverFrameFadingOptions(profile)
+    args = args
   }
 end

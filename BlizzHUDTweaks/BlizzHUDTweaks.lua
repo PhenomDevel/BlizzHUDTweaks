@@ -65,7 +65,7 @@ local defaultConfig = {
     ["GlobalOptionsMiscellaneousEnabled"] = true,
     ["Enabled"] = true,
     ["*Global*"] = {
-      displayName = "* |T134063:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Global Settings|r",
+      displayName = "! |T134063:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Global Settings|r",
       description = "You can set global values which can be activated for each frame."
     },
     ["PlayerFrame"] = {

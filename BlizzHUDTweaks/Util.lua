@@ -47,3 +47,15 @@ function addon:tClone(orig, copies)
   end
   return copy
 end
+
+function addon:tKeys(t)
+  local keyset = {}
+  local n = 0
+
+  for k, _ in pairs(t) do
+    n = n + 1
+    keyset[n] = k
+  end
+
+  return keyset
+end
