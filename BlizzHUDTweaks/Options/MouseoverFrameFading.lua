@@ -350,7 +350,7 @@ local function addMouseoverFrameLinkOptions(t, profile)
     order = 1,
     name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
       "You can specify if frames should be faded together if you mouseover one of them. Each link will act like you mouseover all of the frames at the same time.\n\n" ..
-        "The linked frames will only be faded if those frames are enabled.\n\n",
+        "The linked frames will only be faded if those frames are enabled. Each link is automatically synchronized with all other frames.\n\n",
     width = "full",
     type = "description",
     fontSize = "medium"
@@ -371,6 +371,10 @@ local function addMouseoverFrameLinkOptions(t, profile)
               type = "execute",
               name = "Reset " .. (frameOptions.displayName or frameName) .. " links",
               func = function()
+                local currentFrameLinks = profile[frameName .. "LinkedFrames"]
+                for k, _ in pairs(currentFrameLinks) do
+                  profile[k .. "LinkedFrames"] = {}
+                end
                 profile[frameName .. "LinkedFrames"] = {}
               end
             },
@@ -456,7 +460,14 @@ function MouseoverFrameFading:SetMultiselectValue(info, selectedValue, value)
   end
 
   addon:GetProfileDB()[info[#info]][selectedValue] = value
-  addon:GetProfileDB()[selectedValue .. "LinkedFrames"][info.arg] = value
+
+  local currentLinkedFrames = addon:GetProfileDB()[info.arg .. "LinkedFrames"]
+
+  -- sync options to selected frames
+  for k, _ in pairs(currentLinkedFrames) do
+    addon:GetProfileDB()[k .. "LinkedFrames"] = currentLinkedFrames
+    addon:GetProfileDB()[k .. "LinkedFrames"][info.arg] = true
+  end
 end
 
 function MouseoverFrameFading:GetMultiselectValue(info, value)
