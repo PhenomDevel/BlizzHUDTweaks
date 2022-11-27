@@ -232,7 +232,7 @@ do
       if frameName ~= "*Global*" then
         frameOptions["UseGlobalOptions"] = true
       else
-        frameOptions["UpdateInterval"] = 0.1
+        frameOptions["UpdateInterval"] = 0.2
       end
 
       if tContains({"Minimap", "BuffFrame", "DebuffFrame", "ObjectiveTrackerFrame"}, frameName) then

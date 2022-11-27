@@ -152,11 +152,10 @@ local function getNormalizedFrameAlpha(frame)
 end
 
 local function collectLinkedFrameOptions(linkedFrames, profile)
-  local linkedFrameNames = addon:tKeys(linkedFrames)
   local linkedFrameOptions = {}
 
   for frameName, frameOptions in pairs(addon:GetFrameMapping()) do
-    if tContains(linkedFrameNames, frameName) then
+    if linkedFrames[frameName] then
       if linkedFrames[frameName] and profile[frameName].Enabled then
         tinsert(linkedFrameOptions, frameOptions.mainFrame)
       end
@@ -226,6 +225,26 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
   end
 end
 
+local function determineMouseOver(profile, frameName, frameOptions)
+  local linkedFrames = profile[frameName .. "LinkedFrames"]
+  local linkedFrameMouseover
+
+  if linkedFrames then
+    for linkedFrameName, _ in pairs(linkedFrames) do
+      if linkedFrames[linkedFrameName] then
+        if linkedFrames[linkedFrameName] and profile[linkedFrameName].Enabled then
+          if addon:GetFrameMapping()[linkedFrameName].mainFrame:IsMouseOver() then
+            linkedFrameMouseover = true
+            return linkedFrameMouseover or frameOptions.mainFrame:IsMouseOver()
+          end
+        end
+      end
+    end
+  end
+
+  return frameOptions.mainFrame:IsMouseOver()
+end
+
 local mouseoverFrames = {}
 
 function MouseoverFrameFading:RefreshMouseoverFrameAlphas(forced)
@@ -237,7 +256,7 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas(forced)
     for frameName, frameMappingOptions in pairs(addon:GetFrameMapping()) do
       local frameOptions = profile[frameName]
       if frameOptions.Enabled and frameMappingOptions.mainFrame then
-        local isMouseover = frameMappingOptions.mainFrame:IsMouseOver()
+        local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
         local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
         local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
 
@@ -257,7 +276,6 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas(forced)
           fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
           fadeLinkedFrames(profile, frameName, currentAlpha, targetAlpha, fadeDuration)
         end
-
         mouseoverFrames[frameMappingOptions.mainFrame] = isMouseover
       end
     end

@@ -118,12 +118,12 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order + 0.1
     subOptions["UpdateInterval"] = {
       order = order,
-      name = "Update Interval",
+      name = "Update Interval" .. addon:ColoredString(" (!)", "eb4034"),
       desc = "The interval in which the add-on should check for necessary alpha changes." ..
-        "If you don't need mouseovers to be instantaneously, a value of 0.1 should be fine for you." ..
-          addon:ColoredString("\n\nNOTE: ", "eb4034") ..
-            "Setting a value below 0.1 puts some stress on the CPU, since the add-on will check" ..
-              "for mouseovers far more often. It shouldn't be a real problem, but if " .. "you have any FPS issues, try increasing the value again.",
+        "If you don't need mouseovers to be instantaneously, a value of 0.2 should be fine for you." ..
+          addon:ColoredString("\n\nCaution: ", "eb4034") ..
+            "If the value is decreased, the CPU load increases exponentially. Recommended value is 0.2." ..
+              " If you decrease this value and experience any FPS drops, please consider increasing the value again.",
       width = 0.8,
       type = "range",
       get = "GetUpdateTickerValue",
