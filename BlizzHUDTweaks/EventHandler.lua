@@ -131,6 +131,16 @@ function EventHandler:PLAYER_TARGET_CHANGED()
   end
 end
 
+local function updatePartyAndRaidFrame()
+  if IsInGroup() then
+    local frameMapping = addon:GetFrameMapping()
+    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"].Enabled then
+      addon:InitializePartyAndRaidSubFrames(true)
+      restoreMouseoverFade()
+    end
+  end
+end
+
 function EventHandler:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
 
@@ -149,6 +159,7 @@ function EventHandler:PLAYER_ENTERING_WORLD()
     restoreMouseoverFade()
 
     installKeyDownHandler()
+    updatePartyAndRaidFrame()
   end
 end
 
@@ -238,13 +249,7 @@ end
 
 function EventHandler:GROUP_ROSTER_UPDATE()
   if addon:IsEnabled() then
-    if IsInGroup() then
-      local frameMapping = addon:GetFrameMapping()
-      if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"].Enabled then
-        addon:InitializePartyAndRaidSubFrames(true)
-        restoreMouseoverFade()
-      end
-    end
+    updatePartyAndRaidFrame()
   end
 end
 
