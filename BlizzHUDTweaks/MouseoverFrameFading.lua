@@ -238,8 +238,8 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
 
         if isMouseover and not mouseoverFrames[frameMappingOptions.mainFrame] then
           if not inCombat then
-            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
             self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
+            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
           elseif (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat) then
             self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
             fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
@@ -274,7 +274,7 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
             fadeDelay = determineFadeDelay(globalOptions, frameOptions)
           end
           self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, fadeDelay, forced)
-          fadeSubFrames(frameMappingOptions, currentAlpha, targetAlpha, fadeDuration)
+          fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
         end
       end
     end
