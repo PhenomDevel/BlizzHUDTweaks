@@ -32,6 +32,10 @@ end
 
 local fadeOrderDescription = addon:ColoredString("\n\nFading Order", "fcba03") .. ": InCombat > HasTarget > InstancedArea > RestedArea > OutOfCombat"
 
+local function doNothing()
+  return
+end
+
 local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   local subOptions = {}
 
@@ -39,7 +43,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     name = generateFrameOptionName(frameOptions, frameName),
     desc = generateFrameOptionDescription(frameOptions, frameName),
     type = "group",
-    disabled = "GetUseGlobalFrameOptions",
+    disabled = "GetDisabledFrameOptions",
     args = subOptions
   }
 
@@ -57,7 +61,8 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         addon:ResetFrameByMappingOptions(addon:GetFrameMapping()[frameName])
         MouseoverFrameFading:RefreshFrameAlphas()
       end,
-      arg = frameName
+      arg = frameName,
+      disabled = doNothing
     }
     order = order + 0.1
     subOptions["CopyFrom"] = {
@@ -84,8 +89,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         MouseoverFrameFading:RefreshFrameAlphas()
       end,
       arg = frameName,
-      disabled = function()
-      end
+      disabled = doNothing
     }
   end
 
@@ -321,34 +325,36 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   }
 end
 
-local function resetAllFrameLinks(profile)
-  for frameName, _ in pairs(profile) do
-    profile[frameName .. "LinkedFrames"] = {}
+local function resetAllFrameLinks(profile, frameTable)
+  for frameName, _ in pairs(frameTable) do
+    if profile[frameName .. "LinkedFrames"] then
+      profile[frameName .. "LinkedFrames"] = {}
+    end
   end
 end
 
 local function addMouseoverFrameLinkOptions(t, profile)
   local args = {}
+  local selectValues = addon:GetFrameTable()
+  selectValues["*Global*"] = nil
 
   args["FrameLinksResetAll"] = {
     order = 0,
     type = "execute",
-    name = "Reset All Links",
+    name = "Reset all links",
     func = function()
-      resetAllFrameLinks(profile)
+      resetAllFrameLinks(profile, selectValues)
     end
   }
   args["FrameLinksDescription"] = {
     order = 1,
     name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
-      "You can specify if frames should be faded together if you mouseover one of them. Each link will act like you mouseover all of the frames at the same time.\n\n",
+      "You can specify if frames should be faded together if you mouseover one of them. Each link will act like you mouseover all of the frames at the same time.\n\n" ..
+        "The linked frames will only be faded if those frames are enabled.\n\n",
     width = "full",
     type = "description",
     fontSize = "medium"
   }
-
-  local selectValues = addon:GetFrameTable()
-  selectValues["*Global*"] = nil
 
   for frameName, frameOptions in pairs(profile) do
     if type(frameOptions) == "table" and frameOptions.displayName then
@@ -363,7 +369,7 @@ local function addMouseoverFrameLinkOptions(t, profile)
             [frameName .. "ResetLinkedFrames"] = {
               order = 1,
               type = "execute",
-              name = "Reset " .. frameOptions.displayName or frameName .. " links",
+              name = "Reset " .. (frameOptions.displayName or frameName) .. " links",
               func = function()
                 profile[frameName .. "LinkedFrames"] = {}
               end
@@ -469,10 +475,10 @@ function MouseoverFrameFading:SetUpdateTickerValue(info, value)
   addon:RefreshUpdateTicker(interval)
 end
 
-function MouseoverFrameFading:GetUseGlobalFrameOptions(info)
+function MouseoverFrameFading:GetDisabledFrameOptions(info)
   if info then
     if addon:GetProfileDB()[info.arg] then
-      return addon:GetProfileDB()[info.arg]["UseGlobalOptions"] or false
+      return (addon:GetProfileDB()[info.arg]["UseGlobalOptions"] or not addon:GetProfileDB()[info.arg]["Enabled"]) or false
     end
   end
 end

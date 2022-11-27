@@ -152,13 +152,13 @@ local function getNormalizedFrameAlpha(frame)
   return tonumber(string.format("%.2f", frame:GetAlpha()))
 end
 
-local function collectLinkedFrameOptions(linkedFrames)
+local function collectLinkedFrameOptions(linkedFrames, profile)
   local linkedFrameNames = addon:tKeys(linkedFrames)
   local linkedFrameOptions = {}
 
   for frameName, frameOptions in pairs(addon:GetFrameMapping()) do
     if tContains(linkedFrameNames, frameName) then
-      if linkedFrames[frameName] then
+      if linkedFrames[frameName] and profile[frameName].Enabled then
         tinsert(linkedFrameOptions, frameOptions.mainFrame)
       end
     end
@@ -180,7 +180,7 @@ local function fadeLinkedFrames(profile, frameName, currentAlpha, targetAlpha, f
   local linkedFrameOptions
 
   if linkedFrames then
-    linkedFrameOptions = collectLinkedFrameOptions(linkedFrames)
+    linkedFrameOptions = collectLinkedFrameOptions(linkedFrames, profile)
     fadeSubFrames(linkedFrameOptions, currentAlpha, targetAlpha, fadeDuration)
   end
 end
