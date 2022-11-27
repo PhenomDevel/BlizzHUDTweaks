@@ -39,6 +39,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     name = generateFrameOptionName(frameOptions, frameName),
     desc = generateFrameOptionDescription(frameOptions, frameName),
     type = "group",
+    disabled = "GetUseGlobalFrameOptions",
     args = subOptions
   }
 
@@ -82,7 +83,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         addon:RefreshOptionTables()
         MouseoverFrameFading:RefreshFrameAlphas()
       end,
-      arg = frameName
+      arg = frameName,
+      disabled = function()
+      end
     }
   end
 
@@ -93,9 +96,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     desc = "When activated you can mouseover action bars and frames while within combat to show the frame with full alpha.",
     width = "full",
     type = "toggle",
-    get = "GetValue",
-    set = "SetValue",
-    disabled = "GetUseGlobalFrameOptions",
     arg = frameName
   }
   order = order + 0.1
@@ -105,12 +105,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     desc = "The duration how long the fade should take (fade in and out).",
     width = 0.8,
     type = "range",
-    get = "GetValue",
-    set = "SetValue",
     min = 0.05,
     max = 2,
     step = 0.05,
-    disabled = "GetUseGlobalFrameOptions",
     arg = frameName
   }
   if not withUseGlobal then
@@ -162,9 +159,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         desc = "When active the fade value will be applied when you're in combat." .. fadeOrderDescription,
         width = 0.6,
         type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       },
       ["InCombatAlpha"] = {
@@ -180,7 +174,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         softMin = 0,
         softMax = 100,
         step = 5,
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
     }
@@ -199,9 +192,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." .. fadeOrderDescription,
         width = "normal",
         type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       },
       ["TreatTargetLikeInCombatTargetType"] = {
@@ -213,7 +203,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         set = "SetValue",
         get = "GetValue",
         values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
     }
@@ -232,9 +221,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         desc = "When active this fade will be applied if you're in an instanced area and *not* in combat." .. fadeOrderDescription,
         width = 0.6,
         type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       },
       ["InstancedAreaAlpha"] = {
@@ -250,7 +236,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         softMin = 0,
         softMax = 100,
         step = 5,
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
     }
@@ -269,9 +254,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         desc = "When active this fade will be applied when you're in a rested area." .. fadeOrderDescription,
         width = 0.6,
         type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       },
       ["RestedAreaAlpha"] = {
@@ -287,7 +269,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         softMin = 0,
         softMax = 100,
         step = 5,
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
     }
@@ -305,9 +286,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         desc = "When active the fade value will be applied when you're not in combat." .. fadeOrderDescription,
         width = 0.6,
         type = "toggle",
-        get = "GetValue",
-        set = "SetValue",
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       },
       ["OutOfCombatAlpha"] = {
@@ -323,7 +301,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         softMin = 0,
         softMax = 100,
         step = 5,
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       },
       ["OutOfCombatFadeDelay"] = {
@@ -335,12 +312,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
               addon:ColoredString("\n\nNOTE: ", "eb4034") .. "Mouseover a frame will interrupt the delay and use the normal alpha values instead.",
         width = 0.8,
         type = "range",
-        get = "GetValue",
-        set = "SetValue",
         min = 0,
         max = 60,
         step = 0.5,
-        disabled = "GetUseGlobalFrameOptions",
         arg = frameName
       }
     }
@@ -426,8 +400,10 @@ end
 
 function MouseoverFrameFading:GetOptionsTable(profile)
   return {
-    name = "Mouseover Frame Fading",
+    name = "Mouseover Fading",
     type = "group",
+    set = "SetValue",
+    get = "GetValue",
     handler = MouseoverFrameFading,
     args = MouseoverFrameFading:GetMouseoverFrameFadingOptions(profile)
   }
