@@ -212,6 +212,7 @@ function EventHandler:ACTIONBAR_SLOT_CHANGED()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -222,6 +223,7 @@ function EventHandler:ACTIONBAR_SHOWGRID()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -232,6 +234,7 @@ function EventHandler:ACTIONBAR_HIDEGRID()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -242,7 +245,11 @@ function EventHandler:UNIT_PET(_, unit)
       local profile = addon:GetProfileDB()
 
       restoreMouseoverFade()
-      Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+
+      if Miscellaneous:IsEnabled() then
+        Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+        Miscellaneous:UpdateActionbar1UnusedButtons()
+      end
     end
   end
 end
