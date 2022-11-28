@@ -166,7 +166,7 @@ local function determineMouseOver(profile, frameName, frameOptions)
   if linkedFrames then
     for linkedFrameName, _ in pairs(linkedFrames) do
       if profile[linkedFrameName].Enabled then
-        if linkedFrames[linkedFrameName] then
+        if linkedFrames[linkedFrameName] and addon:GetFrameMapping()[linkedFrameName].mainFrame then
           if addon:GetFrameMapping()[linkedFrameName].mainFrame:IsMouseOver() then
             linkedFrameMouseover = true
             return linkedFrameMouseover or frameOptions.mainFrame:IsMouseOver()
