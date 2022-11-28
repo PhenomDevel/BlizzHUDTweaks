@@ -51,9 +51,9 @@ local function restoreMouseoverFade()
     updatePartyAndRaidFrame()
 
     if BlizzHUDTweaks.hasTarget then
-      MouseoverFrameFading:RefreshFrameAlphas(true)
+      MouseoverFrameFading:RefreshFrameAlphas()
     else
-      MouseoverFrameFading:RefreshFrameAlphas(true, true)
+      MouseoverFrameFading:RefreshFrameAlphas(nil, true)
     end
   end
 end
