@@ -74,7 +74,8 @@ local eventsToRegister = {
   "GROUP_ROSTER_UPDATE",
   "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
-  "UPDATE_SHAPESHIFT_COOLDOWN"
+  "UPDATE_SHAPESHIFT_COOLDOWN",
+  "PLAYER_MOUNT_DISPLAY_CHANGED"
 }
 
 local registeredEvents = {}
@@ -210,7 +211,6 @@ function EventHandler:ACTIONBAR_SLOT_CHANGED()
   if addon:IsEnabled() then
     if Miscellaneous:IsEnabled() then
       local profile = addon:GetProfileDB()
-
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
       Miscellaneous:UpdateActionbar1UnusedButtons()
     end
@@ -274,4 +274,13 @@ end
 
 function EventHandler:UPDATE_SHAPESHIFT_COOLDOWN()
   Miscellaneous:UpdateActionbar1UnusedButtons()
+end
+
+function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
+  C_Timer.After(
+    0.1,
+    function()
+      Miscellaneous:UpdateActionbar1UnusedButtons()
+    end
+  )
 end
