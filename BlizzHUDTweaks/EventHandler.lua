@@ -75,7 +75,7 @@ local eventsToRegister = {
   "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
   "UPDATE_SHAPESHIFT_COOLDOWN",
-  "PLAYER_MOUNT_DISPLAY_CHANGED"
+  "UPDATE_BONUS_ACTIONBAR"
 }
 
 local registeredEvents = {}
@@ -276,11 +276,6 @@ function EventHandler:UPDATE_SHAPESHIFT_COOLDOWN()
   Miscellaneous:UpdateActionbar1UnusedButtons()
 end
 
-function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
-  C_Timer.After(
-    0.1,
-    function()
-      Miscellaneous:UpdateActionbar1UnusedButtons()
-    end
-  )
+function EventHandler:UPDATE_BONUS_ACTIONBAR()
+  Miscellaneous:UpdateActionbar1UnusedButtons()
 end
