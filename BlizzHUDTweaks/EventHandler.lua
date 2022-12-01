@@ -136,7 +136,7 @@ function EventHandler:PLAYER_UPDATE_RESTING()
   end
 end
 
-BlizzHUDTweaks.lastUpdate = GetTime()
+BlizzHUDTweaks.lastUpdate = 0
 
 function EventHandler:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")

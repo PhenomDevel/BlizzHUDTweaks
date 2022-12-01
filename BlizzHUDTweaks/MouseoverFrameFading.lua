@@ -261,25 +261,27 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
 
     for frameName, frameMappingOptions in pairs(addon:GetFrameMapping()) do
       local frameOptions = profile[frameName]
-      if frameOptions.Enabled and frameMappingOptions.mainFrame then
-        local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
-        local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
-        local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+      if frameOptions then
+        if frameOptions.Enabled and frameMappingOptions.mainFrame then
+          local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
+          local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
+          local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
 
-        if isMouseover and not mouseoverFrames[frameMappingOptions.mainFrame] then
-          if not inCombat then
-            self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
-            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
-          elseif (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat) then
-            self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
-            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
+          if isMouseover and not mouseoverFrames[frameMappingOptions.mainFrame] then
+            if not inCombat then
+              self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
+              fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
+            elseif (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat) then
+              self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
+              fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
+            end
+          elseif not isMouseover and mouseoverFrames[frameMappingOptions.mainFrame] then
+            local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+            self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration)
+            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
           end
-        elseif not isMouseover and mouseoverFrames[frameMappingOptions.mainFrame] then
-          local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
-          self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration)
-          fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
+          mouseoverFrames[frameMappingOptions.mainFrame] = isMouseover
         end
-        mouseoverFrames[frameMappingOptions.mainFrame] = isMouseover
       end
     end
   end

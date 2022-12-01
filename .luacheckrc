@@ -134,6 +134,8 @@ globals = {
   "FocusFrameToT",
   "PetName",
   "IsInGroup",
+  "GetAddOnInfo",
+  "WorldQuestTrackerScreenPanel",
   -- Locals
   "L"
 }

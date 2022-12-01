@@ -260,56 +260,78 @@ local function ensureFrameOptions(profile, addonName, frames)
 end
 
 local function showFrameOptions(profile, frames)
-  for _, frameOptions in ipairs(frames) do
-    if profile[frameOptions.name] then
-      profile[frameOptions.name]["Hidden"] = false
+  if frames then
+    for _, frameOptions in ipairs(frames) do
+      if profile[frameOptions.name] then
+        profile[frameOptions.name]["Hidden"] = false
+      end
     end
   end
 end
 
 local function hideFrameOptions(profile, frames)
-  for _, frameOptions in ipairs(frames) do
-    if profile[frameOptions.name] then
-      profile[frameOptions.name]["Hidden"] = true
+  if frames then
+    for _, frameOptions in ipairs(frames) do
+      if profile[frameOptions.name] then
+        profile[frameOptions.name]["Hidden"] = true
+      end
     end
   end
 end
 
-local additionalFrameNames = {
-  {
-    name = "MicroButtonAndBagsBarMovable",
-    frame = MicroButtonAndBagsBarMovable
+local additionalAddonFrames = {
+  ["EditModeExpanded"] = {
+    frames = {
+      {
+        name = "MicroButtonAndBagsBarMovable",
+        frame = MicroButtonAndBagsBarMovable
+      },
+      {
+        name = "EditModeExpandedBackpackBar",
+        frame = EditModeExpandedBackpackBar
+      }
+    },
+    hideDefaultFrames = {
+      "MicroButtonAndBagsBar"
+    }
   },
-  {
-    name = "EditModeExpandedBackpackBar",
-    frame = EditModeExpandedBackpackBar
+  ["WorldQuestTracker"] = {
+    frames = {
+      {
+        name = "WorldQuestTrackerScreenPanel",
+        frame = WorldQuestTrackerScreenPanel
+      }
+    },
+    hideDefaultFrames = {}
   }
 }
+
 local function updateFramesForLoadedAddons(profile)
-  ensureFrameOptions(profile, "EditModeExpanded", additionalFrameNames)
+  for addonName, options in pairs(additionalAddonFrames) do
+    local _, _, _, enabled = GetAddOnInfo(addonName)
 
-  local EditModeExpanded
+    if enabled then
+      if options.frames then
+        ensureFrameOptions(profile, addonName, options.frames)
 
-  if LibStub then
-    EditModeExpanded = LibStub:GetLibrary("EditModeExpanded-1.0", true)
-  end
-
-  if EditModeExpanded then -- and EditModeExpanded.IsRegistered
-    addon:Print("EditModeExpanded found. Adding additional frames.")
-    for _, frameOptions in ipairs(additionalFrameNames) do
-      if frameOptions.frame then
-        if frameOptions.frame then --EditModeExpanded:IsRegistered(frameOptions.frame)
+        for _, frameOptions in ipairs(options.frames) do
           frameMapping[frameOptions.name] = {mainFrame = frameOptions.frame}
           if profile[frameOptions.name] then
             profile[frameOptions.name]["Hidden"] = false
           end
         end
+
+        for _, defaultFrameName in ipairs(options.hideDefaultFrames) do
+          hideFrameOptions(profile, {{name = defaultFrameName}})
+        end
       end
+    else
+      for _, defaultFrameName in ipairs(options.hideDefaultFrames) do
+        showFrameOptions(profile, {{name = defaultFrameName}})
+      end
+
+      hideFrameOptions(profile, options.frames)
     end
-    hideFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
-  else
-    showFrameOptions(profile, {{name = "MicroButtonAndBagsBar"}})
-    hideFrameOptions(profile, additionalFrameNames)
   end
 end
 
