@@ -172,7 +172,7 @@ local function determineFadeDelay(globalOptions, frameOptions)
     delay = frameOptions.OutOfCombatFadeDelay
   end
 
-  return delay
+  return delay or 0
 end
 
 local function getNormalizedFrameAlpha(frame)
@@ -237,6 +237,8 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           frame.BlizzHUDTweaksAnimationGroup = animationGroup
           frame.BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
         end
+        frame.BlizzHUDTweaksFadeAnimation:Stop()
+        frame.BlizzHUDTweaksAnimationGroup:Stop()
 
         frame.BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
         frame.BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)

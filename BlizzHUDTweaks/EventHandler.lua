@@ -46,14 +46,14 @@ local function updatePartyAndRaidFrame()
   end
 end
 
-local function restoreMouseoverFade()
+local function restoreMouseoverFade(forced)
   if MouseoverFrameFading:IsEnabled() then
     updatePartyAndRaidFrame()
 
     if BlizzHUDTweaks.hasTarget then
-      MouseoverFrameFading:RefreshFrameAlphas()
+      MouseoverFrameFading:RefreshFrameAlphas(forced)
     else
-      MouseoverFrameFading:RefreshFrameAlphas(nil, true)
+      MouseoverFrameFading:RefreshFrameAlphas(forced, true)
     end
   end
 end
@@ -136,12 +136,18 @@ function EventHandler:PLAYER_UPDATE_RESTING()
   end
 end
 
+BlizzHUDTweaks.lastUpdate = GetTime()
+
 function EventHandler:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
 
-  if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
-    restoreMouseoverFade()
+  if GetTime() ~= BlizzHUDTweaks.lastUpdate and (GetTime() - BlizzHUDTweaks.lastUpdate) > 0.05 then
+    if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
+      restoreMouseoverFade(true)
+    end
   end
+
+  BlizzHUDTweaks.lastUpdate = GetTime()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
