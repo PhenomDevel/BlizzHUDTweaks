@@ -136,7 +136,12 @@ globals = {
   "IsInGroup",
   "GetAddOnInfo",
   "WorldQuestTrackerScreenPanel",
-  -- Locals
+  "PetFrameHealthBarTextLeft",
+  "PetFrameHealthBarTextRight",
+  "PetFrameHealthBarText",
+  "PetFrameManaBarTextLeft",
+  "PetFrameManaBarTextRight",
+  "PetFrameManaBarText",
   "L"
 }
 max_line_length = 200
