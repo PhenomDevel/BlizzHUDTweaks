@@ -153,54 +153,6 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   }
 
   order = order + 0.1
-  subOptions["ByHealthGroup"] = {
-    order = order,
-    type = "group",
-    guiInline = true,
-    name = "Health Fade",
-    args = {
-      ["FadeByHealth"] = {
-        order = 1,
-        name = "Enabled",
-        desc = "When active the fade value will be applied when your health drops below the defined percentage." .. fadeOrderDescription,
-        width = 0.6,
-        type = "toggle",
-        arg = frameName
-      },
-      ["ByHealthThreshold"] = {
-        order = 2,
-        name = "Health threshold",
-        desc = "If the current HP % of the player drops below the threshold the fade will be applied.",
-        width = 0.8,
-        type = "range",
-        get = "GetValue",
-        set = "SetValue",
-        min = 0,
-        max = 100,
-        softMin = 0,
-        softMax = 100,
-        step = 1,
-        arg = frameName
-      },
-      ["ByHealthAlpha"] = {
-        order = 3,
-        name = "Alpha",
-        desc = "Set the alpha value of the frame when HP % of the player is below the defined threshold.",
-        width = 0.8,
-        type = "range",
-        get = "GetFadeSliderValue",
-        set = "SetFadeSliderValue",
-        min = 0,
-        max = 100,
-        softMin = 0,
-        softMax = 100,
-        step = 5,
-        arg = frameName
-      }
-    }
-  }
-
-  order = order + 0.1
   subOptions["InCombatGroup"] = {
     order = order,
     type = "group",
@@ -257,6 +209,54 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
         set = "SetValue",
         get = "GetValue",
         values = {["friendly"] = "Friendly", ["hostile"] = "Hostile", ["both"] = "Both"},
+        arg = frameName
+      }
+    }
+  }
+
+  order = order + 0.1
+  subOptions["ByHealthGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Health Fade",
+    args = {
+      ["FadeByHealth"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade value will be applied when your health drops below the defined percentage." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        arg = frameName
+      },
+      ["ByHealthThreshold"] = {
+        order = 2,
+        name = "Health threshold",
+        desc = "If the current HP % of the player drops below the threshold the fade will be applied.",
+        width = 0.8,
+        type = "range",
+        get = "GetValue",
+        set = "SetValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 1,
+        arg = frameName
+      },
+      ["ByHealthAlpha"] = {
+        order = 3,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame when HP % of the player is below the defined threshold.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
         arg = frameName
       }
     }
