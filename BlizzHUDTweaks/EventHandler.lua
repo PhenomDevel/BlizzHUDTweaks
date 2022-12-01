@@ -75,7 +75,8 @@ local eventsToRegister = {
   "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
   "UPDATE_SHAPESHIFT_COOLDOWN",
-  "UPDATE_BONUS_ACTIONBAR"
+  "UPDATE_BONUS_ACTIONBAR",
+  "UNIT_HEALTH"
 }
 
 local registeredEvents = {}
@@ -278,4 +279,10 @@ end
 
 function EventHandler:UPDATE_BONUS_ACTIONBAR()
   Miscellaneous:UpdateActionbar1UnusedButtons()
+end
+
+function EventHandler:UNIT_HEALTH(_, unit)
+  if unit == "player" then
+    MouseoverFrameFading:RefreshFrameAlphas()
+  end
 end

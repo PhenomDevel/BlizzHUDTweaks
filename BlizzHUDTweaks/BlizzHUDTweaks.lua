@@ -220,6 +220,10 @@ local function setFrameDefaultOptions(frameOptions)
 
   frameOptions["TreatTargetLikeInCombat"] = false
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
+
+  frameOptions["FadeByHealth"] = false
+  frameOptions["ByHealthThreshold"] = 0
+  frameOptions["ByHealthAlpha"] = 1
 end
 
 do

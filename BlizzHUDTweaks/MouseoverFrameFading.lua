@@ -2,6 +2,16 @@ local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 
+local function byHealthAlphaValue(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeByHealth then
+      return globalOptions.ByHealthAlpha
+    end
+  elseif frameOptions.FadeByHealth then
+    return frameOptions.ByHealthAlpha
+  end
+end
+
 local function inCombatAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     if globalOptions.FadeInCombat then
@@ -62,6 +72,22 @@ local function restedAreaAlphaValue(globalOptions, frameOptions)
   return alpha
 end
 
+local function byHealthFadeActive(globalOptions, frameOptions)
+  local maxHP = UnitHealthMax("player")
+  local currentHP = UnitHealth("player")
+  local currentPercent = (currentHP / maxHP) * 100
+
+  if frameOptions.UseGlobalOptions then
+    if currentPercent <= (globalOptions.ByHealthThreshold or 0) then
+      return globalOptions.FadeByHealth
+    end
+  else
+    if currentPercent <= (frameOptions.ByHealthThreshold or 0) then
+      return frameOptions.FadeByHealth
+    end
+  end
+end
+
 local function inCombatFadeActive(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     return globalOptions.FadeInCombat
@@ -119,6 +145,8 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
   elseif not inCombat and hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
+  elseif not inCombat and byHealthFadeActive(globalOptions, frameOptions) then
+    alpha = byHealthAlphaValue(globalOptions, frameOptions)
   elseif not inCombat and select(2, GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then
     alpha = instancedAreaAlphaValue(globalOptions, frameOptions)
   elseif not inCombat and isResting and restedAreaFadeActive(globalOptions, frameOptions) then

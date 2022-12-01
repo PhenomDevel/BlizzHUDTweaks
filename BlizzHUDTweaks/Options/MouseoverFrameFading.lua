@@ -30,7 +30,7 @@ local function generateFrameOptionName(frameOptions, frameName)
   return name
 end
 
-local fadeOrderDescription = addon:ColoredString("\n\nFading Order", "fcba03") .. ": InCombat > HasTarget > InstancedArea > RestedArea > OutOfCombat"
+local fadeOrderDescription = addon:ColoredString("\n\nFading Order", "fcba03") .. ": InCombat > HasTarget > Health% > InstancedArea > RestedArea > OutOfCombat"
 
 local function doNothing()
   return
@@ -139,15 +139,65 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
       "The fade settings will be applied in the following order:\n" ..
-        addon:ColoredString("In Combat", "7af15f") ..
+        addon:ColoredString("In Combat", "5cdb4f") ..
           " > " ..
-            addon:ColoredString("Has Target", "b8c91c") ..
+            addon:ColoredString("Has Target", "9ac113") ..
               " > " ..
-                addon:ColoredString("Instanced Area", "d69e0b") ..
-                  " > " .. addon:ColoredString("Rested Area", "df7330") .. " > " .. addon:ColoredString("Out Of Combat", "d24d4d") .. "\n\n",
+                addon:ColoredString("Health %", "bea500") ..
+                  " > " ..
+                    addon:ColoredString("Instanced Area", "d3870f") ..
+                      " > " .. addon:ColoredString("Rested Area", "dc6933") .. " > " .. addon:ColoredString("Out Of Combat", "d64f4f") .. "\n\n",
     width = "full",
     type = "description",
     fontSize = "medium"
+  }
+
+  order = order + 0.1
+  subOptions["ByHealthGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Health Fade",
+    args = {
+      ["FadeByHealth"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade value will be applied when your health drops below the defined percentage." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        arg = frameName
+      },
+      ["ByHealthThreshold"] = {
+        order = 2,
+        name = "Health threshold",
+        desc = "If the current HP % of the player drops below the threshold the fade will be applied.",
+        width = 0.8,
+        type = "range",
+        get = "GetValue",
+        set = "SetValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 1,
+        arg = frameName
+      },
+      ["ByHealthAlpha"] = {
+        order = 3,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame when HP % of the player is below the defined threshold.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        arg = frameName
+      }
+    }
   }
 
   order = order + 0.1
