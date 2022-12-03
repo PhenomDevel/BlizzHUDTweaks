@@ -209,12 +209,12 @@ function Miscellaneous:FlashObjectiveTracker(profile)
       local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
 
       MouseoverFrameFading:Fade(ObjectiveTrackerFrame, 0, 1, fadeDuration, 0, 0)
-      ObjectiveTrackerFrame.BlizzHUDTweaksForceFaded = true
+      ObjectiveTrackerFrame.__BlizzHUDTweaksForceFaded = true
 
       C_Timer.After(
         profile["MiscellaneousShowHideObjectiveTrackerUpdateFlashDuration"] or 5,
         function()
-          ObjectiveTrackerFrame.BlizzHUDTweaksForceFaded = false
+          ObjectiveTrackerFrame.__BlizzHUDTweaksForceFaded = false
           MouseoverFrameFading:RefreshFrameAlphas()
         end
       )

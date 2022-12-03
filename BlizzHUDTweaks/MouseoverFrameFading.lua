@@ -204,7 +204,40 @@ local function determineMouseOver(profile, frameName, frameOptions)
     end
   end
 
-  return frameOptions.mainFrame:IsMouseOver()
+  return frameOptions.mainFrame.__BlizzHUDTweaksForceMouseover or frameOptions.mainFrame:IsMouseOver()
+end
+
+local function SpellFlyoutOnLeave()
+  local parent = SpellFlyout:GetParent():GetParent()
+  parent.__BlizzHUDTweaksForceMouseover = false
+end
+
+local function SpellFlyoutOnEnter()
+  local parent = SpellFlyout:GetParent():GetParent()
+  parent.__BlizzHUDTweaksForceMouseover = true
+end
+
+local function SpellFlyoutOnShow()
+  local parent = SpellFlyout:GetParent():GetParent()
+
+  if not parent.BlizzHUDTweaksHooked then
+    SpellFlyout:HookScript("OnEnter", SpellFlyoutOnEnter)
+    SpellFlyout:HookScript("OnLeave", SpellFlyoutOnLeave)
+    parent.BlizzHUDTweaksHooked = true
+  end
+
+  for i = 1, 12 do
+    local button = _G["SpellFlyoutButton" .. i]
+    if not button then
+      break
+    end
+
+    if not button.BlizzHUDTweaksHooked then
+      button:HookScript("OnEnter", SpellFlyoutOnEnter)
+      button:HookScript("OnLeave", SpellFlyoutOnLeave)
+      button.BlizzHUDTweaksHooked = true
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -228,7 +261,7 @@ end
 
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay, forced)
   if currentAlpha and targetAlpha and frame:IsShown() then
-    if not frame.BlizzHUDTweaksForceFaded then
+    if not frame.__BlizzHUDTweaksForceFaded then
       if (currentAlpha ~= targetAlpha) or forced then
         if not frame.BlizzHUDTweaksAnimationGroup then
           local animationGroup = frame:CreateAnimationGroup()
@@ -280,6 +313,7 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
             self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration)
             fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
           end
+
           mouseoverFrames[frameMappingOptions.mainFrame] = isMouseover
         end
       end
@@ -311,6 +345,10 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
       end
     end
   end
+end
+
+function MouseoverFrameFading:InstallHooks()
+  SpellFlyout:HookScript("OnShow", SpellFlyoutOnShow)
 end
 
 function MouseoverFrameFading:Disable()

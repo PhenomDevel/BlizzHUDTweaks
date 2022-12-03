@@ -200,6 +200,10 @@ function EventHandler:PLAYER_LOGIN()
     if Miscellaneous:IsEnabled() then
       Miscellaneous:InstallHooks()
     end
+
+    if MouseoverFrameFading:IsEnabled() then
+      MouseoverFrameFading:InstallHooks()
+    end
   end
 end
 

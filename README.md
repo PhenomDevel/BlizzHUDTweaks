@@ -7,6 +7,7 @@ Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
 - Rested area fading for action bars / frames
 - In combat fading for action bars / frames
 - Action bar padding below blizzard minimum of 2
+- Hide unused actionbar 1 buttons
 - Repositioning / Scaling of class resources and totem bar (For example combo points, arcane charges etc.)
 - Small quality of life improvements
 
@@ -27,15 +28,20 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 - Fade Duration
 - In Combat Fade
 - Out of Combat Fade
+- Fade based on health percentage
+- Instanced Area fade
 - Rested Area Fade
 - Set options globally or for each frame
 - Treat targeting as in combat fade
+- Be able to link frames together for fading
 
 #### The priority of the checks is as follows
 1. In Combat Fade
 2. Has Target Fade (which uses the `In Combat Fade` values)
-3. Out Of Combat Fade
-4. Rested Area Fade
+3. Health percentage
+4. Instanced Area fade
+5. Rested Area Fade
+6. Out Of Combat Fade
 
 ### Supported action bars and frames
 - Action Bar 1-8
@@ -56,11 +62,6 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 - LFG Eye
 - Durability Frame
 - Vehicle Seat Frame
-
-### Additional Frames
-#### [EditModeExpanded](https://www.curseforge.com/wow/addons/edit-mode-expanded)
-- Micro Button Bar
-- Bags Bar
 
 ## Miscellaneous
 - Overwrite your characters name
