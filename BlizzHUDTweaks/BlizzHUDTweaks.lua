@@ -544,8 +544,8 @@ end
 
 function addon:ResetFrame(frame)
   if frame then
-    if frame.BlizzHUDTweaksAnimationGroup then
-      frame.BlizzHUDTweaksAnimationGroup:Stop()
+    if frame.__BlizzHUDTweaksAnimationGroup then
+      frame.__BlizzHUDTweaksAnimationGroup:Stop()
     end
     frame:SetAlpha(1)
   end

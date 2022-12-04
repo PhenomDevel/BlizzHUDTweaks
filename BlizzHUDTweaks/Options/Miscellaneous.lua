@@ -37,6 +37,12 @@ end
 local function doNothing()
 end
 
+local function hideFrame(option)
+  if option.frame then
+    option.frame:Hide()
+  end
+end
+
 local function showFrame(option)
   if option.frame then
     option.frame:Show()
@@ -247,7 +253,22 @@ Miscellaneous.options = {
         },
         type = "toggle",
         setFn = toggleFrames,
-        restoreOriginalValueFn = showFrames
+        restoreOriginalValueFn = showFrames,
+        frameHooks = {
+          function(option)
+            for _, frame in ipairs(option.frames) do
+              if not frame.__BlizzHUDTweaksOnShowHooked then
+                frame:HookScript(
+                  "OnShow",
+                  function()
+                    hideFrame({frame = frame})
+                  end
+                )
+                frame.__BlizzHUDTweaksOnShowHooked = true
+              end
+            end
+          end
+        }
       }
     }
   },

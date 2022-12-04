@@ -173,16 +173,16 @@ function Miscellaneous:RestoreActionbarPaddings(profile, forcePadding, forceSize
       local actionbar = v.frame
 
       if actionbar and padding ~= actionbar.buttonPadding and enabled then
-        if not actionbar.BlizzHUDTweaksRestoredPadding or forcePadding then
+        if not actionbar.__BlizzHUDTweaksRestoredPadding or forcePadding then
           if actionbar:IsShown() then
-            if not actionbar.BlizzHUDTweaksRestoredSize or forceSize then
+            if not actionbar.__BlizzHUDTweaksRestoredSize or forceSize then
               Miscellaneous:RestoreActionbarSize(profile, v, padding)
-              actionbar.BlizzHUDTweaksRestoredSize = true
+              actionbar.__BlizzHUDTweaksRestoredSize = true
             end
 
             Miscellaneous:RestoreActionbarPadding(profile, v, padding)
-            actionbar.BlizzHUDTweaksRestoredPadding = true
-            actionbar.BlizzHUDTweaksOverwritePadding = padding
+            actionbar.__BlizzHUDTweaksRestoredPadding = true
+            actionbar.__BlizzHUDTweaksOverwritePadding = padding
           end
         end
       end
@@ -293,6 +293,14 @@ function Miscellaneous:InstallHooks()
   QuickKeybindFrame:HookScript("OnHide", restore)
   SpellBookFrame:HookScript("OnShow", restore)
   SpellBookFrame:HookScript("OnHide", restore)
+
+  for _, groupOptions in pairs(Miscellaneous.options) do
+    for _, option in ipairs(groupOptions.options or {}) do
+      for _, frameHook in ipairs(option.frameHooks or {}) do
+        frameHook(option)
+      end
+    end
+  end
 end
 
 function Miscellaneous:Disable()

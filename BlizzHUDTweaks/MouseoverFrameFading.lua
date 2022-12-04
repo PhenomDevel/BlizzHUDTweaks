@@ -220,10 +220,10 @@ end
 local function SpellFlyoutOnShow()
   local parent = SpellFlyout:GetParent():GetParent()
 
-  if not parent.BlizzHUDTweaksHooked then
+  if not parent.__BlizzHUDTweaksHooked then
     SpellFlyout:HookScript("OnEnter", SpellFlyoutOnEnter)
     SpellFlyout:HookScript("OnLeave", SpellFlyoutOnLeave)
-    parent.BlizzHUDTweaksHooked = true
+    parent.__BlizzHUDTweaksHooked = true
   end
 
   for i = 1, 12 do
@@ -232,10 +232,10 @@ local function SpellFlyoutOnShow()
       break
     end
 
-    if not button.BlizzHUDTweaksHooked then
+    if not button.__BlizzHUDTweaksHooked then
       button:HookScript("OnEnter", SpellFlyoutOnEnter)
       button:HookScript("OnLeave", SpellFlyoutOnLeave)
-      button.BlizzHUDTweaksHooked = true
+      button.__BlizzHUDTweaksHooked = true
     end
   end
 end
@@ -263,22 +263,22 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
   if currentAlpha and targetAlpha and frame:IsShown() then
     if not frame.__BlizzHUDTweaksForceFaded then
       if (currentAlpha ~= targetAlpha) or forced then
-        if not frame.BlizzHUDTweaksAnimationGroup then
+        if not frame.__BlizzHUDTweaksAnimationGroup then
           local animationGroup = frame:CreateAnimationGroup()
           animationGroup:SetToFinalAlpha(true)
 
-          frame.BlizzHUDTweaksAnimationGroup = animationGroup
-          frame.BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
+          frame.__BlizzHUDTweaksAnimationGroup = animationGroup
+          frame.__BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
         end
-        frame.BlizzHUDTweaksFadeAnimation:Stop()
-        frame.BlizzHUDTweaksAnimationGroup:Stop()
+        frame.__BlizzHUDTweaksFadeAnimation:Stop()
+        frame.__BlizzHUDTweaksAnimationGroup:Stop()
 
-        frame.BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
-        frame.BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
-        frame.BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
-        frame.BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
+        frame.__BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
+        frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
+        frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
+        frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
 
-        frame.BlizzHUDTweaksAnimationGroup:Restart()
+        frame.__BlizzHUDTweaksAnimationGroup:Restart()
       end
     end
   end
