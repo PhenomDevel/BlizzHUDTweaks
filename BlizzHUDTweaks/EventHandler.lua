@@ -48,8 +48,6 @@ end
 
 local function restoreMouseoverFade(forced, ignoreFadeWhenFading)
   if MouseoverFrameFading:IsEnabled() then
-    updatePartyAndRaidFrame()
-
     if BlizzHUDTweaks.hasTarget then
       MouseoverFrameFading:RefreshFrameAlphas(forced)
     else
@@ -167,6 +165,7 @@ function EventHandler:PLAYER_ENTERING_WORLD()
     end
 
     restoreMouseoverFade()
+    updatePartyAndRaidFrame()
     installKeyDownHandler()
   end
 end
