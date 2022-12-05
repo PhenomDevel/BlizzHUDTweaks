@@ -141,7 +141,8 @@ function EventHandler:PLAYER_TARGET_CHANGED()
 
   if GetTime() ~= BlizzHUDTweaks.lastUpdate and (GetTime() - BlizzHUDTweaks.lastUpdate) > 0.05 then
     if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
-      restoreMouseoverFade(true, true)
+      MouseoverFrameFading:StopAnimations()
+      restoreMouseoverFade()
     end
   end
 

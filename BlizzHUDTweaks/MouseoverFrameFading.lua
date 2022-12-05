@@ -333,6 +333,17 @@ local function shouldFade(frame, ignoreFadeWhenFading)
   end
 end
 
+function MouseoverFrameFading:StopAnimations()
+  for _, frameMappingOptions in pairs(addon:GetFrameMapping()) do
+    local frame = frameMappingOptions.mainFrame
+    if frame then
+      if frame.__BlizzHUDTweaksAnimationGroup then
+        frame.__BlizzHUDTweaksAnimationGroup:Stop()
+      end
+    end
+  end
+end
+
 function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay, ignoreFadeWhenFading)
   if addon:IsEnabled() and MouseoverFrameFading:IsEnabled() then
     local profile = addon:GetProfileDB()
