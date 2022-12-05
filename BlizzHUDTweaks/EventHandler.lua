@@ -46,14 +46,14 @@ local function updatePartyAndRaidFrame()
   end
 end
 
-local function restoreMouseoverFade(forced)
+local function restoreMouseoverFade(forced, ignoreFadeWhenFading)
   if MouseoverFrameFading:IsEnabled() then
     updatePartyAndRaidFrame()
 
     if BlizzHUDTweaks.hasTarget then
       MouseoverFrameFading:RefreshFrameAlphas(forced)
     else
-      MouseoverFrameFading:RefreshFrameAlphas(forced, true)
+      MouseoverFrameFading:RefreshFrameAlphas(forced, true, ignoreFadeWhenFading)
     end
   end
 end
@@ -143,7 +143,7 @@ function EventHandler:PLAYER_TARGET_CHANGED()
 
   if GetTime() ~= BlizzHUDTweaks.lastUpdate and (GetTime() - BlizzHUDTweaks.lastUpdate) > 0.05 then
     if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
-      restoreMouseoverFade(true)
+      restoreMouseoverFade(true, true)
     end
   end
 

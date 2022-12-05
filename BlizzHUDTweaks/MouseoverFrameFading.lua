@@ -321,26 +321,40 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
   end
 end
 
-function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
+local function shouldFade(frame, ignoreFadeWhenFading)
+  if frame then
+    if ignoreFadeWhenFading and frame.__BlizzHUDTweaksAnimationGroup then
+      if not frame.__BlizzHUDTweaksAnimationGroup:IsPlaying() then
+        return true
+      end
+    else
+      return true
+    end
+  end
+end
+
+function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay, ignoreFadeWhenFading)
   if addon:IsEnabled() and MouseoverFrameFading:IsEnabled() then
     local profile = addon:GetProfileDB()
     local globalOptions = addon:GetProfileDB()["*Global*"]
 
     for frameName, frameMappingOptions in pairs(addon:GetFrameMapping()) do
-      local frameOptions = profile[frameName]
+      if shouldFade(frameMappingOptions.mainFrame, ignoreFadeWhenFading) then
+        local frameOptions = profile[frameName]
 
-      if frameOptions.Enabled and frameMappingOptions.mainFrame then
-        local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
-        local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
-        local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+        if frameOptions.Enabled and frameMappingOptions.mainFrame then
+          local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+          local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
+          local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
 
-        if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
-          local fadeDelay = 0
-          if useFadeDelay then
-            fadeDelay = determineFadeDelay(globalOptions, frameOptions)
+          if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
+            local fadeDelay = 0
+            if useFadeDelay then
+              fadeDelay = determineFadeDelay(globalOptions, frameOptions)
+            end
+            self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, fadeDelay, forced)
+            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
           end
-          self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, fadeDelay, forced)
-          fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
         end
       end
     end
