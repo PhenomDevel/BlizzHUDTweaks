@@ -144,6 +144,7 @@ globals = {
   "PetFrameManaBarText",
   "SpellFlyout",
   "IsInRaid",
+  "UIWidgetPowerBarContainerFrame",
   "L"
 }
 max_line_length = 200

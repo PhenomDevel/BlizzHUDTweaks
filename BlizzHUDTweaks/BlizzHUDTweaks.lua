@@ -162,6 +162,9 @@ local defaultConfig = {
     },
     ["FocusFrameToT"] = {
       displayName = "Target of Focus Target"
+    },
+    ["UIWidgetPowerBarContainerFrame"] = {
+      displayName = "Encounter Bar"
     }
   }
 }
@@ -197,7 +200,8 @@ local frameMapping = {
   ["PartyFrame"] = {mainFrame = PartyFrame},
   ["CompactRaidFrameContainer"] = {mainFrame = CompactRaidFrameContainer},
   ["MainMenuBarVehicleLeaveButton"] = {mainFrame = MainMenuBarVehicleLeaveButton},
-  ["FocusFrameToT"] = {mainFrame = FocusFrameToT}
+  ["FocusFrameToT"] = {mainFrame = FocusFrameToT},
+  ["UIWidgetPowerBarContainerFrame"] = {mainFrame = UIWidgetPowerBarContainerFrame}
 }
 
 local function setFrameDefaultOptions(frameOptions)
