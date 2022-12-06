@@ -28,7 +28,7 @@ BlizzHUDTweaks.lua
 MouseoverFrameFading.lua
 ClassResource.lua
 Miscellaneous.lua
-
+API.lua
 
 Util.lua
 EventHandler.lua

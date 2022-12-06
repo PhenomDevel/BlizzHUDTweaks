@@ -483,6 +483,16 @@ function addon:InitializeUpdateTicker()
   end
 end
 
+function addon:LoadProfileByName(name)
+  local profiles = self.db:GetProfiles()
+
+  if not tContains(profiles, name) then
+    addon:Print("The profile", name, "was not found.")
+  else
+    self.db:SetProfile(name)
+  end
+end
+
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, "Default")
   updateFramesForLoadedAddons(self.db.profile)
