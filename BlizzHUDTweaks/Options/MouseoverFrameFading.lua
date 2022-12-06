@@ -64,6 +64,9 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       arg = frameName,
       disabled = doNothing
     }
+    local frameValues = addon:GetFrameTable()
+    frameValues["Global"] = "*Global*"
+
     order = order + 0.1
     subOptions["CopyFrom"] = {
       order = order,
@@ -72,7 +75,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       width = "full",
       type = "select",
       set = "CopyFrom",
-      values = addon:GetFrameTable(),
+      values = frameValues,
       arg = frameName
     }
     order = order + 0.1
@@ -480,6 +483,10 @@ end
 
 function MouseoverFrameFading:CopyFrom(info, value)
   local fromFrameOptions = addon:GetProfileDB()[value]
+
+  if value == "Global" then
+    fromFrameOptions = addon:GetProfileDB()["*Global*"]
+  end
 
   if fromFrameOptions then
     local copy = addon:tClone(fromFrameOptions)
