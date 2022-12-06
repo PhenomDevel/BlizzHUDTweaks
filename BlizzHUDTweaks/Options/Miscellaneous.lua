@@ -107,6 +107,37 @@ Miscellaneous.options = {
         restoreOriginalValueFn = showFrame
       },
       {
+        optionName = "MiscellaneousShowHidePlayerGroupIndicator",
+        displayName = "Hide Player Group Indicator",
+        frame = PlayerFrame.PlayerFrameContent.PlayerFrameContentContextual.GroupIndicator,
+        description = "Hides the players group indicator",
+        type = "toggle",
+        setFn = function(option)
+          if IsInRaid() then
+            hideFrame(option)
+          end
+        end,
+        restoreOriginalValueFn = function(option)
+          if IsInRaid() then
+            showFrame(option)
+          end
+        end,
+        frameHooks = {
+          function(option)
+            local frame = option.frame
+            if not frame.__BlizzHUDTweaksOnShowHooked then
+              frame:HookScript(
+                "OnShow",
+                function()
+                  hideFrame({frame = frame})
+                end
+              )
+              frame.__BlizzHUDTweaksOnShowHooked = true
+            end
+          end
+        }
+      },
+      {
         optionName = "MiscellaneousFontSizeOverwritePlayerHealthBarFontSize",
         displayName = "Player Health Font Size",
         frames = {

@@ -194,11 +194,15 @@ end
 
 function EventHandler:PLAYER_LOGIN()
   if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
+
     addon:InitializePartyAndRaidSubFrames()
     addon:RefreshOptionTables()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:InstallHooks()
+      Miscellaneous:RestoreAll(profile)
+      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
 
     if MouseoverFrameFading:IsEnabled() then

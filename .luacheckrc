@@ -143,6 +143,7 @@ globals = {
   "PetFrameManaBarTextRight",
   "PetFrameManaBarText",
   "SpellFlyout",
+  "IsInRaid",
   "L"
 }
 max_line_length = 200
