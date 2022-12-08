@@ -46,12 +46,12 @@ local function updatePartyAndRaidFrame()
   end
 end
 
-local function restoreMouseoverFade(forced, ignoreFadeWhenFading)
+local function restoreMouseoverFade()
   if MouseoverFrameFading:IsEnabled() then
     if BlizzHUDTweaks.hasTarget then
-      MouseoverFrameFading:RefreshFrameAlphas(forced)
+      MouseoverFrameFading:RefreshFrameAlphas()
     else
-      MouseoverFrameFading:RefreshFrameAlphas(forced, true, ignoreFadeWhenFading)
+      MouseoverFrameFading:RefreshFrameAlphas()
     end
   end
 end
@@ -201,7 +201,12 @@ function EventHandler:PLAYER_LOGIN()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:InstallHooks()
-      Miscellaneous:RestoreAll(profile)
+      C_Timer.After(
+        1,
+        function()
+          Miscellaneous:RestoreAll(profile)
+        end
+      )
       Miscellaneous:UpdateActionbar1UnusedButtons()
     end
 
