@@ -266,6 +266,9 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           frame.__BlizzHUDTweaksAnimationGroup = animationGroup
           frame.__BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
         end
+
+        Debug:IncrementFnCall("MouseoverFrameFading:Fade")
+
         frame.__BlizzHUDTweaksFadeAnimation:Stop()
         frame.__BlizzHUDTweaksAnimationGroup:Stop()
 

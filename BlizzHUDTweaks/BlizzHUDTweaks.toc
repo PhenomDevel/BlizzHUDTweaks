@@ -29,6 +29,7 @@ MouseoverFrameFading.lua
 ClassResource.lua
 Miscellaneous.lua
 API.lua
+Debug.lua
 
 Util.lua
 EventHandler.lua

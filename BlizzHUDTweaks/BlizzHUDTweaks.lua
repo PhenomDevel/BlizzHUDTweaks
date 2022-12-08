@@ -9,6 +9,7 @@ local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local ClassResource = addon:NewModule("ClassResource")
 local Miscellaneous = addon:NewModule("Miscellaneous")
+local Debug = addon:NewModule("Debug")
 
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
@@ -524,6 +525,11 @@ function addon:OnInitialize()
 
   addon:InitializeUpdateTicker()
   addon:InitializeOptions()
+
+  --@debug@
+  self.db.profile.debug = false
+  Debug:Init()
+  --@end-debug@
 end
 
 function addon:InitializeOptions()
