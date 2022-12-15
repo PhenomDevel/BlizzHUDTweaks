@@ -166,6 +166,9 @@ local defaultConfig = {
     },
     ["UIWidgetPowerBarContainerFrame"] = {
       displayName = "Encounter Bar"
+    },
+    ["BuffFrame.CollapseAndExpandButton"] = {
+      displayName = "BuffFrame Collapse Button"
     }
   }
 }
@@ -202,7 +205,8 @@ local frameMapping = {
   ["CompactRaidFrameContainer"] = {mainFrame = CompactRaidFrameContainer},
   ["MainMenuBarVehicleLeaveButton"] = {mainFrame = MainMenuBarVehicleLeaveButton},
   ["FocusFrameToT"] = {mainFrame = FocusFrameToT},
-  ["UIWidgetPowerBarContainerFrame"] = {mainFrame = UIWidgetPowerBarContainerFrame}
+  ["UIWidgetPowerBarContainerFrame"] = {mainFrame = UIWidgetPowerBarContainerFrame},
+  ["BuffFrame.CollapseAndExpandButton"] = {mainFrame = BuffFrame.CollapseAndExpandButton}
 }
 
 local function setFrameDefaultOptions(frameOptions)
