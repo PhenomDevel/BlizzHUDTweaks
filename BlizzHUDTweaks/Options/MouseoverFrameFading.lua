@@ -390,6 +390,7 @@ local function addMouseoverFrameLinkOptions(t, profile)
   local args = {}
   local selectValues = addon:GetFrameTable()
   selectValues["*Global*"] = nil
+  selectValues["Global"] = nil
 
   args["FrameLinksResetAll"] = {
     order = 0,
