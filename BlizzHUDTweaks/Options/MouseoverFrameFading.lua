@@ -388,9 +388,7 @@ end
 
 local function addMouseoverFrameLinkOptions(t, profile)
   local args = {}
-  local selectValues = addon:tClone(addon:GetFrameTable())
-  selectValues["*Global*"] = nil
-  selectValues["Global"] = nil
+  local selectValues = addon:GetFrameTable()
 
   args["FrameLinksResetAll"] = {
     order = 0,
@@ -413,7 +411,9 @@ local function addMouseoverFrameLinkOptions(t, profile)
   for frameName, frameOptions in pairs(profile) do
     if type(frameOptions) == "table" and frameOptions.displayName then
       if not frameOptions.Hidden and frameName ~= "*Global*" then
-        local selectValuesForFrame = selectValues
+        local selectValuesForFrame = addon:tClone(selectValues)
+        selectValuesForFrame["*Global*"] = nil
+        selectValuesForFrame["Global"] = nil
         selectValuesForFrame[frameName] = nil
         args[frameName .. "LinkedFramesOptions"] = {
           type = "group",
