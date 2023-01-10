@@ -247,6 +247,10 @@ function Miscellaneous:UpdateActionbar1UnusedButtons(forcedAlpha)
       end
     end
   end
+
+  if MainMenuBar.Background:IsShown() and addon:GetProfileDB()["MiscellaneousActionbar1HideUnbindActionbuttons"] then
+    MainMenuBar.Background:Hide()
+  end
 end
 
 function Miscellaneous:RestoreOriginal()
