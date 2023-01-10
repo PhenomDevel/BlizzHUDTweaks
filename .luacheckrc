@@ -145,6 +145,8 @@ globals = {
   "SpellFlyout",
   "IsInRaid",
   "UIWidgetPowerBarContainerFrame",
+  "IsMounted",
+  "HasBonusActionBar",
   "L"
 }
 max_line_length = 200

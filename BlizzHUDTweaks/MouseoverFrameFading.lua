@@ -13,6 +13,16 @@ local function byHealthAlphaValue(globalOptions, frameOptions)
   end
 end
 
+local function vehicleAlphaValue(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    if globalOptions.FadeVehicle then
+      return globalOptions.VehicleAlpha
+    end
+  elseif frameOptions.FadeVehicle then
+    return frameOptions.VehicleAlpha
+  end
+end
+
 local function inCombatAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     if globalOptions.FadeInCombat then
@@ -85,6 +95,14 @@ local function byHealthFadeActive(globalOptions, frameOptions)
   end
 end
 
+local function vehicleFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.FadeVehicle
+  else
+    return frameOptions.FadeVehicle
+  end
+end
+
 local function inCombatFadeActive(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     return globalOptions.FadeInCombat
@@ -135,10 +153,13 @@ local function determineTargetAlpha(globalOptions, frameOptions)
   local inCombat = BlizzHUDTweaks.inCombat
   local isResting = BlizzHUDTweaks.isResting
   local hasTarget = BlizzHUDTweaks.hasTarget
+  local hasBonusActionBar = IsMounted() and HasBonusActionBar()
 
   local alpha
 
-  if inCombat and inCombatFadeActive(globalOptions, frameOptions) then
+  if hasBonusActionBar and vehicleFadeActive(globalOptions, frameOptions) then
+    alpha = vehicleAlphaValue(globalOptions, frameOptions)
+  elseif inCombat and inCombatFadeActive(globalOptions, frameOptions) then
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)

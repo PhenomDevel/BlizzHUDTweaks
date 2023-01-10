@@ -156,6 +156,39 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   }
 
   order = order + 0.1
+  subOptions["VehicleGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Vehicle Fade",
+    args = {
+      ["FadeVehicle"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active the fade value will be applied when you're in an vehicle." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        arg = frameName
+      },
+      ["VehicleAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame when on an vehicle.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        arg = frameName
+      }
+    }
+  }
+
+  order = order + 0.1
   subOptions["InCombatGroup"] = {
     order = order,
     type = "group",

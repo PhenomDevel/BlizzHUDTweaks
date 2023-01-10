@@ -75,7 +75,8 @@ local eventsToRegister = {
   "UPDATE_SHAPESHIFT_COOLDOWN",
   "UPDATE_BONUS_ACTIONBAR",
   "UNIT_HEALTH",
-  "ZONE_CHANGED_NEW_AREA"
+  "ZONE_CHANGED_NEW_AREA",
+  "PLAYER_MOUNT_DISPLAY_CHANGED"
 }
 
 local registeredEvents = {}
@@ -315,5 +316,11 @@ function EventHandler:ZONE_CHANGED_NEW_AREA()
       Miscellaneous:RestoreAll(profile)
       Miscellaneous:UpdateActionbar1UnusedButtons()
     end
+  end
+end
+
+function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
+  if addon:IsEnabled() then
+    restoreMouseoverFade()
   end
 end
