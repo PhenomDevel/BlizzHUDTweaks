@@ -147,7 +147,9 @@ globals = {
   "UIWidgetPowerBarContainerFrame",
   "IsMounted",
   "HasBonusActionBar",
-  "L"
+  "L",
+  "BagsBar",
+  "MicroMenu"
 }
 max_line_length = 200
 max_code_line_length = 200
