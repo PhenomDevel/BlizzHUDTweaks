@@ -375,9 +375,17 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
         local frameOptions = profile[frameName]
 
         if frameOptions.Enabled and frameMappingOptions.mainFrame then
+          local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
+
           local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
           local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
-          local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+          local targetAlpha
+
+          if isMouseover then
+            targetAlpha = 1
+          else
+            targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+          end
 
           if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
             local fadeDelay = 0
