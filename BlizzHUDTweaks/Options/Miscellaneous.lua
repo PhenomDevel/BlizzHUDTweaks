@@ -330,7 +330,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbar1HideUnbindActionbuttons",
         displayName = "Hide unused action bar 1 buttons",
         frame = MainMenuBar,
-        actionButtonName = "ActionButton",
+        actionButtonName = "MainMenuBarButtonContainer",
         type = "toggle",
         setFn = function()
           Miscellaneous:UpdateActionbar1UnusedButtons()
@@ -343,7 +343,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar1",
         displayName = "Action Bar 1",
         frame = MainMenuBar,
-        actionButtonName = "ActionButton",
+        actionButtonName = "MainMenuBarButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -351,7 +351,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar2",
         displayName = "Action Bar 2",
         frame = MultiBarBottomLeft,
-        actionButtonName = "MultiBarBottomLeftButton",
+        actionButtonName = "MultiBarBottomLeftButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -359,7 +359,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar3",
         displayName = "Action Bar 3",
         frame = MultiBarBottomRight,
-        actionButtonName = "MultiBarBottomRightButton",
+        actionButtonName = "MultiBarBottomRightButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -367,7 +367,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar4",
         displayName = "Action Bar 4",
         frame = MultiBarRight,
-        actionButtonName = "MultiBarRightButton",
+        actionButtonName = "MultiBarRightButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -375,7 +375,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar5",
         displayName = "Action Bar 5",
         frame = MultiBarLeft,
-        actionButtonName = "MultiBarLeftButton",
+        actionButtonName = "MultiBarLeftButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -383,7 +383,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar6",
         displayName = "Action Bar 6",
         frame = MultiBar5,
-        actionButtonName = "MultiBar5Button",
+        actionButtonName = "MultiBar5ButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -391,7 +391,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar7",
         displayName = "Action Bar 7",
         frame = MultiBar6,
-        actionButtonName = "MultiBar6Button",
+        actionButtonName = "MultiBar6ButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -399,7 +399,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar8",
         displayName = "Action Bar 8",
         frame = MultiBar7,
-        actionButtonName = "MultiBar7Button",
+        actionButtonName = "MultiBar7ButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -407,7 +407,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwritePetActionBar",
         displayName = "Pet Action Bar",
         frame = PetActionBar,
-        actionButtonName = "PetActionButton",
+        actionButtonName = "PetActionButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -415,7 +415,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteStanceBar",
         displayName = "Stance Bar",
         frame = StanceBar,
-        actionButtonName = "StanceButton",
+        actionButtonName = "StanceButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       }
