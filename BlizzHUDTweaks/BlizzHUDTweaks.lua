@@ -525,8 +525,6 @@ function addon:OnInitialize()
   self:RegisterChatCommand("blizzhudtweaks", "ExecuteChatCommand")
   self:RegisterChatCommand("bht", "ExecuteChatCommand")
 
-  addon:HideGCDFlash()
-
   EventHandler:RegisterEvents()
 
   QueueStatusButton:SetParent(UIParent)

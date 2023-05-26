@@ -156,6 +156,7 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
+    addon:HideGCDFlash()
 
     if ClassResource:IsEnabled() then
       ClassResource:Restore(profile)
