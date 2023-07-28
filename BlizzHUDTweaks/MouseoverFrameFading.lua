@@ -299,7 +299,7 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
           frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
           frame.__BlizzHUDTweaksAnimationGroup:Restart()
-         end)        
+         end)
       end
     end
   end
