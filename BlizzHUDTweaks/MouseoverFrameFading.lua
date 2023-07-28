@@ -291,18 +291,15 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
 
         Debug:IncrementFnCall("MouseoverFrameFading:Fade")
 
-        C_Timer.After(math.random(10) / 100, function() 
+        C_Timer.After(math.random(10) / 100, function()
           frame.__BlizzHUDTweaksFadeAnimation:Stop()
           frame.__BlizzHUDTweaksAnimationGroup:Stop()
-  
           frame.__BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
           frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
           frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
           frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
-  
           frame.__BlizzHUDTweaksAnimationGroup:Restart()
-         end)
-        
+         end)        
       end
     end
   end
