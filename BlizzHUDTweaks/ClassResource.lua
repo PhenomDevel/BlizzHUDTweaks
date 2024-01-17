@@ -99,28 +99,30 @@ function ClassResource:Restore(profile)
       currentSpecName = select(2, GetSpecializationInfo(currentSpec))
     end
 
-    local enabled = profile["ClassResourcePositionEnabled_" .. class .. "_" .. currentSpecName]
-    local anchor = profile["ClassResourcePositionAnchor_" .. class .. "_" .. currentSpecName]
-    local xOffset = profile["ClassResourcePositionXOffset_" .. class .. "_" .. currentSpecName]
-    local yOffset = profile["ClassResourcePositionYOffset_" .. class .. "_" .. currentSpecName]
-    local scale = profile["ClassResourcePositionScale_" .. class .. "_" .. currentSpecName]
-    local hide = profile["ClassResourcePositionHide_" .. class .. "_" .. currentSpecName]
+    if currentSpecName then
+      local enabled = profile["ClassResourcePositionEnabled_" .. class .. "_" .. currentSpecName]
+      local anchor = profile["ClassResourcePositionAnchor_" .. class .. "_" .. currentSpecName]
+      local xOffset = profile["ClassResourcePositionXOffset_" .. class .. "_" .. currentSpecName]
+      local yOffset = profile["ClassResourcePositionYOffset_" .. class .. "_" .. currentSpecName]
+      local scale = profile["ClassResourcePositionScale_" .. class .. "_" .. currentSpecName]
+      local hide = profile["ClassResourcePositionHide_" .. class .. "_" .. currentSpecName]
 
-    if enabled then
-      if hide then
-        PlayerFrameBottomManagedFramesContainer:Hide()
-      else
-        PlayerFrameBottomManagedFramesContainer:Show()
-      end
-
-      if PlayerFrameBottomManagedFramesContainer:IsShown() then
-        ClassResource:SetPoint(anchor, nil, nil, xOffset, yOffset)
-        if scale then
-          PlayerFrameBottomManagedFramesContainer:SetScale(scale)
+      if enabled then
+        if hide then
+          PlayerFrameBottomManagedFramesContainer:Hide()
+        else
+          PlayerFrameBottomManagedFramesContainer:Show()
         end
+
+        if PlayerFrameBottomManagedFramesContainer:IsShown() then
+          ClassResource:SetPoint(anchor, nil, nil, xOffset, yOffset)
+          if scale then
+            PlayerFrameBottomManagedFramesContainer:SetScale(scale)
+          end
+        end
+      else
+        ClassResource:RestorePosition()
       end
-    else
-      ClassResource:RestorePosition()
     end
   end
 end
