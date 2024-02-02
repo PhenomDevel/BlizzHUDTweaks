@@ -456,7 +456,7 @@ local function addActionbarPaddingOption(profile, t, option, order)
         name = "Padding",
         desc = option.description or "",
         type = "range",
-        min = -4,
+        min = -18,
         max = 18,
         step = 1,
         set = function(info, value)
