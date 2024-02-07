@@ -407,7 +407,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwritePetActionBar",
         displayName = "Pet Action Bar",
         frame = PetActionBar,
-        actionButtonName = "PetActionButtonContainer",
+        actionButtonName = "PetActionBarButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
@@ -415,7 +415,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousActionbarPaddingOverwriteStanceBar",
         displayName = "Stance Bar",
         frame = StanceBar,
-        actionButtonName = "StanceButtonContainer",
+        actionButtonName = "StanceBarButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       }

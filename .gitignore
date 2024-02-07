@@ -9,3 +9,4 @@ BlizzHUDTweaks/Libs/Callback*
 *.html
 SCRATCH.lua
 /Assets
+.vscode/settings.json
