@@ -11,7 +11,7 @@ local ClassResource = addon:NewModule("ClassResource")
 local Miscellaneous = addon:NewModule("Miscellaneous")
 local Debug = addon:NewModule("Debug")
 
-local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
+local LibDBIcon = LibStub("LibDBIcon-1.0")
 
 local function getBlizzHUDTweaksLibDbIconData(db)
   local LibDataBroker = LibStub:GetLibrary("LibDataBroker-1.1", true)
@@ -566,7 +566,7 @@ function addon:RefreshOptionTables()
 end
 
 function addon:OpenOptions()
-  InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+  Settings.OpenToCategory("BlizzHUDTweaks")
 end
 
 function addon:ResetFrame(frame)

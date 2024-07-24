@@ -202,8 +202,8 @@ Miscellaneous.options = {
         optionName = "MiscellaneousFontSizeOverwriteTargetHealthBarFontSize",
         displayName = "Target Health Font Size",
         frames = {
-          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.LeftText, 
-          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.RightText, 
+          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.LeftText,
+          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.RightText,
           TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.TextString},
         description = "",
         type = "range",

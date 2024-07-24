@@ -312,7 +312,7 @@ function Miscellaneous:InstallHooks()
   QuickKeybindFrame:HookScript("OnShow", restore)
   QuickKeybindFrame:HookScript("OnHide", restore)
 
-  if PlayerSpellFrame then
+  if PlayerSpellsFrame then
     PlayerSpellsFrame:HookScript("OnShow", restore)
     PlayerSpellsFrame:HookScript("OnHide", restore)
   end
