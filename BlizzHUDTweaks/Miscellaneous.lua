@@ -311,8 +311,11 @@ function Miscellaneous:InstallHooks()
   EditModeManagerFrame:HookScript("OnHide", restore)
   QuickKeybindFrame:HookScript("OnShow", restore)
   QuickKeybindFrame:HookScript("OnHide", restore)
-  SpellBookFrame:HookScript("OnShow", restore)
-  SpellBookFrame:HookScript("OnHide", restore)
+
+  if PlayerSpellFrame then
+    PlayerSpellsFrame:HookScript("OnShow", restore)
+    PlayerSpellsFrame:HookScript("OnHide", restore)
+  end
 
   for _, groupOptions in pairs(Miscellaneous.options) do
     for _, option in ipairs(groupOptions.options or {}) do

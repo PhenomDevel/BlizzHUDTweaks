@@ -144,10 +144,10 @@ Miscellaneous.options = {
           PlayerFrameHealthBarText,
           PlayerFrameHealthBarTextLeft,
           PlayerFrameHealthBarTextRight,
-          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.HealthBarText,
-          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.TextString,
-          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.LeftText,
-          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarArea.HealthBar.RightText
+          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarsContainer.HealthBar.HealthBarText,
+          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarsContainer.HealthBar.TextString,
+          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarsContainer.HealthBar.LeftText,
+          PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.HealthBarsContainer.HealthBar.RightText
         },
         description = "",
         type = "range",
@@ -201,7 +201,10 @@ Miscellaneous.options = {
       {
         optionName = "MiscellaneousFontSizeOverwriteTargetHealthBarFontSize",
         displayName = "Target Health Font Size",
-        frames = {TargetFrame.healthbar.HealthBarText, TargetFrame.healthbar.LeftText, TargetFrame.healthbar.RightText},
+        frames = {
+          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.LeftText, 
+          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.RightText, 
+          TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBarsContainer.HealthBar.TextString},
         description = "",
         type = "range",
         min = 2,
