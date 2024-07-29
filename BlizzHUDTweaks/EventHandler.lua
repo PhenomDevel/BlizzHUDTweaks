@@ -61,7 +61,7 @@ local eventsToRegister = {
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
   "PLAYER_UPDATE_RESTING",
-  "PLAYER_TARGET_CHANGED",
+  "UNIT_TARGET",
   "PLAYER_ENTERING_WORLD",
   "PLAYER_TOTEM_UPDATE",
   "PLAYER_SPECIALIZATION_CHANGED",
@@ -138,7 +138,7 @@ end
 
 BlizzHUDTweaks.lastUpdate = 0
 
-function EventHandler:PLAYER_TARGET_CHANGED()
+function EventHandler:UNIT_TARGET()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
 
   if GetTime() ~= BlizzHUDTweaks.lastUpdate and (GetTime() - BlizzHUDTweaks.lastUpdate) > 0.05 then
