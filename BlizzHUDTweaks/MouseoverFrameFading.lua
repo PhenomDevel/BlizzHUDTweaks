@@ -354,12 +354,12 @@ local function shouldFade(frame)
   end
 end
 
-function MouseoverFrameFading:StopAnimations()
+function MouseoverFrameFading:PauseAnimations()
   for _, frameMappingOptions in pairs(addon:GetFrameMapping()) do
     local frame = frameMappingOptions.mainFrame
     if frame then
       if frame.__BlizzHUDTweaksAnimationGroup then
-        frame.__BlizzHUDTweaksAnimationGroup:Stop()
+        frame.__BlizzHUDTweaksAnimationGroup:Pause()
       end
     end
   end
