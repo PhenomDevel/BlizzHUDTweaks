@@ -328,7 +328,7 @@ Miscellaneous.options = {
   },
   ["ActionBarOptions"] = {
     name = "Action Bars",
-    options = {  
+    options = {
       {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar1",
         displayName = "Action Bar 1",
