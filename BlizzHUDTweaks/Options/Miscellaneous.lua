@@ -328,20 +328,7 @@ Miscellaneous.options = {
   },
   ["ActionBarOptions"] = {
     name = "Action Bars",
-    options = {
-      {
-        optionName = "MiscellaneousActionbar1HideUnbindActionbuttons",
-        displayName = "Hide unused action bar 1 buttons",
-        frame = MainMenuBar,
-        actionButtonName = "MainMenuBarButtonContainer",
-        type = "toggle",
-        setFn = function()
-          Miscellaneous:UpdateActionbar1UnusedButtons()
-        end,
-        restoreOriginalValueFn = function()
-          Miscellaneous:UpdateActionbar1UnusedButtons(1)
-        end
-      },
+    options = {  
       {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar1",
         displayName = "Action Bar 1",

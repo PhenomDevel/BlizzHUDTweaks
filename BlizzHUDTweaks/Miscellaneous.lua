@@ -236,39 +236,6 @@ function Miscellaneous:FlashObjectiveTracker(profile)
   end
 end
 
-function Miscellaneous:UpdateActionbar1UnusedButtons(forcedAlpha)
-  local buttons = MainMenuBar.numButtonsShowable
-
-  for i = 1, buttons do
-    local buttonName = "ActionButton" .. i
-    local button = _G[buttonName]
-
-    if forcedAlpha then
-      button:SetAlpha(forcedAlpha)
-    elseif MainMenuBar.ShowAllButtons then
-      if button:GetAlpha() ~= 1 then
-        button:SetAlpha(1)
-      end
-    else
-      if button:HasAction() then
-        button:SetAlpha(1)
-      else
-        if addon:GetProfileDB()["MiscellaneousActionbar1HideUnbindActionbuttons"] then
-          button:SetAlpha(0)
-        else
-          button:SetAlpha(1)
-        end
-      end
-    end
-  end
-
-  if MainMenuBar.Background then
-    if MainMenuBar.Background:IsShown() and addon:GetProfileDB()["MiscellaneousActionbar1HideUnbindActionbuttons"] then
-      MainMenuBar.Background:Hide()
-    end
-  end
-end
-
 function Miscellaneous:RestoreOriginal()
   for _, groupOptions in pairs(Miscellaneous.options) do
     for _, option in ipairs(groupOptions.options) do
@@ -277,7 +244,6 @@ function Miscellaneous:RestoreOriginal()
       end
     end
   end
-  Miscellaneous:UpdateActionbar1UnusedButtons()
 end
 
 function Miscellaneous:RestoreAll(profile)
@@ -295,9 +261,6 @@ function Miscellaneous:RestoreAll(profile)
           end
         end
       end
-    end
-    if profile["MiscellaneousActionbar1HideUnbindActionbuttons"] then
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -329,7 +292,6 @@ end
 function Miscellaneous:Disable()
   local profile = addon:GetProfileDB()
   Miscellaneous:RestoreOriginal(profile)
-  Miscellaneous:UpdateActionbar1UnusedButtons(1)
   --@debug@
   addon:Print("Disabled Module", addon:ColoredString("Miscellaneous", "fcba03"))
   --@end-debug@

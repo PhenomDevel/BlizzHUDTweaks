@@ -72,8 +72,6 @@ local eventsToRegister = {
   "GROUP_ROSTER_UPDATE",
   "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
-  "UPDATE_SHAPESHIFT_COOLDOWN",
-  "UPDATE_BONUS_ACTIONBAR",
   "UNIT_HEALTH",
   "ZONE_CHANGED_NEW_AREA",
   "PLAYER_MOUNT_DISPLAY_CHANGED"
@@ -165,7 +163,6 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:RestoreAll(profile)
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
 
     restoreMouseoverFade()
@@ -210,7 +207,6 @@ function EventHandler:PLAYER_LOGIN()
           Miscellaneous:RestoreAll(profile)
         end
       )
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
 
     if MouseoverFrameFading:IsEnabled() then
@@ -235,7 +231,6 @@ function EventHandler:ACTIONBAR_SLOT_CHANGED()
     if Miscellaneous:IsEnabled() then
       local profile = addon:GetProfileDB()
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -246,7 +241,6 @@ function EventHandler:ACTIONBAR_SHOWGRID()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -257,7 +251,6 @@ function EventHandler:ACTIONBAR_HIDEGRID()
       local profile = addon:GetProfileDB()
 
       Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
@@ -295,14 +288,6 @@ function EventHandler:UNIT_QUEST_LOG_CHANGED()
   end
 end
 
-function EventHandler:UPDATE_SHAPESHIFT_COOLDOWN()
-  Miscellaneous:UpdateActionbar1UnusedButtons()
-end
-
-function EventHandler:UPDATE_BONUS_ACTIONBAR()
-  Miscellaneous:UpdateActionbar1UnusedButtons()
-end
-
 function EventHandler:UNIT_HEALTH(_, unit)
   if unit == "player" then
     MouseoverFrameFading:RefreshFrameAlphas()
@@ -315,7 +300,6 @@ function EventHandler:ZONE_CHANGED_NEW_AREA()
 
     if Miscellaneous:IsEnabled() then
       Miscellaneous:RestoreAll(profile)
-      Miscellaneous:UpdateActionbar1UnusedButtons()
     end
   end
 end
