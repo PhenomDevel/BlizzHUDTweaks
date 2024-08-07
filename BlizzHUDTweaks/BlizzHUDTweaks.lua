@@ -199,7 +199,7 @@ local frameMapping = {
   ["MinimapCluster"] = {mainFrame = MinimapCluster},
   ["StatusTrackingBarManager"] = {mainFrame = StatusTrackingBarManager},
   ["PlayerCastingBarFrame"] = {mainFrame = PlayerCastingBarFrame},
-  ["ExtraActionButtonFrame"] = {mainFrame = ExtraActionButtonFrame},
+  ["ExtraActionButtonFrame"] = {mainFrame = ExtraAbilityContainer},
   ["PetFrame"] = {mainFrame = PetFrame},
   ["QueueStatusButton"] = {mainFrame = QueueStatusButton},
   ["DurabilityFrame"] = {mainFrame = DurabilityFrame},
