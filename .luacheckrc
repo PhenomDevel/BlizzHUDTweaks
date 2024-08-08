@@ -118,6 +118,7 @@ globals = {
   "PlayerFrameHealthBarTextLeft",
   "PlayerFrameHealthBarTextRight",
   "PlayerFrameManaBarText",
+  "ExtraAbilityContainer",
   "PlayerFrameManaBarTextLeft",
   "PlayerFrameManaBarTextRight",
   "ActionButton1",
