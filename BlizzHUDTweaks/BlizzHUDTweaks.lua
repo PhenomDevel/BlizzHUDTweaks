@@ -322,7 +322,7 @@ local additionalAddonFrames = {
 
 local function updateFramesForLoadedAddons(profile)
   for addonName, options in pairs(additionalAddonFrames) do
-    local _, _, _, enabled = GetAddOnInfo(addonName)
+    local _, _, _, enabled = C_AddOns.GetAddOnInfo(addonName)
 
     if enabled then
       if options.frames then

@@ -74,6 +74,7 @@ globals = {
   "time",
   "date",
   "C_Timer",
+  "C_AddOns",
   "PlayerFrame",
   "TargetFrame",
   "MainMenuBar",
