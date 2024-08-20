@@ -197,7 +197,7 @@ local frameMapping = {
   ["DebuffFrame"] = {mainFrame = DebuffFrame},
   ["ZoneAbilityFrame"] = {mainFrame = ZoneAbilityFrame},
   ["MinimapCluster"] = {mainFrame = MinimapCluster},
-  ["StatusTrackingBarManager"] = {mainFrame = StatusTrackingBarManager},
+  ["StatusTrackingBarManager"] = {mainFrame = MainStatusTrackingBarContainer},
   ["PlayerCastingBarFrame"] = {mainFrame = PlayerCastingBarFrame},
   ["ExtraActionButtonFrame"] = {mainFrame = ExtraAbilityContainer},
   ["PetFrame"] = {mainFrame = PetFrame},
