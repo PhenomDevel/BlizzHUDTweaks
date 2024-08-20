@@ -76,6 +76,7 @@ globals = {
   "C_Timer",
   "C_AddOns",
   "PlayerFrame",
+  "MainStatusTrackingBarContainer",
   "TargetFrame",
   "MainMenuBar",
   "MultiBarBottomLeft",
