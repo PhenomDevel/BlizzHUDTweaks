@@ -74,7 +74,9 @@ local eventsToRegister = {
   "UNIT_QUEST_LOG_CHANGED",
   "UNIT_HEALTH",
   "ZONE_CHANGED_NEW_AREA",
-  "PLAYER_MOUNT_DISPLAY_CHANGED"
+  "PLAYER_MOUNT_DISPLAY_CHANGED",
+  "UNIT_EXITING_VEHICLE",
+  "UNIT_ENTERING_VEHICLE"
 }
 
 local registeredEvents = {}
@@ -307,5 +309,27 @@ end
 function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
   if addon:IsEnabled() then
     restoreMouseoverFade()
+  end
+end
+
+function EventHandler:UNIT_EXITING_VEHICLE(data)
+  if addon:IsEnabled() then
+    if ClassResource:IsEnabled() then
+      local profile = addon:GetProfileDB()
+
+      ClassResource:Restore(profile)
+      ClassResource:RestoreTotemFrame(profile)
+    end
+  end
+end
+
+function EventHandler:UNIT_ENTERING_VEHICLE(data)
+  if addon:IsEnabled() then
+    if ClassResource:IsEnabled() then
+      local profile = addon:GetProfileDB()
+
+      ClassResource:Restore(profile)
+      ClassResource:RestoreTotemFrame(profile)
+    end
   end
 end
