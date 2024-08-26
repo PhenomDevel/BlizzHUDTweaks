@@ -312,7 +312,7 @@ function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
   end
 end
 
-function EventHandler:UNIT_EXITING_VEHICLE(data)
+function EventHandler:UNIT_EXITING_VEHICLE()
   if addon:IsEnabled() then
     if ClassResource:IsEnabled() then
       local profile = addon:GetProfileDB()
@@ -323,7 +323,7 @@ function EventHandler:UNIT_EXITING_VEHICLE(data)
   end
 end
 
-function EventHandler:UNIT_ENTERING_VEHICLE(data)
+function EventHandler:UNIT_ENTERING_VEHICLE()
   if addon:IsEnabled() then
     if ClassResource:IsEnabled() then
       local profile = addon:GetProfileDB()
