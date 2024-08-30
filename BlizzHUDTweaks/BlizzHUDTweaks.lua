@@ -127,8 +127,11 @@ local defaultConfig = {
     ["MinimapCluster"] = {
       displayName = "Minimap"
     },
-    ["StatusTrackingBarManager"] = {
-      displayName = "Reputation and Experience Bar"
+    ["MainStatusTrackingBarContainer"] = {
+      displayName = "Experience Bar"
+    },
+    ["SecondaryStatusTrackingBarContainer"] = {
+      displayName = "Reputation Bar"
     },
     ["PlayerCastingBarFrame"] = {
       displayName = "Player Cast Bar"
@@ -197,7 +200,8 @@ local frameMapping = {
   ["DebuffFrame"] = {mainFrame = DebuffFrame},
   ["ZoneAbilityFrame"] = {mainFrame = ZoneAbilityFrame},
   ["MinimapCluster"] = {mainFrame = MinimapCluster},
-  ["StatusTrackingBarManager"] = {mainFrame = StatusTrackingBarManager},
+  ["MainStatusTrackingBarContainer"] = {mainFrame = MainStatusTrackingBarContainer},
+  ["SecondaryStatusTrackingBarContainer"] = {mainFrame = SecondaryStatusTrackingBarContainer},
   ["PlayerCastingBarFrame"] = {mainFrame = PlayerCastingBarFrame},
   ["ExtraActionButtonFrame"] = {mainFrame = ExtraAbilityContainer},
   ["PetFrame"] = {mainFrame = PetFrame},

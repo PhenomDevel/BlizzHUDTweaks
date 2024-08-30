@@ -77,6 +77,7 @@ globals = {
   "C_AddOns",
   "PlayerFrame",
   "MainStatusTrackingBarContainer",
+  "SecondaryStatusTrackingBarContainer",
   "TargetFrame",
   "MainMenuBar",
   "MultiBarBottomLeft",
