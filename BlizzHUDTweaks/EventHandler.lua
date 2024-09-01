@@ -19,6 +19,8 @@ local function installKeyDownHandler()
         local shiftDown = IsShiftKeyDown()
         local ctrlDown = IsControlKeyDown()
         local altDown = IsAltKeyDown()
+        
+        local keybindHasModifiers = string.find(keybind, "SHIFT") or string.find(keybind, "CTRL") or string.find(keybind, "ALT")
 
         if keybind and keybind ~= "" then
           if string.find(keybind, pressedKey) then
@@ -26,8 +28,20 @@ local function installKeyDownHandler()
               return
             end
 
-            local normalizedKeybind = keybind:gsub("SHIFT", ""):gsub("ALT", ""):gsub("CTRL", ""):gsub("-", "")
-            if string.len(normalizedKeybind) == string.len(pressedKey) then
+            local normaliedPressedKey = ""
+
+            if altDown then 
+              normaliedPressedKey = normaliedPressedKey .. "ALT-" 
+            end 
+            if ctrlDown then 
+              normaliedPressedKey = normaliedPressedKey .. "CTRL-" 
+            end 
+            if shiftDown then 
+              normaliedPressedKey = normaliedPressedKey .. "SHIFT-" 
+            end 
+            normaliedPressedKey = normaliedPressedKey .. pressedKey
+
+            if keybind == normaliedPressedKey then
               MouseoverFrameFading:Toggle()
             end
           end
