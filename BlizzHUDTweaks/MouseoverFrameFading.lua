@@ -207,22 +207,49 @@ end
 
 local function determineMouseOver(profile, frameName, frameOptions)
   local linkedFrames = profile[frameName .. "LinkedFrames"]
-  local linkedFrameMouseover
+  local mainFrame = frameOptions.mainFrame
+  local fallback = mainFrame.__BlizzHUDTweaksForceMouseover or mainFrame:IsMouseOver()
 
+  -- Check if SpellFlyout is shown and mouse-over
+  local spellFlyoutButtonBarName = ""
+  if SpellFlyout and SpellFlyout:IsShown() and SpellFlyout:IsMouseOver() then
+    local button = SpellFlyout:GetParent()
+    if button and button.bar then
+      spellFlyoutButtonBarName = button.bar:GetName()
+    end
+  end
+
+  local linkedFrameMouseover = false
+
+  -- Frame with links
   if linkedFrames then
     for linkedFrameName, _ in pairs(linkedFrames) do
-      if profile[linkedFrameName].Enabled then
-        if linkedFrames[linkedFrameName] and addon:GetFrameMapping()[linkedFrameName].mainFrame then
-          if addon:GetFrameMapping()[linkedFrameName].mainFrame:IsMouseOver() then
-            linkedFrameMouseover = true
-            return linkedFrameMouseover or frameOptions.mainFrame:IsMouseOver()
+      local frameProfile = profile[linkedFrameName]
+      if frameProfile and frameProfile.Enabled then
+        if linkedFrames[linkedFrameName] then
+          local mappedFrame = addon:GetFrameMapping()[linkedFrameName]
+          if mappedFrame and mappedFrame.mainFrame then
+            if spellFlyoutButtonBarName == mappedFrame.mainFrame:GetName() then
+              return true
+            end
+            if mappedFrame.mainFrame:IsMouseOver() then
+              linkedFrameMouseover = true
+            end
           end
         end
       end
     end
   end
 
-  return frameOptions.mainFrame.__BlizzHUDTweaksForceMouseover or frameOptions.mainFrame:IsMouseOver()
+  -- Frame with no links
+  local mappedFrame = addon:GetFrameMapping()[frameName]
+  if mappedFrame and mappedFrame.mainFrame then
+    if spellFlyoutButtonBarName == mappedFrame.mainFrame:GetName() then
+      return true
+    end
+  end
+
+  return linkedFrameMouseover or fallback
 end
 
 local function SpellFlyoutOnLeave()
@@ -299,7 +326,7 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
           frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
           frame.__BlizzHUDTweaksAnimationGroup:Restart()
-         end)
+        end)
       end
     end
   end
