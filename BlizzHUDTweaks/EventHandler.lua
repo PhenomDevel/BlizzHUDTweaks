@@ -28,8 +28,8 @@ local function installKeyDownHandler()
 
             local normaliedPressedKey = ""
 
-            if altDown then 
-              normaliedPressedKey = normaliedPressedKey .. "ALT-" 
+            if altDown then
+              normaliedPressedKey = normaliedPressedKey .. "ALT-"
             end
             if ctrlDown then
               normaliedPressedKey = normaliedPressedKey .. "CTRL-"
