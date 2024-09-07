@@ -19,8 +19,6 @@ local function installKeyDownHandler()
         local shiftDown = IsShiftKeyDown()
         local ctrlDown = IsControlKeyDown()
         local altDown = IsAltKeyDown()
-        
-        local keybindHasModifiers = string.find(keybind, "SHIFT") or string.find(keybind, "CTRL") or string.find(keybind, "ALT")
 
         if keybind and keybind ~= "" then
           if string.find(keybind, pressedKey) then
@@ -32,13 +30,13 @@ local function installKeyDownHandler()
 
             if altDown then 
               normaliedPressedKey = normaliedPressedKey .. "ALT-" 
-            end 
-            if ctrlDown then 
-              normaliedPressedKey = normaliedPressedKey .. "CTRL-" 
-            end 
-            if shiftDown then 
-              normaliedPressedKey = normaliedPressedKey .. "SHIFT-" 
-            end 
+            end
+            if ctrlDown then
+              normaliedPressedKey = normaliedPressedKey .. "CTRL-"
+            end
+            if shiftDown then
+              normaliedPressedKey = normaliedPressedKey .. "SHIFT-"
+            end
             normaliedPressedKey = normaliedPressedKey .. pressedKey
 
             if keybind == normaliedPressedKey then
