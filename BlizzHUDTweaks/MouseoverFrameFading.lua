@@ -209,31 +209,33 @@ local function determineMouseOver(profile, frameName, frameOptions)
   local linkedFrames = profile[frameName .. "LinkedFrames"]
   local mainFrame = frameOptions.mainFrame
   local fallback = mainFrame.__BlizzHUDTweaksForceMouseover or mainFrame:IsMouseOver()
-
-  -- Check if SpellFlyout is shown and mouse-over
   local spellFlyoutButtonBarName = ""
+
   if SpellFlyout and SpellFlyout:IsShown() and SpellFlyout:IsMouseOver() then
     local button = SpellFlyout:GetParent()
     if button and button.bar then
       spellFlyoutButtonBarName = button.bar:GetName()
+      local mappedFrame = addon:GetFrameMapping()[frameName]
+      if mappedFrame and mappedFrame.mainFrame then
+        if spellFlyoutButtonBarName == mappedFrame.mainFrame:GetName() then
+          return true -- this frame has flyout mouseover
+        end
+      end
     end
   end
 
-  local linkedFrameMouseover = false
-
-  -- Frame with links
   if linkedFrames then
     for linkedFrameName, _ in pairs(linkedFrames) do
       local frameProfile = profile[linkedFrameName]
       if frameProfile and frameProfile.Enabled then
         if linkedFrames[linkedFrameName] then
-          local mappedFrame = addon:GetFrameMapping()[linkedFrameName]
-          if mappedFrame and mappedFrame.mainFrame then
-            if spellFlyoutButtonBarName == mappedFrame.mainFrame:GetName() then
-              return true
+          local linkedFrame = addon:GetFrameMapping()[linkedFrameName]
+          if linkedFrame and linkedFrame.mainFrame then
+            if spellFlyoutButtonBarName == linkedFrame.mainFrame:GetName() then
+              return true -- Linked frame has flyout mouseover
             end
-            if mappedFrame.mainFrame:IsMouseOver() then
-              linkedFrameMouseover = true
+            if linkedFrame.mainFrame:IsMouseOver() then
+              return true -- Linked frame has mouseover
             end
           end
         end
@@ -241,15 +243,7 @@ local function determineMouseOver(profile, frameName, frameOptions)
     end
   end
 
-  -- Frame with no links
-  local mappedFrame = addon:GetFrameMapping()[frameName]
-  if mappedFrame and mappedFrame.mainFrame then
-    if spellFlyoutButtonBarName == mappedFrame.mainFrame:GetName() then
-      return true
-    end
-  end
-
-  return linkedFrameMouseover or fallback
+  return fallback
 end
 
 local function SpellFlyoutOnLeave()
