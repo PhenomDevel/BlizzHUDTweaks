@@ -92,8 +92,8 @@ local function getFramePositionOptions(profile, prefix, name, frame)
         ClassResource:Restore(profile)
       end
     end,
-    min = -100,
-    max = 100,
+    softMin = -100,
+    softMax = 100,
     step = 1
   }
   t[yOffsetName] = {
@@ -111,8 +111,8 @@ local function getFramePositionOptions(profile, prefix, name, frame)
         ClassResource:Restore(profile)
       end
     end,
-    min = -100,
-    max = 100,
+    softMin = -100,
+    softMax = 100,
     step = 1
   }
   t[scaleName] = {
@@ -130,8 +130,8 @@ local function getFramePositionOptions(profile, prefix, name, frame)
         ClassResource:Restore(profile)
       end
     end,
-    min = 0.2,
-    max = 2,
+    softMin = 0.2,
+    softMax = 2,
     step = 0.05
   }
 
