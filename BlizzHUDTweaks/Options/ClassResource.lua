@@ -3,10 +3,15 @@ local Options = addon:GetModule("Options")
 local ClassResource = addon:GetModule("ClassResource")
 
 local anchors = {
-  ["LEFT"] = "LEFT",
-  ["RIGHT"] = "RIGHT",
-  ["TOP"] = "TOP",
-  ["BOTTOM"] = "BOTTOM"
+  ["TOP"] = "BOTTOM",
+  ["BOTTOM"] = "TOP",
+  ["LEFT"] = "RIGHT",
+  ["RIGHT"] = "LEFT",
+  ["TOPLEFT"] = "TOPLEFT",
+  ["CENTER"] = "CENTER",
+  ["TOPRIGHT"] = "TOPRIGHT",
+  ["BOTTOMRIGHT"] = "BOTTOMRIGHT",
+  ["BOTTOMLEFT"] = "BOTTOMLEFT"
 }
 
 local function getFramePositionOptions(profile, prefix, name, frame)

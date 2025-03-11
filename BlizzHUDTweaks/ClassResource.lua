@@ -5,7 +5,12 @@ local anchorInverse = {
   ["TOP"] = "BOTTOM",
   ["BOTTOM"] = "TOP",
   ["LEFT"] = "RIGHT",
-  ["RIGHT"] = "LEFT"
+  ["RIGHT"] = "LEFT",
+  ["TOPLEFT"] = "BOTTOMRIGHT",
+  ["CENTER"] = "CENTER",
+  ["TOPRIGHT"] = "BOTTOMLEFT",
+  ["BOTTOMRIGHT"] = "TOPLEFT",
+  ["BOTTOMLEFT"] = "TOPRIGHT"
 }
 
 -------------------------------------------------------------------------------
