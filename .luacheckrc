@@ -155,7 +155,11 @@ globals = {
   "HasBonusActionBar",
   "L",
   "BagsBar",
-  "MicroMenu"
+  "MicroMenu",
+  "BuffIconCooldownViewer",
+  "EssentialCooldownViewer",
+  "UtilityCooldownViewer",
+  "BuffBarCooldownViewer"
 }
 max_line_length = 200
 max_code_line_length = 200

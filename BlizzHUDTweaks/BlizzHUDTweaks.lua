@@ -176,6 +176,18 @@ local defaultConfig = {
     },
     ["MicroMenu"] = {
       displayName = "MicroMenu"
+    },
+    ["BuffIconCooldownViewer"] = {
+      displayName = "Cooldown Manager Tracked Buffs"
+    },
+    ["EssentialCooldownViewer"] = {
+      displayName = "Cooldown Manager Essential Cooldowns"
+    },
+    ["UtilityCooldownViewer"] = {
+      displayName = "Cooldown Manager Utility Cooldowns"
+    },
+    ["BuffBarCooldownViewer"] = {
+      displayName = "Cooldown Manager Tracked Bars"
     }
   }
 }
@@ -215,7 +227,11 @@ local frameMapping = {
   ["UIWidgetPowerBarContainerFrame"] = {mainFrame = UIWidgetPowerBarContainerFrame},
   ["BuffFrame.CollapseAndExpandButton"] = {mainFrame = BuffFrame.CollapseAndExpandButton},
   ["BagsBar"] = {mainFrame = BagsBar},
-  ["MicroMenu"] = {mainFrame = MicroMenu}
+  ["MicroMenu"] = {mainFrame = MicroMenu},
+  ["BuffIconCooldownViewer"] = {mainFrame = BuffIconCooldownViewer},
+  ["EssentialCooldownViewer"] = {mainFrame = EssentialCooldownViewer},
+  ["UtilityCooldownViewer"] = {mainFrame = UtilityCooldownViewer},
+  ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer}    
 }
 
 local function setFrameDefaultOptions(frameOptions)
