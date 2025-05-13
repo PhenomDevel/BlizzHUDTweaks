@@ -231,7 +231,7 @@ local frameMapping = {
   ["BuffIconCooldownViewer"] = {mainFrame = BuffIconCooldownViewer},
   ["EssentialCooldownViewer"] = {mainFrame = EssentialCooldownViewer},
   ["UtilityCooldownViewer"] = {mainFrame = UtilityCooldownViewer},
-  ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer}    
+  ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer}
 }
 
 local function setFrameDefaultOptions(frameOptions)
