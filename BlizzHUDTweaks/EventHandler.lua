@@ -345,7 +345,3 @@ function EventHandler:UNIT_ENTERING_VEHICLE()
     end
   end
 end
-
-
-
-/run print(string.find(keybind, pressedKey)
