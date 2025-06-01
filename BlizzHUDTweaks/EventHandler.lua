@@ -21,7 +21,7 @@ local function installKeyDownHandler()
         local altDown = IsAltKeyDown()
 
         if keybind and keybind ~= "" then
-          if string.find(keybind, pressedKey) then
+          if string.find(keybind, pressedKey, 1, true) then
             if (string.find(keybind, "SHIFT") and not shiftDown) or (string.find(keybind, "CTRL") and not ctrlDown) or (string.find(keybind, "ALT") and not altDown) then
               return
             end
@@ -345,3 +345,7 @@ function EventHandler:UNIT_ENTERING_VEHICLE()
     end
   end
 end
+
+
+
+/run print(string.find(keybind, pressedKey)
