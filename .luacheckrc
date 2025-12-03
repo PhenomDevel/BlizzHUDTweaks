@@ -80,6 +80,7 @@ globals = {
   "SecondaryStatusTrackingBarContainer",
   "TargetFrame",
   "MainMenuBar",
+  "MainActionBar",
   "MultiBarBottomLeft",
   "MultiBarBottomRight",
   "MultiBarRight",

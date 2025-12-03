@@ -197,7 +197,7 @@ local frameMapping = {
   ["TargetFrame"] = {mainFrame = TargetFrame},
   ["TargetFrameToT"] = {mainFrame = TargetFrameToT},
   ["FocusFrame"] = {mainFrame = FocusFrame},
-  ["ActionBar1"] = {mainFrame = MainMenuBar},
+  ["ActionBar1"] = {mainFrame = MainActionBar},
   ["ActionBar2"] = {mainFrame = MultiBarBottomLeft},
   ["ActionBar3"] = {mainFrame = MultiBarBottomRight},
   ["ActionBar4"] = {mainFrame = MultiBarRight},

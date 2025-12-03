@@ -332,8 +332,8 @@ Miscellaneous.options = {
       {
         optionName = "MiscellaneousActionbarPaddingOverwriteActionbar1",
         displayName = "Action Bar 1",
-        frame = MainMenuBar,
-        actionButtonName = "MainMenuBarButtonContainer",
+        frame = MainActionBar,
+        actionButtonName = "MainActionBarButtonContainer",
         type = "actionbarpaddinggroup",
         restoreOriginalValueFn = resetActionbarPadding
       },
