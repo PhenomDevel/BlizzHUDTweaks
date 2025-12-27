@@ -555,7 +555,6 @@ function addon:OnInitialize()
 
   --@debug@
   self.db.profile.debug = false
-  Debug:Init()
   --@end-debug@
 end
 
@@ -564,7 +563,6 @@ function addon:InitializeOptions()
   self.optionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
   self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
   self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
-  self.classResourceOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_ClassResource", "Class Resource", "BlizzHUDTweaks")
   self.miscellaneousOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
 end
 
@@ -577,9 +575,6 @@ function addon:RefreshOptionTables()
 
   local mouseoverFrameFadingOptions = MouseoverFrameFading:GetOptionsTable(self.db.profile)
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
-
-  local classResourceOptions = ClassResource:GetOptionsTable(self.db.profile)
-  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_ClassResource", classResourceOptions)
 
   local miscellaneousOptions = Miscellaneous:GetOptionsTable()
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Miscellaneous", miscellaneousOptions)

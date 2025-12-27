@@ -3,7 +3,6 @@ local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 
 local EventHandler = addon:GetModule("EventHandler")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
-local ClassResource = addon:GetModule("ClassResource")
 local Miscellaneous = addon:GetModule("Miscellaneous")
 
 local blizzHUDTweaksFrame = CreateFrame("Frame", "BlizzHUDTweaks", UIParent)
@@ -76,7 +75,6 @@ local eventsToRegister = {
   "UNIT_TARGET",
   "PLAYER_ENTERING_WORLD",
   "PLAYER_TOTEM_UPDATE",
-  "PLAYER_SPECIALIZATION_CHANGED",
   "ACTIONBAR_SLOT_CHANGED",
   "UNIT_PET",
   "ACTIONBAR_SHOWGRID",
@@ -86,9 +84,7 @@ local eventsToRegister = {
   "UNIT_QUEST_LOG_CHANGED",
   "UNIT_HEALTH",
   "ZONE_CHANGED_NEW_AREA",
-  "PLAYER_MOUNT_DISPLAY_CHANGED",
-  "UNIT_EXITING_VEHICLE",
-  "UNIT_ENTERING_VEHICLE"
+  "PLAYER_MOUNT_DISPLAY_CHANGED"
 }
 
 local registeredEvents = {}
@@ -170,11 +166,6 @@ function EventHandler:PLAYER_ENTERING_WORLD()
     local profile = addon:GetProfileDB()
     addon:HideGCDFlash()
 
-    if ClassResource:IsEnabled() then
-      ClassResource:Restore(profile)
-      ClassResource:RestoreTotemFrame(profile)
-    end
-
     if Miscellaneous:IsEnabled() then
       Miscellaneous:RestoreAll(profile)
     end
@@ -197,13 +188,6 @@ function EventHandler:PLAYER_TOTEM_UPDATE()
       ["YOffset"] = orgYOffset
     }
   end
-
-  if addon:IsEnabled() then
-    if ClassResource:IsEnabled() then
-      ClassResource:Restore(profile)
-      ClassResource:RestoreTotemFrame(profile)
-    end
-  end
 end
 
 function EventHandler:PLAYER_LOGIN()
@@ -225,17 +209,6 @@ function EventHandler:PLAYER_LOGIN()
 
     if MouseoverFrameFading:IsEnabled() then
       MouseoverFrameFading:InstallHooks()
-    end
-  end
-end
-
-function EventHandler:PLAYER_SPECIALIZATION_CHANGED()
-  if addon:IsEnabled() then
-    if ClassResource:IsEnabled() then
-      local profile = addon:GetProfileDB()
-
-      ClassResource:Restore(profile)
-      ClassResource:RestoreTotemFrame(profile)
     end
   end
 end
@@ -321,27 +294,5 @@ end
 function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
   if addon:IsEnabled() then
     restoreMouseoverFade()
-  end
-end
-
-function EventHandler:UNIT_EXITING_VEHICLE()
-  if addon:IsEnabled() then
-    if ClassResource:IsEnabled() then
-      local profile = addon:GetProfileDB()
-
-      ClassResource:Restore(profile)
-      ClassResource:RestoreTotemFrame(profile)
-    end
-  end
-end
-
-function EventHandler:UNIT_ENTERING_VEHICLE()
-  if addon:IsEnabled() then
-    if ClassResource:IsEnabled() then
-      local profile = addon:GetProfileDB()
-
-      ClassResource:Restore(profile)
-      ClassResource:RestoreTotemFrame(profile)
-    end
   end
 end

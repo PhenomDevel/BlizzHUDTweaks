@@ -1,4 +1,4 @@
-## Interface: 110207
+## Interface: 120000
 ## Title: BlizzHUDTweaks
 ## Version: @project-version@
 ## Author: @project-author@
@@ -39,14 +39,10 @@ BlizzHUDTweaks.lua
 
 # Modules
 MouseoverFrameFading.lua
-ClassResource.lua
 Miscellaneous.lua
-API.lua
-Debug.lua
 
 Util.lua
 EventHandler.lua
 Options.lua
-Options/ClassResource.lua
 Options/MouseoverFrameFading.lua
 Options/Miscellaneous.lua
