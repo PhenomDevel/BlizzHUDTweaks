@@ -7,10 +7,7 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local EventHandler = addon:NewModule("EventHandler", "AceEvent-3.0")
 local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
-local ClassResource = addon:NewModule("ClassResource")
 local Miscellaneous = addon:NewModule("Miscellaneous")
-local Debug = addon:NewModule("Debug")
-
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
 local function getBlizzHUDTweaksLibDbIconData(db)

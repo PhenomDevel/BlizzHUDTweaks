@@ -2,16 +2,6 @@ local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 
-local function byHealthAlphaValue(globalOptions, frameOptions)
-  if frameOptions.UseGlobalOptions then
-    if globalOptions.FadeByHealth then
-      return globalOptions.ByHealthAlpha
-    end
-  elseif frameOptions.FadeByHealth then
-    return frameOptions.ByHealthAlpha
-  end
-end
-
 local function vehicleAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     if globalOptions.FadeVehicle then
