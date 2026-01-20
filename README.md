@@ -43,45 +43,6 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 5. Rested Area Fade
 6. Out Of Combat Fade
 
-### Supported action bars and frames
-- Action Bar 1-8
-- Player Frame
-- Target Frame
-- Focus Frame
-- Buff Frame
-- Debuff Frame
-- Pet Frame
-- Pet Action Bar
-- Stance Bar
-- Micro Button and Bags Bar
-- Objective Tracker Frame
-- Extra Action Button / Zone Ability Frame
-- Minimap
-- Status Tracking Bar (Rep. & Exp.)
-- Player Casting Bar Frame
-- LFG Eye
-- Durability Frame
-- Vehicle Seat Frame
-
-## Miscellaneous
-- Overwrite your characters name
-- Hide Player level
-- Hide Target level
-- Hide Player name
-- Hide Target name
-- Overwrite Player/Target Health/Mana font size
-- Overwrite actionbar padding (-4 to +16)
-- Hide Actionbar1 unused buttons
-
-## Class Resource
-You can
-
-- Scale the class resources
-- Change position based on Player Frame (Left, Right, Top, Bottom)
-- Hide the class resource
-
-You also can change the settings for the Totem Frame.
-
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
 
