@@ -1,4 +1,4 @@
-## Interface: 120000
+## Interface: 110207, 120000
 ## Title: BlizzHUDTweaks
 ## Version: @project-version@
 ## Author: @project-author@

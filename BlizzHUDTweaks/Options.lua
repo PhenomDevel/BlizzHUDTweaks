@@ -1,7 +1,6 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
-local ClassResource = addon:GetModule("ClassResource")
 local Miscellaneous = addon:GetModule("Miscellaneous")
 local EventHandler = addon:GetModule("EventHandler")
 
@@ -76,30 +75,6 @@ local function getGlobalOptions()
         }
       }
     },
-    ["GlobalOptionsClassResource"] = {
-      name = "Class Resource",
-      order = 4,
-      type = "group",
-      guiInline = true,
-      args = {
-        ["GlobalOptionsClassResourceEnabled"] = {
-          order = 0,
-          name = "Enabled",
-          desc = "Enable/Disable this sub module",
-          width = "double",
-          type = "toggle",
-          get = "GetValue",
-          set = function(info, value)
-            Options:SetValue(info, value)
-            if not value then
-              ClassResource:Disable()
-            else
-              ClassResource:Enable()
-            end
-          end
-        }
-      }
-    },
     ["GlobalOptionsMiscellaneous"] = {
       name = "Miscellaneous",
       order = 5,
@@ -157,10 +132,7 @@ function Options:GetOptionsTable()
 end
 
 function Options:DisableAll()
-  -- EventHandler:UnregisterEvents(true)
-
   MouseoverFrameFading:Disable()
-  ClassResource:Disable()
   Miscellaneous:Disable()
 
   addon:ClearUpdateTicker()
@@ -173,7 +145,6 @@ function Options:EnableAll()
 
   addon:InitializeUpdateTicker()
 
-  ClassResource:Enable()
   Miscellaneous:Enable()
   MouseoverFrameFading:Enable()
 
