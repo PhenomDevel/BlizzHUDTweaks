@@ -68,6 +68,22 @@ local function restedAreaAlphaValue(globalOptions, frameOptions)
   return alpha
 end
 
+local function neighborhoodAlphaValue(globalOptions, frameOptions)
+  local alpha
+
+  if BlizzHUDTweaks.inNeighborhood then
+    if frameOptions.UseGlobalOptions then
+      if globalOptions.FadeInNeighborhood then
+        alpha = globalOptions.NeighborhoodAlpha
+      end
+    elseif frameOptions.FadeInNeighborhood then
+      alpha = frameOptions.NeighborhoodAlpha
+    end
+  end
+
+  return alpha
+end
+
 local function vehicleFadeActive(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     return globalOptions.FadeVehicle
@@ -122,9 +138,18 @@ local function restedAreaFadeActive(globalOptions, frameOptions)
   end
 end
 
+local function neighborhoodFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.FadeInNeighborhood
+  else
+    return frameOptions.FadeInNeighborhood
+  end
+end
+
 local function determineTargetAlpha(globalOptions, frameOptions)
   local inCombat = BlizzHUDTweaks.inCombat
   local isResting = BlizzHUDTweaks.isResting
+  local inNeighborhood = BlizzHUDTweaks.inNeighborhood
   local hasTarget = BlizzHUDTweaks.hasTarget
   local hasBonusActionBar = IsMounted() and HasBonusActionBar()
 
@@ -136,6 +161,8 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha = inCombatAlphaValue(globalOptions, frameOptions)
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
+  elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then
+    alpha = neighborhoodAlphaValue(globalOptions, frameOptions)  
   elseif select(2, GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then
     alpha = instancedAreaAlphaValue(globalOptions, frameOptions)
   elseif isResting and restedAreaFadeActive(globalOptions, frameOptions) then

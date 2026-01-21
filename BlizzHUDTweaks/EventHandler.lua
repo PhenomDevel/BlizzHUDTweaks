@@ -48,6 +48,12 @@ local function installKeyDownHandler()
   end
 end
 
+local function CheckInNeighborhood()
+  local inInstance, instanceType = IsInInstance()
+
+  return instanceType == "neighborhood" or instanceType == "interior"
+end
+
 local function updatePartyAndRaidFrame()
   if IsInGroup() then
     local frameMapping = addon:GetFrameMapping()
@@ -136,6 +142,7 @@ end
 
 function EventHandler:PLAYER_UPDATE_RESTING()
   BlizzHUDTweaks.isResting = IsResting("player")
+  BlizzHUDTweaks.inNeighborhood = CheckInNeighborhood()
 
   if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
     if MouseoverFrameFading:IsEnabled() then
@@ -161,6 +168,7 @@ end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
   BlizzHUDTweaks.isResting = IsResting("player")
+  BlizzHUDTweaks.inNeighborhood = CheckInNeighborhood()
 
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()

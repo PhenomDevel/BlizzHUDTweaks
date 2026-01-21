@@ -142,14 +142,13 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     order = order,
     name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
       "The fade settings will be applied in the following order:\n" ..
-        addon:ColoredString("In Combat", "5cdb4f") ..
-          " > " ..
-            addon:ColoredString("Has Target", "9ac113") ..
-              " > " ..
-                addon:ColoredString("Health %", "bea500") ..
-                  " > " ..
-                    addon:ColoredString("Instanced Area", "d3870f") ..
-                      " > " .. addon:ColoredString("Rested Area", "dc6933") .. " > " .. addon:ColoredString("Out Of Combat", "d64f4f") .. "\n\n",
+        addon:ColoredString("1. In Combat", "5cdb4f") .. "\n" ..
+        addon:ColoredString("2. Has Target", "9ac113") .. "\n" ..
+        addon:ColoredString("3. Health %", "bea500") .. "\n" ..
+        addon:ColoredString("4. Neighborhood", "d3870f") .. "\n" ..
+        addon:ColoredString("5. Instanced Area", "d3870f") .. "\n" ..
+        addon:ColoredString("6. Rested Area", "dc6933") .. "\n" ..
+        addon:ColoredString("7. Out Of Combat", "d64f4f"),
     width = "full",
     type = "description",
     fontSize = "medium"
@@ -299,6 +298,39 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   }
 
   order = order + 0.1
+  subOptions["NeighborhoodGroup"] = {
+    order = order,
+    type = "group",
+    guiInline = true,
+    name = "Neighborhood Fade",
+    args = {
+      ["FadeInNeighborhood"] = {
+        order = 1,
+        name = "Enabled",
+        desc = "When active this fade will be applied when you're in a neighborhood area." .. fadeOrderDescription,
+        width = 0.6,
+        type = "toggle",
+        arg = frameName
+      },
+      ["NeighborhoodAlpha"] = {
+        order = 2,
+        name = "Alpha",
+        desc = "Set the alpha value of the frame while in a neighborhood area.",
+        width = 0.8,
+        type = "range",
+        get = "GetFadeSliderValue",
+        set = "SetFadeSliderValue",
+        min = 0,
+        max = 100,
+        softMin = 0,
+        softMax = 100,
+        step = 5,
+        arg = frameName
+      }
+    }
+  }
+
+  order = order + 0.1
   subOptions["InstancedAreaFadeGroup"] = {
     order = order,
     type = "group",
@@ -363,6 +395,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
       }
     }
   }
+
   order = order + 0.1
   subOptions["OutOfCombatGroup"] = {
     order = order,
