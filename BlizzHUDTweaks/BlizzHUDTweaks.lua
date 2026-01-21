@@ -1,4 +1,4 @@
-local addonName, BlizzHUDTweaks = ...
+local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
 local AceConfig = LibStub("AceConfig-3.0")
@@ -21,7 +21,7 @@ local function getBlizzHUDTweaksLibDbIconData(db)
         icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
         OnClick = function(self, button)
           if button == "LeftButton" then
-            Settings.OpenToCategory(1, addonName)
+            Settings.OpenToCategory(1, "BlizzHUDTweaks")
           elseif button == "RightButton" then
             if addon:IsEnabled() then
               addon:Disable()
