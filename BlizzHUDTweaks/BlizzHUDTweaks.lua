@@ -622,7 +622,7 @@ end
 
 function addon:ExecuteChatCommand(input)
   if input == "" or input == nil then
-    addon:OpenOptions()
+    Settings.OpenToCategory(1, "BlizzHUDTweaks")
   elseif input == "minimap" then
     addon:ToggleMinimapIcon()
   end
