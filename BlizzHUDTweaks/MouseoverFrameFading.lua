@@ -162,7 +162,7 @@ local function determineTargetAlpha(globalOptions, frameOptions)
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
   elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then
-    alpha = neighborhoodAlphaValue(globalOptions, frameOptions)  
+    alpha = neighborhoodAlphaValue(globalOptions, frameOptions)
   elseif select(2, GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then
     alpha = instancedAreaAlphaValue(globalOptions, frameOptions)
   elseif isResting and restedAreaFadeActive(globalOptions, frameOptions) then

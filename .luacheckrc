@@ -69,6 +69,7 @@ globals = {
   "SendChatMessage",
   "UnitIsGroupLeader",
   "GetBuildInfo",
+  "IsInInstance",
   "GetSpellDescription",
   "GetZoneText",
   "time",

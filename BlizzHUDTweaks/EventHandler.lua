@@ -49,8 +49,6 @@ local function installKeyDownHandler()
 end
 
 local function CheckInNeighborhood()
-  local inInstance, instanceType = IsInInstance()
-
   return instanceType == "neighborhood" or instanceType == "interior"
 end
 
