@@ -29,6 +29,7 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 - In Combat Fade
 - Out of Combat Fade
 - Fade based on health percentage
+- Neighborhood fade
 - Instanced Area fade
 - Rested Area Fade
 - Set options globally or for each frame
@@ -39,9 +40,10 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 1. In Combat Fade
 2. Has Target Fade (which uses the `In Combat Fade` values)
 3. Health percentage
-4. Instanced Area fade
-5. Rested Area Fade
-6. Out Of Combat Fade
+4. Neighborhood fade
+5. Instanced Area fade
+6. Rested Area Fade
+7. Out Of Combat Fade
 
 # Performance
 Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.

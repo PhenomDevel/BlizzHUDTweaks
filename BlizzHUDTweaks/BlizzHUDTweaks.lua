@@ -185,6 +185,12 @@ local defaultConfig = {
     },
     ["BuffBarCooldownViewer"] = {
       displayName = "Cooldown Manager Tracked Bars"
+    },
+    ["ExternalDefensivesFrame"] = {
+      displayName = "External Defensives Frame"
+    },
+    ["PersonalResourceDisplayFrame"] = {
+      displayName = "Personal Resource Display Frame"
     }
   }
 }
@@ -228,7 +234,9 @@ local frameMapping = {
   ["BuffIconCooldownViewer"] = {mainFrame = BuffIconCooldownViewer},
   ["EssentialCooldownViewer"] = {mainFrame = EssentialCooldownViewer},
   ["UtilityCooldownViewer"] = {mainFrame = UtilityCooldownViewer},
-  ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer}
+  ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer},
+  ["ExternalDefensivesFrame"] = {mainFrame = ExternalDefensivesFrame},
+  ["PersonalResourceDisplayFrame"] = {mainFrame = PersonalResourceDisplayFrame}
 }
 
 local function setFrameDefaultOptions(frameOptions)
