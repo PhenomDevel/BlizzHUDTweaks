@@ -71,6 +71,8 @@ globals = {
   "GetBuildInfo",
   "IsInInstance",
   "GetSpellDescription",
+  "PersonalResourceDisplayFrame",
+  "ExternalDefensivesFrame",
   "GetZoneText",
   "time",
   "date",
