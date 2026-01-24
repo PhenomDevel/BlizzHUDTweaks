@@ -163,7 +163,10 @@ globals = {
   "BuffIconCooldownViewer",
   "EssentialCooldownViewer",
   "UtilityCooldownViewer",
-  "BuffBarCooldownViewer"
+  "BuffBarCooldownViewer",
+  "DamageMeterSessionWindow1",
+  "DamageMeterSessionWindow2",
+  "DamageMeterSessionWindow3",
 }
 max_line_length = 200
 max_code_line_length = 200

@@ -191,6 +191,15 @@ local defaultConfig = {
     },
     ["PersonalResourceDisplayFrame"] = {
       displayName = "Personal Resource Display Frame"
+    },
+    ["DamageMeterSessionWindow1"] = {
+      displayName = "Damage Meter Frame 1",
+    },
+    ["DamageMeterSessionWindow2"] = {
+      displayName = "Damage Meter Frame 2",
+    },
+    ["DamageMeterSessionWindow3"] = {
+      displayName = "Damage Meter Frame 3",
     }
   }
 }
@@ -236,7 +245,10 @@ local frameMapping = {
   ["UtilityCooldownViewer"] = {mainFrame = UtilityCooldownViewer},
   ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer},
   ["ExternalDefensivesFrame"] = {mainFrame = ExternalDefensivesFrame},
-  ["PersonalResourceDisplayFrame"] = {mainFrame = PersonalResourceDisplayFrame}
+  ["PersonalResourceDisplayFrame"] = {mainFrame = PersonalResourceDisplayFrame},
+  ["DamageMeterSessionWindow1"] = {mainFrame = DamageMeterSessionWindow1},
+  ["DamageMeterSessionWindow2"] = {mainFrame = DamageMeterSessionWindow2},
+  ["DamageMeterSessionWindow3"] = {mainFrame = DamageMeterSessionWindow3}
 }
 
 local function setFrameDefaultOptions(frameOptions)
@@ -259,10 +271,6 @@ local function setFrameDefaultOptions(frameOptions)
 
   frameOptions["TreatTargetLikeInCombat"] = false
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
-
-  frameOptions["FadeByHealth"] = false
-  frameOptions["ByHealthThreshold"] = 0
-  frameOptions["ByHealthAlpha"] = 1
 end
 
 do
