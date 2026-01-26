@@ -402,63 +402,7 @@ function addon:ClearPartyAndRaidSubFrames()
 end
 
 function addon:InitializePartyAndRaidSubFrames()
-  local partyFrameSubFrames = {}
-  frameMapping["PartyFrame"].subFrames = partyFrameSubFrames
-  for memberIndex = 1, 5 do
-    local backgroundFrame = _G["CompactPartyFrameMember" .. memberIndex .. "Background"]
 
-    if backgroundFrame then
-      local horizBottomBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "HorizBottomBorder"]
-      local horizTopBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "HorizTopBorder"]
-      local vertLeftBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "VertLeftBorder"]
-      local vertRightBorderFrame = _G["CompactPartyFrameMember" .. memberIndex .. "VertRightBorder"]
-
-      tinsert(partyFrameSubFrames, backgroundFrame)
-      tinsert(partyFrameSubFrames, horizBottomBorderFrame)
-      tinsert(partyFrameSubFrames, horizTopBorderFrame)
-      tinsert(partyFrameSubFrames, vertLeftBorderFrame)
-      tinsert(partyFrameSubFrames, vertRightBorderFrame)
-    end
-  end
-
-  local raidFrameSubFrames = {}
-  frameMapping["CompactRaidFrameContainer"].subFrames = raidFrameSubFrames
-
-  for groupIndex = 1, 8 do
-    for groupMemberIndex = 1, 5 do
-      local backgroundFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "Background"]
-
-      if backgroundFrame then
-        local horizBottomBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "HorizBottomBorder"]
-        local horizTopBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "HorizTopBorder"]
-        local vertLeftBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "VertLeftBorder"]
-        local vertRightBorderFrame = _G["CompactRaidGroup" .. groupIndex .. "Member" .. groupMemberIndex .. "VertRightBorder"]
-
-        tinsert(raidFrameSubFrames, backgroundFrame)
-        tinsert(raidFrameSubFrames, horizBottomBorderFrame)
-        tinsert(raidFrameSubFrames, horizTopBorderFrame)
-        tinsert(raidFrameSubFrames, vertLeftBorderFrame)
-        tinsert(raidFrameSubFrames, vertRightBorderFrame)
-      end
-    end
-  end
-
-  for memberIndex = 1, 40 do
-    local backgroundFrame = _G["CompactRaidFrame" .. memberIndex .. "Background"]
-
-    if backgroundFrame then
-      local horizBottomBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "HorizBottomBorder"]
-      local horizTopBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "HorizTopBorder"]
-      local vertLeftBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "VertLeftBorder"]
-      local vertRightBorderFrame = _G["CompactRaidFrame" .. memberIndex .. "VertRightBorder"]
-
-      tinsert(raidFrameSubFrames, backgroundFrame)
-      tinsert(raidFrameSubFrames, horizBottomBorderFrame)
-      tinsert(raidFrameSubFrames, horizTopBorderFrame)
-      tinsert(raidFrameSubFrames, vertLeftBorderFrame)
-      tinsert(raidFrameSubFrames, vertRightBorderFrame)
-    end
-  end
 end
 
 function addon:GetFrameMapping()
