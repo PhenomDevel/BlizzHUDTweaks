@@ -21,7 +21,7 @@ local function getBlizzHUDTweaksLibDbIconData(db)
         icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
         OnClick = function(self, button)
           if button == "LeftButton" then
-            Settings.OpenToCategory(1, "BlizzHUDTweaks")
+            Settings.OpenToCategory(BlizzHUDTweaks.optionsCategoryID)
           elseif button == "RightButton" then
             if addon:IsEnabled() then
               addon:Disable()
@@ -517,10 +517,12 @@ end
 
 function addon:InitializeOptions()
   addon:RefreshOptionTables()
-  self.optionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+  self.optionsFrame, categoryId = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
   self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
   self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
   self.miscellaneousOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
+
+  BlizzHUDTweaks.optionsCategoryID = categoryId
 end
 
 function addon:RefreshOptionTables()
