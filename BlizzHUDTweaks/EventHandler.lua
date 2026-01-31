@@ -7,51 +7,104 @@ local Miscellaneous = addon:GetModule("Miscellaneous")
 
 local blizzHUDTweaksFrame = CreateFrame("Frame", "BlizzHUDTweaks", UIParent)
 
-local function installKeyDownHandler()
-  if not blizzHUDTweaksFrame.OnKeyDown then
-    blizzHUDTweaksFrame:SetPropagateKeyboardInput(true)
-    blizzHUDTweaksFrame:SetScript(
-      "OnKeyDown",
-      function(_, pressedKey)
-        local profile = addon:GetProfileDB()
-        local keybind = profile["GlobalOptionsMouseoverFrameFadingToggleKeybind"]
-        local shiftDown = IsShiftKeyDown()
-        local ctrlDown = IsControlKeyDown()
-        local altDown = IsAltKeyDown()
+local parsedKeybind = nil
+local parsedKey = nil
+local parsedMods = { shift = false, ctrl = false, alt = false }
+local cachedInstanceInfo = nil
 
-        if keybind and keybind ~= "" then
-          if string.find(keybind, pressedKey, 1, true) then
-            if (string.find(keybind, "SHIFT") and not shiftDown) or (string.find(keybind, "CTRL") and not ctrlDown) or (string.find(keybind, "ALT") and not altDown) then
-              return
-            end
+local keyDownHandlerInstalled = false
+local cachedIsResting = nil
+local cachedInNeighborhood = nil
 
-            local normaliedPressedKey = ""
+local _IsResting = IsResting
+local _IsInInstance = IsInInstance
+local _IsShiftKeyDown = IsShiftKeyDown
+local _IsControlKeyDown = IsControlKeyDown
+local _IsAltKeyDown = IsAltKeyDown
 
-            if altDown then
-              normaliedPressedKey = normaliedPressedKey .. "ALT-"
-            end
-            if ctrlDown then
-              normaliedPressedKey = normaliedPressedKey .. "CTRL-"
-            end
-            if shiftDown then
-              normaliedPressedKey = normaliedPressedKey .. "SHIFT-"
-            end
-            normaliedPressedKey = normaliedPressedKey .. pressedKey
-
-            if keybind == normaliedPressedKey then
-              MouseoverFrameFading:Toggle()
-            end
-          end
-        end
-      end
-    )
-  end
+local function trim(s)
+  return (s:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
-local function CheckInNeighborhood()
-  local _, instanceType = IsInInstance()
+local function normalizeModifierToken(token)
+  token = token:upper()
+  if token == "CONTROL" or token == "LCTRL" or token == "RCTRL" or token == "LEFTCTRL" or token == "RIGHTCTRL" then
+    return "CTRL"
+  end
+  if token == "ALTGR" then
+    return "ALT"
+  end
+  return token
+end
 
-  return instanceType == "neighborhood" or instanceType == "interior"
+local function parseKeybind(keybind)
+  if not keybind or keybind == "" then
+    return nil, { shift = false, ctrl = false, alt = false }
+  end
+
+  keybind = trim(keybind)
+  keybind = keybind:upper()
+
+  local mods = { shift = false, ctrl = false, alt = false }
+  local key = keybind
+  local parts = {}
+  
+  for part in string.gmatch(keybind, "[^%-]+") do
+    parts[#parts + 1] = trim(part)
+  end
+
+  if #parts > 1 then
+    key = parts[#parts]
+    for i = 1, #parts - 1 do
+      local t = normalizeModifierToken(parts[i])
+      if t == "SHIFT" then mods.shift = true end
+      if t == "CTRL" then mods.ctrl = true end
+      if t == "ALT" then mods.alt = true end
+    end
+  end
+
+  return key, mods
+end
+
+local function installKeyDownHandler()
+  if keyDownHandlerInstalled then
+    return
+  end
+
+  blizzHUDTweaksFrame:SetPropagateKeyboardInput(true)
+  blizzHUDTweaksFrame:SetScript("OnKeyDown", function(_, pressedKey)
+    local profile = addon:GetProfileDB()
+    local keybind = profile["GlobalOptionsMouseoverFrameFadingToggleKeybind"]
+
+    if keybind ~= parsedKeybind then
+      parsedKey, parsedMods = parseKeybind(keybind)
+      parsedKeybind = keybind
+    end
+
+    if not parsedKey then
+      return
+    end
+
+    local normPressed = tostring(pressedKey):upper()
+
+    if normPressed ~= parsedKey then
+      return
+    end
+
+    if (parsedMods.shift and not _IsShiftKeyDown()) or (parsedMods.ctrl and not _IsControlKeyDown()) or (parsedMods.alt and not _IsAltKeyDown()) then
+      return
+    end
+
+    MouseoverFrameFading:Toggle()
+  end)
+
+  keyDownHandlerInstalled = true
+end
+
+local function updateNeighborhoodCache()
+  local _, instanceType = _IsInInstance()
+  cachedInNeighborhood = (instanceType == "neighborhood" or instanceType == "interior")
+  return cachedInNeighborhood
 end
 
 local function restoreMouseoverFade()
@@ -83,6 +136,13 @@ local registeredEvents = {}
 
 -------------------------------------------------------------------------------
 -- Public API
+
+function EventHandler:GetInstanceInfo()
+  if not cachedInstanceInfo then
+    cachedInstanceInfo = { GetInstanceInfo() }
+  end
+  return unpack(cachedInstanceInfo)
+end
 
 function EventHandler:RegisterEvents(forced)
   if addon:IsEnabled() or forced then
@@ -127,8 +187,11 @@ function EventHandler:PLAYER_REGEN_DISABLED()
 end
 
 function EventHandler:PLAYER_UPDATE_RESTING()
-  BlizzHUDTweaks.isResting = IsResting("player")
-  BlizzHUDTweaks.inNeighborhood = CheckInNeighborhood()
+  cachedIsResting = _IsResting("player")
+  updateNeighborhoodCache()
+
+  BlizzHUDTweaks.isResting = cachedIsResting
+  BlizzHUDTweaks.inNeighborhood = cachedInNeighborhood
 
   if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
     if MouseoverFrameFading:IsEnabled() then
@@ -138,8 +201,11 @@ function EventHandler:PLAYER_UPDATE_RESTING()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
-  BlizzHUDTweaks.isResting = IsResting("player")
-  BlizzHUDTweaks.inNeighborhood = CheckInNeighborhood()
+  cachedIsResting = _IsResting("player")
+  updateNeighborhoodCache()
+
+  BlizzHUDTweaks.isResting = cachedIsResting
+  BlizzHUDTweaks.inNeighborhood = cachedInNeighborhood
 
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
@@ -252,6 +318,10 @@ function EventHandler:UNIT_HEALTH(_, unit)
 end
 
 function EventHandler:ZONE_CHANGED_NEW_AREA()
+  cachedInstanceInfo = nil
+  cachedIsResting = nil
+  cachedInNeighborhood = nil
+
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
 
@@ -262,6 +332,8 @@ function EventHandler:ZONE_CHANGED_NEW_AREA()
 end
 
 function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
+  cachedInNeighborhood = nil
+
   if addon:IsEnabled() then
     restoreMouseoverFade()
   end
