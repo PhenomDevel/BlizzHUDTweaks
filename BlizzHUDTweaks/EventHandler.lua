@@ -65,11 +65,7 @@ end
 
 local function restoreMouseoverFade()
   if MouseoverFrameFading:IsEnabled() then
-    if BlizzHUDTweaks.hasTarget then
-      MouseoverFrameFading:RefreshFrameAlphas()
-    else
-      MouseoverFrameFading:RefreshFrameAlphas()
-    end
+    MouseoverFrameFading:RefreshFrameAlphas()
   end
 end
 
@@ -78,7 +74,6 @@ local eventsToRegister = {
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
   "PLAYER_UPDATE_RESTING",
-  "UNIT_TARGET",
   "PLAYER_ENTERING_WORLD",
   "PLAYER_TOTEM_UPDATE",
   "ACTIONBAR_SLOT_CHANGED",
@@ -90,7 +85,8 @@ local eventsToRegister = {
   "UNIT_QUEST_LOG_CHANGED",
   "UNIT_HEALTH",
   "ZONE_CHANGED_NEW_AREA",
-  "PLAYER_MOUNT_DISPLAY_CHANGED"
+  "PLAYER_MOUNT_DISPLAY_CHANGED",
+  "PLAYER_TARGET_CHANGED"
 }
 
 local registeredEvents = {}
@@ -149,21 +145,6 @@ function EventHandler:PLAYER_UPDATE_RESTING()
       MouseoverFrameFading:RefreshFrameAlphas()
     end
   end
-end
-
-BlizzHUDTweaks.lastUpdate = 0
-
-function EventHandler:UNIT_TARGET()
-  BlizzHUDTweaks.hasTarget = UnitExists("target")
-
-  if GetTime() ~= BlizzHUDTweaks.lastUpdate and (GetTime() - BlizzHUDTweaks.lastUpdate) > 0.05 then
-    if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
-      MouseoverFrameFading:PauseAnimations()
-      restoreMouseoverFade()
-    end
-  end
-
-  BlizzHUDTweaks.lastUpdate = GetTime()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
@@ -301,6 +282,14 @@ end
 
 function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
   if addon:IsEnabled() then
+    restoreMouseoverFade()
+  end
+end
+
+function EventHandler:PLAYER_TARGET_CHANGED()
+  BlizzHUDTweaks.hasTarget = UnitExists("target")
+  if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
+
     restoreMouseoverFade()
   end
 end
