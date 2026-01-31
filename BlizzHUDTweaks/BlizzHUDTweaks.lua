@@ -517,7 +517,9 @@ end
 
 function addon:InitializeOptions()
   addon:RefreshOptionTables()
-  local self.optionsFrame, categoryId = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+  local optionsFrame, categoryId = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
+  self.optionsFrame = optionsFrame
+  
   self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
   self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
   self.miscellaneousOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
