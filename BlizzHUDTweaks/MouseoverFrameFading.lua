@@ -1,6 +1,7 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
+local EventHandler = addon:GetModule("EventHandler")
 
 local function vehicleAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
@@ -161,7 +162,7 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
   elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then
     alpha = neighborhoodAlphaValue(globalOptions, frameOptions)
-  elseif select(2, GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then
+  elseif select(2, EventHandler:GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then
     alpha = instancedAreaAlphaValue(globalOptions, frameOptions)
   elseif isResting and restedAreaFadeActive(globalOptions, frameOptions) then
     alpha = restedAreaAlphaValue(globalOptions, frameOptions)
@@ -190,8 +191,12 @@ local function determineFadeDelay(globalOptions, frameOptions)
 end
 
 local function getNormalizedFrameAlpha(frame)
-  return tonumber(string.format("%.2f", frame:GetAlpha()))
+  local a = frame:GetAlpha()
+  return math.floor(a * 100 + 0.5) / 100
 end
+
+local MOUSEOVER_CACHE_TTL = 0.05
+local mouseoverCache = {}
 
 local function fadeSubFrames(subFrames, currentAlpha, targetAlpha, fadeDuration)
   if subFrames then
@@ -202,36 +207,44 @@ local function fadeSubFrames(subFrames, currentAlpha, targetAlpha, fadeDuration)
 end
 
 local function determineMouseOver(profile, frameName, frameOptions)
+  local now = GetTime()
+  local entry = mouseoverCache[frameName]
+  if entry and now - entry.ts < MOUSEOVER_CACHE_TTL then
+    return entry.value
+  end
+
+  local mapping = addon:GetFrameMapping()
   local linkedFrames = profile[frameName .. "LinkedFrames"]
   local mainFrame = frameOptions.mainFrame
   local fallback = mainFrame.__BlizzHUDTweaksForceMouseover or mainFrame:IsMouseOver()
-  local spellFlyoutButtonBarName = ""
+
+  if fallback then
+    mouseoverCache[frameName] = { value = true, ts = now }
+    return true
+  end
+
+  local hasMouseover = false
 
   if SpellFlyout and SpellFlyout:IsShown() and SpellFlyout:IsMouseOver() then
     local button = SpellFlyout:GetParent()
     if button and button.bar then
-      spellFlyoutButtonBarName = button.bar:GetName()
-      local mappedFrame = addon:GetFrameMapping()[frameName]
-      if mappedFrame and mappedFrame.mainFrame then
-        if spellFlyoutButtonBarName == mappedFrame.mainFrame:GetName() then
-          return true -- this frame has flyout mouseover
-        end
-      end
-    end
-  end
+      local spellFlyoutButtonBarName = button.bar:GetName()
+      local mainFrameName = mainFrame:GetName()
 
-  if linkedFrames then
-    for linkedFrameName, _ in pairs(linkedFrames) do
-      local frameProfile = profile[linkedFrameName]
-      if frameProfile and frameProfile.Enabled then
-        if linkedFrames[linkedFrameName] then
-          local linkedFrame = addon:GetFrameMapping()[linkedFrameName]
-          if linkedFrame and linkedFrame.mainFrame then
-            if spellFlyoutButtonBarName == linkedFrame.mainFrame:GetName() then
-              return true -- Linked frame has flyout mouseover
-            end
-            if linkedFrame.mainFrame:IsMouseOver() then
-              return true -- Linked frame has mouseover
+      if spellFlyoutButtonBarName == mainFrameName then
+        hasMouseover = true
+      else
+        if linkedFrames then
+          for linkedFrameName, _ in pairs(linkedFrames) do
+            local frameProfile = profile[linkedFrameName]
+            if frameProfile and frameProfile.Enabled then
+              local linkedFrame = mapping[linkedFrameName]
+              if linkedFrame and linkedFrame.mainFrame then
+                if spellFlyoutButtonBarName == linkedFrame.mainFrame:GetName() then
+                  hasMouseover = true
+                  break
+                end
+              end
             end
           end
         end
@@ -239,7 +252,21 @@ local function determineMouseOver(profile, frameName, frameOptions)
     end
   end
 
-  return fallback
+  if not hasMouseover and linkedFrames then
+    for linkedFrameName, _ in pairs(linkedFrames) do
+      local frameProfile = profile[linkedFrameName]
+      if frameProfile and frameProfile.Enabled then
+        local linkedFrame = mapping[linkedFrameName]
+        if linkedFrame and linkedFrame.mainFrame and linkedFrame.mainFrame:IsMouseOver() then
+          hasMouseover = true
+          break
+        end
+      end
+    end
+  end
+
+  mouseoverCache[frameName] = { value = hasMouseover, ts = now }
+  return hasMouseover
 end
 
 local function SpellFlyoutOnLeave()
@@ -307,20 +334,18 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(5)
 
         end
-        
+
         if (not forced) and targetAlpha == frame.__BlizzHUDTweaksFadeAnimation:GetToAlpha() then
           return
         end
 
-        C_Timer.After(math.random(2) / 100, function()
-          frame.__BlizzHUDTweaksFadeAnimation:Stop()
-          frame.__BlizzHUDTweaksAnimationGroup:Stop()
-          frame.__BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
-          frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
-          frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
-          frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
-          frame.__BlizzHUDTweaksAnimationGroup:Restart()
-        end)
+        frame.__BlizzHUDTweaksFadeAnimation:Stop()
+        frame.__BlizzHUDTweaksAnimationGroup:Stop()
+        frame.__BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
+        frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
+        frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
+        frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
+        frame.__BlizzHUDTweaksAnimationGroup:Restart()
       end
     end
   end
@@ -334,7 +359,16 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
     local inCombat = BlizzHUDTweaks.inCombat
     local globalOptions = profile["*Global*"]
 
-    for frameName, frameMappingOptions in pairs(addon:GetFrameMapping()) do
+    local mapping = addon:GetFrameMapping()
+
+    -- Prune cache entries for frames no longer present
+    for k, _ in pairs(mouseoverCache) do
+      if not mapping[k] then
+        mouseoverCache[k] = nil
+      end
+    end
+
+    for frameName, frameMappingOptions in pairs(mapping) do
       local frameOptions = profile[frameName]
       if frameOptions then
         if frameOptions.Enabled and frameMappingOptions.mainFrame then
@@ -378,7 +412,8 @@ local function shouldFade(frame, globalOptions, frameOptions)
 end
 
 function MouseoverFrameFading:PauseAnimations()
-  for _, frameMappingOptions in pairs(addon:GetFrameMapping()) do
+  local mapping = addon:GetFrameMapping()
+  for _, frameMappingOptions in pairs(mapping) do
     local frame = frameMappingOptions.mainFrame
     if frame then
       if frame.__BlizzHUDTweaksAnimationGroup then
@@ -391,9 +426,10 @@ end
 function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
   if addon:IsEnabled() and MouseoverFrameFading:IsEnabled() then
     local profile = addon:GetProfileDB()
-    local globalOptions = addon:GetProfileDB()["*Global*"]
+    local globalOptions = profile["*Global*"]
 
-    for frameName, frameMappingOptions in pairs(addon:GetFrameMapping()) do
+    local mapping = addon:GetFrameMapping()
+    for frameName, frameMappingOptions in pairs(mapping) do
       if shouldFade(frameMappingOptions.mainFrame, globalOptions, profile[frameName]) then
         local frameOptions = profile[frameName]
 

@@ -11,7 +11,7 @@ function addon:HideGCDFlash()
     MainActionBar, MultiBarBottomLeft, MultiBarBottomRight, MultiBarRight,
     MultiBarLeft, MultiBar5, MultiBar6, MultiBar7, PetActionBar, StanceBar
   }
-  
+
   for _, bar in ipairs(actionbars) do
     if bar and type(bar.SetDrawBling) == "function" then
       bar:SetDrawBling(false)
