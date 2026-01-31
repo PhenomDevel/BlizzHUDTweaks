@@ -307,7 +307,8 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(5)
 
         end
-        if targetAlpha == frame.__BlizzHUDTweaksFadeAnimation:GetToAlpha() then
+        
+        if (not forced) and targetAlpha == frame.__BlizzHUDTweaksFadeAnimation:GetToAlpha() then
           return
         end
 
