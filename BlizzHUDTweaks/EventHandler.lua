@@ -54,15 +54,6 @@ local function CheckInNeighborhood()
   return instanceType == "neighborhood" or instanceType == "interior"
 end
 
-local function updatePartyAndRaidFrame()
-  if IsInGroup() then
-    local frameMapping = addon:GetFrameMapping()
-    if frameMapping["PartyFrame"].Enabled or frameMapping["CompactRaidFrameContainer"].Enabled then
-      addon:InitializePartyAndRaidSubFrames(true)
-    end
-  end
-end
-
 local function restoreMouseoverFade()
   if MouseoverFrameFading:IsEnabled() then
     MouseoverFrameFading:RefreshFrameAlphas()
@@ -80,7 +71,6 @@ local eventsToRegister = {
   "UNIT_PET",
   "ACTIONBAR_SHOWGRID",
   "ACTIONBAR_HIDEGRID",
-  "GROUP_ROSTER_UPDATE",
   "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
   "UNIT_HEALTH",
@@ -160,7 +150,6 @@ function EventHandler:PLAYER_ENTERING_WORLD()
     end
 
     restoreMouseoverFade()
-    updatePartyAndRaidFrame()
     installKeyDownHandler()
   end
 end
@@ -182,8 +171,6 @@ end
 function EventHandler:PLAYER_LOGIN()
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
-
-    addon:InitializePartyAndRaidSubFrames()
     addon:RefreshOptionTables()
 
     if Miscellaneous:IsEnabled() then
@@ -242,12 +229,6 @@ function EventHandler:UNIT_PET(_, unit)
         Miscellaneous:RestoreActionbarPaddings(profile, true, true)
       end
     end
-  end
-end
-
-function EventHandler:GROUP_ROSTER_UPDATE()
-  if addon:IsEnabled() then
-    updatePartyAndRaidFrame()
   end
 end
 

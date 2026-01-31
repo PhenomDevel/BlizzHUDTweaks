@@ -6,9 +6,15 @@ end
 
 --credit https://www.mmo-champion.com/threads/2414999-How-do-I-disable-the-GCD-flash-on-my-bars
 function addon:HideGCDFlash()
-  for _, v in pairs(_G) do
-    if type(v) == "table" and type(v.SetDrawBling) == "function" then
-      v:SetDrawBling(false)
+  -- Optimized: Only check specific actionbar frames instead of iterating all globals
+  local actionbars = {
+    MainActionBar, MultiBarBottomLeft, MultiBarBottomRight, MultiBarRight,
+    MultiBarLeft, MultiBar5, MultiBar6, MultiBar7, PetActionBar, StanceBar
+  }
+  
+  for _, bar in ipairs(actionbars) do
+    if bar and type(bar.SetDrawBling) == "function" then
+      bar:SetDrawBling(false)
     end
   end
 end

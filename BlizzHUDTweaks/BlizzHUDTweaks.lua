@@ -401,10 +401,6 @@ function addon:ClearPartyAndRaidSubFrames()
   frameMapping["CompactRaidFrameContainer"].subFrames = nil
 end
 
-function addon:InitializePartyAndRaidSubFrames()
-
-end
-
 function addon:GetFrameMapping()
   return frameMapping
 end
