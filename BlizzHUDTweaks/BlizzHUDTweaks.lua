@@ -149,12 +149,10 @@ local defaultConfig = {
       displayName = "Vehicle Seats Frame"
     },
     ["PartyFrame"] = {
-      displayName = "Party Frame",
-      description = "|cFFeb4034NOTE: |rThis frame has a lot of sub frames which will also be faded. Depending on your settings this may cause lag."
+      displayName = "Party Frame"
     },
     ["CompactRaidFrameContainer"] = {
-      displayName = "Raid Frame",
-      description = "|cFFeb4034NOTE: |rThis frame has a lot of sub frames which will also be faded. Depending on your settings this may cause lag."
+      displayName = "Raid Frame"
     },
     ["MainMenuBarVehicleLeaveButton"] = {
       displayName = "Vehicle Leave Button"
@@ -271,6 +269,7 @@ local function setFrameDefaultOptions(frameOptions)
 
   frameOptions["TreatTargetLikeInCombat"] = false
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
+  frameOptions["MouseOverFadeEnabled"] = true
 end
 
 do
@@ -517,7 +516,7 @@ function addon:InitializeOptions()
   self.optionsFrame = optionsFrame
 
   self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
-  self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Mouseover Frame Fading", "BlizzHUDTweaks")
+  self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Actionbar/Frame Fading", "BlizzHUDTweaks")
   self.miscellaneousOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
 
   BlizzHUDTweaks.optionsCategoryID = categoryId

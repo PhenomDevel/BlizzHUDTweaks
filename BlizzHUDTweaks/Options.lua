@@ -44,7 +44,7 @@ local function getGlobalOptions()
       fontSize = "medium"
     },
     ["GlobalOptionsMouseoverFrameFading"] = {
-      name = "Mouseover Frame Fading",
+      name = "Actionbar/Frame Fading",
       order = 3,
       type = "group",
       guiInline = true,

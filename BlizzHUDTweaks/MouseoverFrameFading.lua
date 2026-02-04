@@ -351,6 +351,16 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
   end
 end
 
+function MouseoverFrameFading:MouseoverFadingEnabled(frameOptions)
+  if frameOptions.UseGlobalOptions then
+    local profile = addon:GetProfileDB()
+    local globalOptions = profile["*Global*"]
+    return globalOptions.MouseOverFadingEnabled
+  else
+    return frameOptions.MouseOverFadingEnabled
+  end
+end
+
 local mouseoverFrames = {}
 
 function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
@@ -371,7 +381,7 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
     for frameName, frameMappingOptions in pairs(mapping) do
       local frameOptions = profile[frameName]
       if frameOptions then
-        if frameOptions.Enabled and frameMappingOptions.mainFrame then
+        if frameOptions.Enabled and frameMappingOptions.mainFrame and MouseoverFrameFading:MouseoverFadingEnabled(frameOptions) then
           local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
           local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
           local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
