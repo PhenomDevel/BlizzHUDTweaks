@@ -97,6 +97,15 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   end
 
   order = order + 0.1
+  subOptions["MouseOverFadeEnabled"] = {
+    order = order,
+    name = "Fade on mouseover",
+    desc = "When activated you can mouseover action bars and frames to show the frame with full alpha.",
+    width = "full",
+    type = "toggle",
+    arg = frameName
+  }
+  order = order + 0.1
   subOptions["MouseOverInCombat"] = {
     order = order,
     name = "Allow mouseover fade in combat",
@@ -105,7 +114,7 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
     type = "toggle",
     arg = frameName
   }
-  order = order + 0.1
+  order = order + 0.1  
   subOptions["FadeDuration"] = {
     order = order,
     name = "Fade Duration",
@@ -141,13 +150,14 @@ local function addFrameOptions(order, t, frameName, frameOptions, withUseGlobal)
   subOptions["FadeOrderDescription"] = {
     order = order,
     name = addon:ColoredString("\n\nNOTE: ", "eb4034") ..
-      "The fade settings will be applied in the following order:\n" ..
-        addon:ColoredString("1. In Combat", "5cdb4f") .. "\n" ..
-        addon:ColoredString("2. Has Target", "9ac113") .. "\n" ..
-        addon:ColoredString("3. Neighborhood", "d3870f") .. "\n" ..
-        addon:ColoredString("4. Instanced Area", "d3870f") .. "\n" ..
-        addon:ColoredString("5. Rested Area", "dc6933") .. "\n" ..
-        addon:ColoredString("6. Out Of Combat", "d64f4f"),
+      "If the corresponding fade is enabled in the options, the fade settings will be applied in the following order (mouseover will always be applied first):\n" ..
+        addon:ColoredString("1. Vehicle", "018f00") .. "\n" ..      
+        addon:ColoredString("2. In Combat", "467e00") .. "\n" ..
+        addon:ColoredString("3. Has Target", "5f6b00") .. "\n" ..
+        addon:ColoredString("4. Neighborhood", "6f5700") .. "\n" ..
+        addon:ColoredString("5. Instanced Area", "784200") .. "\n" ..
+        addon:ColoredString("6. Rested Area", "7e2800") .. "\n" ..
+        addon:ColoredString("7. Out Of Combat", "7c0000"),
     width = "full",
     type = "description",
     fontSize = "medium"
@@ -584,7 +594,7 @@ function MouseoverFrameFading:GetOptionsTable(profile)
   addMouseoverFrameLinkOptions(args, profile)
 
   return {
-    name = "Mouseover Fading",
+    name = "Actionbar/Frame Fading",
     type = "group",
     set = "SetValue",
     get = "GetValue",
