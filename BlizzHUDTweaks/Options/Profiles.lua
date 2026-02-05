@@ -78,6 +78,12 @@ function Profiles:ImportProfile(s, profileName)
   addon:LoadProfile()
 end
 
+function Profiles:ClearInputs()
+  importString = ""
+  exportString = ""
+  importProfileName = ""
+end
+
 function Profiles:GetOptionsTable(db)
   local options = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
 

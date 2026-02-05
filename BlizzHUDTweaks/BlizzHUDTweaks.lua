@@ -23,6 +23,7 @@ local function getBlizzHUDTweaksLibDbIconData(db)
         icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
         OnClick = function(self, button)
           if button == "LeftButton" then
+            Profiles:ClearInputs()
             Settings.OpenToCategory(BlizzHUDTweaks.optionsCategoryID)
           elseif button == "RightButton" then
             if addon:IsEnabled() then
@@ -591,6 +592,7 @@ end
 
 function addon:ExecuteChatCommand(input)
   if input == "" or input == nil then
+    Profiles:ClearInputs()
     Settings.OpenToCategory(1, "BlizzHUDTweaks")
   elseif input == "minimap" then
     addon:ToggleMinimapIcon()
