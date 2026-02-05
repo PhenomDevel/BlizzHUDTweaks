@@ -23,6 +23,22 @@ local function getGlobalOptions()
           Tooltip:AnchorTooltipToMouse()
         end
       end
+    },
+    ["TooltipShowSpellID"] = {
+      order = 1,
+      name = "Show Spell ID in Tooltip",
+      desc = "If enabled, tooltips will show the spell ID.",
+      width = "full",
+      type = "toggle",
+      get = "GetValue",
+      set = function(option, value)
+        Options:SetValue(option, value)
+        if not value then
+          Tooltip:HideSpellID()
+        else
+          Tooltip:ShowSpellID()
+        end
+      end
     }
   }
 end
