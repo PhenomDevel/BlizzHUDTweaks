@@ -9,6 +9,7 @@ local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local Miscellaneous = addon:NewModule("Miscellaneous")
 local Tooltip = addon:NewModule("Tooltip")
+local Profiles = addon:NewModule("Profiles")
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
 local function getBlizzHUDTweaksLibDbIconData(db)
@@ -521,6 +522,10 @@ function addon:InitializeOptions()
   self.tooltipOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Tooltip", "Tooltip", "BlizzHUDTweaks")
   self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
 
+  addon.db.RegisterCallback(self, "OnProfileChanged", "LoadProfile")
+  addon.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
+  addon.db.RegisterCallback(self, "OnProfileReset", "LoadProfile")
+
   BlizzHUDTweaks.optionsCategoryID = categoryId
 end
 
@@ -531,7 +536,7 @@ function addon:RefreshOptionTables()
   local mouseoverFrameFadingOptions = MouseoverFrameFading:GetOptionsTable(self.db.profile)
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
 
-  local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+  local profiles = Profiles:GetOptionsTable(self.db)
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
 
   local miscellaneousOptions = Miscellaneous:GetOptionsTable()
@@ -594,4 +599,8 @@ end
 
 function addon:GetProfileDB()
   return self.db.profile
+end
+
+function addon:GetGlobalProfileDB()
+  return self.db.global
 end
