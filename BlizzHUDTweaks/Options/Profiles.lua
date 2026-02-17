@@ -8,7 +8,6 @@ local importString = ""
 local importProfileName = ""
 local exportString = ""
 
-
 -------------------------------------------------------------------------------
 -- Public API
 
@@ -20,13 +19,12 @@ function Profiles:SetValue(info, value)
   Options:SetValue(info, value)
 end
 
-
 -------------------------------------------------------------------------------
 -- Profile Import/Export
 
 local function serialize(t)
   local serialized = AceSerializer:Serialize(t)
-  local compressed = LibDeflate:CompressDeflate(serialized, {level = 9})
+  local compressed = LibDeflate:CompressDeflate(serialized, { level = 9 })
 
   return LibDeflate:EncodeForPrint(compressed)
 end
@@ -84,99 +82,101 @@ function Profiles:ClearInputs()
   importProfileName = ""
 end
 
-function Profiles:GetOptionsTable(db)
-  local options = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
-
-  options.args.importExportHeader = {
-    type = "header",
-    name = "Import/Export Profiles",
-    order = 99
-  }
-
-  options.args.exportGroup = {
-    type = "group",
-    name = "Export",
-    order = 100,
-    args = {
-      exportButton = {
-        type = "execute",
-        name = "Generate Export String",
-        desc = "Click to generate an export string for your current profile",
-        order = 101,
-        width = "full",
-        func = function()
-          exportString = Profiles:ExportProfile()
-        end
-      },
-      exportString = {
-        type = "input",
-        name = "Export String",
-        desc = "Copy this string to share your profile",
-        order = 102,
-        multiline = 5,
-        width = "full",
-        get = function()
-          return exportString or "Click 'Generate Export String' button above to create an export string"
-        end,
-        set = function() end
-      }
-    }
-  }
-
-  options.args.importGroup = {
-    type = "group",
-    name = "Import",
-    order = 200,
-    args = {
-      profileName = {
-        type = "input",
-        name = "Profile Name (Optional)",
-        desc = "Name for the imported profile. Leave empty for auto-generated name.",
-        order = 201,
-        width = "full",
-        confirm = false,
-        get = function()
-          return importProfileName or ""
-        end,
-        set = function(_, value)
-          importProfileName = value
-        end
-      },
-      importString = {
-        type = "input",
-        name = "Import String",
-        desc = "Paste the export string here",
-        order = 202,
-        width = "full",
-        multiline = 5,
-        get = function()
-          return importString or ""
-        end,
-        set = function(_, value)
-          importString = value
-        end
-      },
-      importButton = {
-        type = "execute",
-        name = "Import Profile",
-        desc = "Click to import the profile from the string above",
-        order = 203,
-        width = "full",
-        func = function()
-          if importString and importString ~= "" then
-            local success = Profiles:ImportProfile(importString, importProfileName)
-            if success then
-              importString = ""
-              exportString = ""
-              importProfileName = ""
-            end
-          else
-            addon:Print("Please paste an import string first")
+local options = {
+  name = "",
+  handler = addon,
+  type = "group",
+  childGroups = "tab",
+  args = {
+    importGroup = {
+      type = "group",
+      name = "Import",
+      order = 100,
+      args = {
+        profileName = {
+          type = "input",
+          name = "Profile Name (Optional)",
+          desc = "Name for the imported profile. Leave empty for auto-generated name.",
+          order = 101,
+          width = "full",
+          confirm = false,
+          get = function()
+            return importProfileName or ""
+          end,
+          set = function(_, value)
+            importProfileName = value
           end
-        end
+        },
+        importString = {
+          type = "input",
+          name = "Import String",
+          desc = "Paste the export string here",
+          order = 103,
+          width = "full",
+          multiline = 5,
+          get = function()
+            return importString or ""
+          end,
+          set = function(_, value)
+            importString = value
+          end
+        },
+        importButton = {
+          type = "execute",
+          name = "Import Profile",
+          desc = "Click to import the profile from the string above",
+          order = 104,
+          width = "full",
+          func = function()
+            if importString and importString ~= "" then
+              local success = Profiles:ImportProfile(importString, importProfileName)
+              if success then
+                importString = ""
+                exportString = ""
+                importProfileName = ""
+              end
+            else
+              addon:Print("Please paste an import string first")
+            end
+          end
+        }
+      }
+    },
+    exportGroup = {
+      type = "group",
+      name = "Export",
+      order = 201,
+      args = {
+        exportButton = {
+          type = "execute",
+          name = "Generate Export String",
+          desc = "Click to generate an export string for your current profile",
+          order = 202,
+          width = "full",
+          func = function()
+            exportString = Profiles:ExportProfile()
+          end
+        },
+        exportString = {
+          type = "input",
+          name = "Export String",
+          desc = "Copy this string to share your profile",
+          order = 203,
+          multiline = 5,
+          width = "full",
+          get = function()
+            return exportString or "Click 'Generate Export String' button above to create an export string"
+          end,
+          set = function() end
+        }
       }
     }
   }
+}
 
+function addon:GetOptionsTable()
+  local profile_options = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+  profile_options.order = 1
+  options.args.profiles = profile_options
   return options
 end

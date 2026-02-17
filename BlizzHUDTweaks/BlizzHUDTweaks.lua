@@ -531,13 +531,13 @@ function addon:InitializeOptions()
 end
 
 function addon:RefreshOptionTables()
-  local globalOptions = Options:GetOptionsTable()
+local globalOptions = Options:GetOptionsTable()
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_options", globalOptions)
 
   local mouseoverFrameFadingOptions = MouseoverFrameFading:GetOptionsTable(self.db.profile)
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
 
-  local profiles = Profiles:GetOptionsTable(self.db)
+  local profiles = addon:GetOptionsTable()
   AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
 
   local miscellaneousOptions = Miscellaneous:GetOptionsTable()
