@@ -130,7 +130,8 @@ local eventsToRegister = {
   "UNIT_HEALTH",
   "ZONE_CHANGED_NEW_AREA",
   "PLAYER_MOUNT_DISPLAY_CHANGED",
-  "PLAYER_TARGET_CHANGED"
+  "PLAYER_TARGET_CHANGED",
+  "CHAT_MSG_COMBAT_XP_GAIN"
 }
 
 local registeredEvents = {}
@@ -313,6 +314,13 @@ function EventHandler:UNIT_QUEST_LOG_CHANGED()
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
     Miscellaneous:FlashObjectiveTracker(profile)
+  end
+end
+
+function EventHandler:CHAT_MSG_COMBAT_XP_GAIN()
+  if addon:IsEnabled() then
+    local profile = addon:GetProfileDB()
+    Miscellaneous:FlashExperienceBar(profile)
   end
 end
 

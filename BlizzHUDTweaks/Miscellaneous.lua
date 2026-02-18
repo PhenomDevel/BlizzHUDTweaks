@@ -221,14 +221,39 @@ function Miscellaneous:FlashObjectiveTracker(profile)
       local globalOptions = profile["*Global*"]
       local frameOptions = profile["ObjectiveTrackerFrame"]
       local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+      local mapping = addon:GetFrameMapping()
+      local frame = mapping["ObjectiveTrackerFrame"].mainFrame
 
-      MouseoverFrameFading:Fade(ObjectiveTrackerFrame, 0, 1, fadeDuration, 0, 0)
-      ObjectiveTrackerFrame.__BlizzHUDTweaksForceFaded = true
+      MouseoverFrameFading:Fade(frame, 0, 1, fadeDuration, 0, 0)
+      frame.__BlizzHUDTweaksForceFaded = true
 
       C_Timer.After(
         profile["MiscellaneousShowHideObjectiveTrackerUpdateFlashDuration"] or 5,
         function()
-          ObjectiveTrackerFrame.__BlizzHUDTweaksForceFaded = false
+          frame.__BlizzHUDTweaksForceFaded = false
+          MouseoverFrameFading:RefreshFrameAlphas()
+        end
+      )
+    end
+  end
+end
+
+function Miscellaneous:FlashExperienceBar(profile)
+  if MainStatusTrackingBarContainer:IsShown() then
+    if profile["MiscellaneousShowHideExperienceBarUpdateFlash"] and profile["MainStatusTrackingBarContainer"].Enabled then
+      local globalOptions = profile["*Global*"]
+      local frameOptions = profile["MainStatusTrackingBarContainer"]
+      local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+      local mapping = addon:GetFrameMapping()
+      local frame = mapping["MainStatusTrackingBarContainer"].mainFrame
+
+      MouseoverFrameFading:Fade(frame, 0, 1, fadeDuration, 0, 0)
+      frame.__BlizzHUDTweaksForceFaded = true
+
+      C_Timer.After(
+        profile["MiscellaneousShowHideExperienceBarUpdateFlashDuration"] or 5,
+        function()
+          frame.__BlizzHUDTweaksForceFaded = false
           MouseoverFrameFading:RefreshFrameAlphas()
         end
       )

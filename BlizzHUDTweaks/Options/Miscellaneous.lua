@@ -326,6 +326,26 @@ Miscellaneous.options = {
       }
     }
   },
+  ["ExperienceBarOptions"] = {
+    name = "Experience Bar",
+    options = {
+      {
+        optionName = "MiscellaneousShowHideExperienceBarUpdateFlash",
+        displayName = "Experience Bar Flash",
+        frame = MainStatusTrackingBarContainer,
+        description = "Shows the experience bar in full alpha after an experience update.",
+        type = "toggle",
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousShowHideExperienceBarUpdateFlashDuration",
+        displayName = "Flash Duration",
+        frame = MainStatusTrackingBarContainer,
+        type = "range",
+        setFn = doNothing
+      }
+    }
+  },
   ["ActionBarOptions"] = {
     name = "Action Bars",
     options = {
