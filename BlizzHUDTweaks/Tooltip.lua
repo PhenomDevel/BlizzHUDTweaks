@@ -23,7 +23,7 @@ local function addSpellID(tooltip, spellID)
     end
 
     tooltip:AddLine(" ")
-    tooltip:AddDoubleLine("|cff00ff00Spell ID|r", spellID, nil, nil, nil, 255, 255, 255)
+    tooltip:AddLine("|cff00ff00Spell ID|r "..spellID)
     tooltip:Show()
 end
 
