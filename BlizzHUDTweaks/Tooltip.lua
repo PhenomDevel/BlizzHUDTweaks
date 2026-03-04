@@ -1,13 +1,27 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Tooltip = addon:GetModule("Tooltip")
 
-local Original_GameTooltip_SetDefaultAnchor = GameTooltip_SetDefaultAnchor
+-- using a secure hook instead of replacing the global function prevents
+-- Blizzard taint errors.  The hook is registered only once and checks the
+-- profile option each time it runs.
+local anchorHooked
 
-local function anchorTooltipToMouse()
-    GameTooltip_SetDefaultAnchor = function(tooltip, parent)
-        tooltip:SetOwner(parent, "ANCHOR_CURSOR")
+local function ensureTooltipAnchorHook()
+    if not anchorHooked then
+        hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+            if not InCombatLockdown() then
+                local profile = addon:GetProfileDB()
+                if profile["TooltipAnchorToMouse"] then
+                    tooltip:SetOwner(parent, "ANCHOR_CURSOR")
+                end
+            end
+        end)
+        anchorHooked = true
     end
 end
+
+-- original override removed; ResetTooltipAnchor becomes a no-op below
+
 
 -- https://warcraft.wiki.gg/wiki/Struct_TooltipData
 -- https://github.com/Gethe/wow-ui-source/blob/live/Interface/AddOns/Blizzard_APIDocumentationGenerated/TooltipInfoSharedDocumentation.lua
@@ -17,10 +31,22 @@ local tooltipSpellTypeIds = {
     1, 7, 8, 11, 13, 17, 18
 }
 
+local function getTooltipName(tooltip)
+  return tooltip:GetName() or nil
+end
+
 local function addSpellID(tooltip, spellID)
+    if InCombatLockdown() then
+        return
+    end
+
     if not spellID then
         return
     end
+
+    -- Abort when tooltip has no name or when :GetName throws
+    local ok, name = pcall(getTooltipName, tooltip)
+    if not ok or not name then return end
 
     tooltip:AddLine(" ")
     tooltip:AddLine("|cff00ff00Spell ID|r "..spellID)
@@ -31,8 +57,10 @@ local function isSecretValue(value)
   return issecretvalue(value) or issecrettable(value)
 end
 
+-- register the data processor hook only once to avoid duplicate lines
+local spellHooked
 local function showSpellIDOnTooltip()
-    if TooltipDataProcessor then
+    if TooltipDataProcessor and not spellHooked then
         TooltipDataProcessor.AddTooltipPostCall(TooltipDataProcessor.AllTypes,
             function(tooltip, data)
                 if isSecretValue(data.type) or isSecretValue(data.guid) then
@@ -43,6 +71,7 @@ local function showSpellIDOnTooltip()
                     addSpellID(tooltip, data.id)
                 end
             end)
+        spellHooked = true
     end
 end
 
@@ -68,16 +97,17 @@ function Tooltip:AnchorTooltipToMouse()
     if Tooltip:IsEnabled() then
         local profile = addon:GetProfileDB()
         if profile["TooltipAnchorToMouse"] then
-            anchorTooltipToMouse()
+            ensureTooltipAnchorHook()
         end
     end
 end
 
 function Tooltip:ResetTooltipAnchor()
-    if Tooltip:IsEnabled() then
-        GameTooltip_SetDefaultAnchor = Original_GameTooltip_SetDefaultAnchor
-    end
+    -- secure hooks cannot be removed; the hook only repositions if the option
+    -- is enabled so disabling the feature or the module causes it to stop
+    -- without taint.  A UI reload is not needed.
 end
+
 
 function Tooltip:InstallHooks()
     if Tooltip:IsEnabled() then
