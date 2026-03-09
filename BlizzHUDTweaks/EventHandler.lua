@@ -182,6 +182,7 @@ function EventHandler:PLAYER_REGEN_DISABLED()
 
   if addon:IsEnabled() then
     if MouseoverFrameFading:IsEnabled() then
+      MouseoverFrameFading:PauseAnimations()
       MouseoverFrameFading:RefreshFrameAlphas()
     end
   end
