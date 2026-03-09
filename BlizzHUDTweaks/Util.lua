@@ -65,3 +65,7 @@ function addon:tKeys(t)
 
   return keyset
 end
+
+function addon:IsMounted()
+  return IsMounted() or ( GetShapeshiftForm() == 3 )
+end

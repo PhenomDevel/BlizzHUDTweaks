@@ -150,7 +150,7 @@ local function determineTargetAlpha(globalOptions, frameOptions)
   local isResting = BlizzHUDTweaks.isResting
   local inNeighborhood = BlizzHUDTweaks.inNeighborhood
   local hasTarget = BlizzHUDTweaks.hasTarget
-  local hasBonusActionBar = IsMounted() and HasBonusActionBar()
+  local hasBonusActionBar = addon:IsMounted() and HasBonusActionBar()
 
   local alpha
 

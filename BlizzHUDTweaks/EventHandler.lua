@@ -128,7 +128,8 @@ local eventsToRegister = {
   "ZONE_CHANGED_NEW_AREA",
   "PLAYER_MOUNT_DISPLAY_CHANGED",
   "PLAYER_TARGET_CHANGED",
-  "CHAT_MSG_COMBAT_XP_GAIN"
+  "CHAT_MSG_COMBAT_XP_GAIN",
+  "UPDATE_SHAPESHIFT_FORM"
 }
 
 local registeredEvents = {}
@@ -315,7 +316,6 @@ end
 
 function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
   cachedInNeighborhood = nil
-
   if addon:IsEnabled() then
     restoreMouseoverFade()
   end
@@ -327,5 +327,11 @@ function EventHandler:PLAYER_TARGET_CHANGED()
 
     local forced = not BlizzHUDTweaks.inCombat
     restoreMouseoverFade(forced)
+  end
+end
+
+function EventHandler:UPDATE_SHAPESHIFT_FORM()
+  if addon:IsEnabled() then
+    restoreMouseoverFade()
   end
 end
