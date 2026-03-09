@@ -127,7 +127,6 @@ local eventsToRegister = {
   "ACTIONBAR_HIDEGRID",
   "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
-  "UNIT_HEALTH",
   "ZONE_CHANGED_NEW_AREA",
   "PLAYER_MOUNT_DISPLAY_CHANGED",
   "PLAYER_TARGET_CHANGED",
@@ -321,12 +320,6 @@ function EventHandler:CHAT_MSG_COMBAT_XP_GAIN()
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
     Miscellaneous:FlashExperienceBar(profile)
-  end
-end
-
-function EventHandler:UNIT_HEALTH(_, unit)
-  if unit == "player" then
-    MouseoverFrameFading:RefreshFrameAlphas()
   end
 end
 
