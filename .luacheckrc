@@ -172,7 +172,8 @@ globals = {
   "DamageMeterSessionWindow3",
   "GameTooltip_SetDefaultAnchor",
   "hooksecurefunc",
-  "C_SpellBook"
+  "C_SpellBook",
+  "GetShapeshiftForm",
 }
 max_line_length = 250
 max_code_line_length = 200
