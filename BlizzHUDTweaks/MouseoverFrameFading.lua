@@ -427,7 +427,9 @@ function MouseoverFrameFading:PauseAnimations()
     local frame = frameMappingOptions.mainFrame
     if frame then
       if frame.__BlizzHUDTweaksAnimationGroup then
-        frame.__BlizzHUDTweaksAnimationGroup:Pause()
+        if frame.__BlizzHUDTweaksAnimationGroup:IsPlaying() then
+          frame.__BlizzHUDTweaksAnimationGroup:Pause()
+        end
       end
     end
   end

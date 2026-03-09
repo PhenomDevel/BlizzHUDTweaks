@@ -108,9 +108,9 @@ local function updateNeighborhoodCache()
   return cachedInNeighborhood
 end
 
-local function restoreMouseoverFade()
+local function restoreMouseoverFade(forced)
   if MouseoverFrameFading:IsEnabled() then
-    MouseoverFrameFading:RefreshFrameAlphas()
+    MouseoverFrameFading:RefreshFrameAlphas(forced)
   end
 end
 
@@ -120,12 +120,10 @@ local eventsToRegister = {
   "PLAYER_REGEN_DISABLED",
   "PLAYER_UPDATE_RESTING",
   "PLAYER_ENTERING_WORLD",
-  "PLAYER_TOTEM_UPDATE",
   "ACTIONBAR_SLOT_CHANGED",
   "UNIT_PET",
   "ACTIONBAR_SHOWGRID",
   "ACTIONBAR_HIDEGRID",
-  "GROUP_LEFT",
   "UNIT_QUEST_LOG_CHANGED",
   "ZONE_CHANGED_NEW_AREA",
   "PLAYER_MOUNT_DISPLAY_CHANGED",
@@ -181,10 +179,7 @@ function EventHandler:PLAYER_REGEN_DISABLED()
   BlizzHUDTweaks.inCombat = true
 
   if addon:IsEnabled() then
-    if MouseoverFrameFading:IsEnabled() then
-      MouseoverFrameFading:PauseAnimations()
-      MouseoverFrameFading:RefreshFrameAlphas()
-    end
+    restoreMouseoverFade()
   end
 end
 
@@ -197,7 +192,7 @@ function EventHandler:PLAYER_UPDATE_RESTING()
 
   if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
     if MouseoverFrameFading:IsEnabled() then
-      MouseoverFrameFading:RefreshFrameAlphas()
+      restoreMouseoverFade()
     end
   end
 end
@@ -219,20 +214,6 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 
     restoreMouseoverFade()
     installKeyDownHandler()
-  end
-end
-
-function EventHandler:PLAYER_TOTEM_UPDATE()
-  local profile = addon:GetProfileDB()
-
-  if not profile["TotemFrameOriginalPoint"] then
-    local orgAnchor, _, orgRelativeAnchor, orgXOffset, orgYOffset = TotemFrame:GetPoint()
-    profile["TotemFrameOriginalPoint"] = {
-      ["Anchor"] = orgAnchor,
-      ["RelativeAnchor"] = orgRelativeAnchor,
-      ["XOffset"] = orgXOffset,
-      ["YOffset"] = orgYOffset
-    }
   end
 end
 
@@ -304,12 +285,6 @@ function EventHandler:UNIT_PET(_, unit)
   end
 end
 
-function EventHandler:GROUP_LEFT()
-  if addon:IsEnabled() then
-    addon:ClearPartyAndRaidSubFrames()
-  end
-end
-
 function EventHandler:UNIT_QUEST_LOG_CHANGED()
   if addon:IsEnabled() then
     local profile = addon:GetProfileDB()
@@ -350,6 +325,7 @@ function EventHandler:PLAYER_TARGET_CHANGED()
   BlizzHUDTweaks.hasTarget = UnitExists("target")
   if addon:IsEnabled() and not BlizzHUDTweaks.inCombat then
 
-    restoreMouseoverFade()
+    local forced = not BlizzHUDTweaks.inCombat
+    restoreMouseoverFade(forced)
   end
 end
