@@ -174,6 +174,8 @@ globals = {
   "hooksecurefunc",
   "C_SpellBook",
   "GetShapeshiftForm",
+  "UIFrameFadeRemoveFrame",
+  "UIFrameFade"
 }
 max_line_length = 250
 max_code_line_length = 200

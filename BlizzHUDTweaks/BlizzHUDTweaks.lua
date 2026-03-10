@@ -398,11 +398,6 @@ end
 -------------------------------------------------------------------------------
 -- Public API
 
-function addon:ClearPartyAndRaidSubFrames()
-  frameMapping["PartyFrame"].subFrames = nil
-  frameMapping["CompactRaidFrameContainer"].subFrames = nil
-end
-
 function addon:GetFrameMapping()
   return frameMapping
 end
@@ -426,6 +421,7 @@ function addon:GetFrameTable()
 end
 
 function addon:LoadProfile()
+  frameTable = nil
   updateFramesForLoadedAddons(self.db.profile)
 
   if addon:IsEnabled() then
@@ -552,6 +548,13 @@ function addon:ResetFrame(frame)
   if frame then
     if frame.__BlizzHUDTweaksAnimationGroup then
       frame.__BlizzHUDTweaksAnimationGroup:Stop()
+    end
+    if UIFrameFadeRemoveFrame then
+      UIFrameFadeRemoveFrame(frame)
+    end
+
+    if MouseoverFrameFading and MouseoverFrameFading.ClearActiveFade then
+      MouseoverFrameFading:ClearActiveFade(frame)
     end
     frame:SetAlpha(1)
   end
