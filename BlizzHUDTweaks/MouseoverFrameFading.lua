@@ -302,8 +302,16 @@ local function SpellFlyoutOnShow()
   end
 end
 
--------------------------------------------------------------------------------
--- Public API
+
+local activeFades = {}
+
+function MouseoverFrameFading:ClearActiveFade(frame)
+  activeFades[frame] = nil
+end
+
+function MouseoverFrameFading:TrackActiveFade(frame)
+  activeFades[frame] = true
+end
 
 function MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
   local fadeDuration = 0.25
@@ -325,27 +333,32 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
   if currentAlpha and targetAlpha and frame:IsShown() then
     if not frame.__BlizzHUDTweaksForceFaded then
       if (currentAlpha ~= targetAlpha) or forced then
-        if not frame.__BlizzHUDTweaksAnimationGroup then
-          local animationGroup = frame:CreateAnimationGroup()
-          animationGroup:SetToFinalAlpha(true)
-
-          frame.__BlizzHUDTweaksAnimationGroup = animationGroup
-          frame.__BlizzHUDTweaksFadeAnimation = animationGroup:CreateAnimation("Alpha")
-          frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(5)
-
+        -- Cancel any existing fade for this frame
+        if activeFades[frame] then
+          UIFrameFadeRemoveFrame(frame)
+          MouseoverFrameFading:ClearActiveFade(frame)
         end
 
-        if (not forced) and targetAlpha == frame.__BlizzHUDTweaksFadeAnimation:GetToAlpha() then
-          return
+        -- If target alpha is different, start new fade
+        if currentAlpha ~= targetAlpha or forced then
+          MouseoverFrameFading:TrackActiveFade(frame)
+          local fadeFunc = function()
+            UIFrameFade(frame, {
+              mode = "IN",
+              timeToFade = duration,
+              startAlpha = currentAlpha,
+              endAlpha = targetAlpha,
+              finishedFunc = function()
+                MouseoverFrameFading:ClearActiveFade(frame)
+              end
+            })
+          end
+          if delay and delay > 0 then
+            C_Timer.After(delay, fadeFunc)
+          else
+            fadeFunc()
+          end
         end
-
-        frame.__BlizzHUDTweaksFadeAnimation:Stop()
-        frame.__BlizzHUDTweaksAnimationGroup:Stop()
-        frame.__BlizzHUDTweaksFadeAnimation:SetFromAlpha(currentAlpha or 1)
-        frame.__BlizzHUDTweaksFadeAnimation:SetToAlpha(targetAlpha or 1)
-        frame.__BlizzHUDTweaksFadeAnimation:SetDuration(math.min(duration, 2))
-        frame.__BlizzHUDTweaksFadeAnimation:SetStartDelay(delay or 0)
-        frame.__BlizzHUDTweaksAnimationGroup:Restart()
       end
     end
   end
@@ -409,13 +422,9 @@ end
 
 local function shouldFade(frame, globalOptions, frameOptions)
   if frame then
-    if frame.__BlizzHUDTweaksAnimationGroup then
-      local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
-
-      if not frame.__BlizzHUDTweaksAnimationGroup:IsPlaying() or targetAlpha ~= frame.__BlizzHUDTweaksFadeAnimation:GetToAlpha() then
-        return true
-      end
-    else
+    local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+    local currentAlpha = getNormalizedFrameAlpha(frame)
+    if currentAlpha ~= targetAlpha or activeFades[frame] then
       return true
     end
   end
@@ -425,12 +434,9 @@ function MouseoverFrameFading:PauseAnimations()
   local mapping = addon:GetFrameMapping()
   for _, frameMappingOptions in pairs(mapping) do
     local frame = frameMappingOptions.mainFrame
-    if frame then
-      if frame.__BlizzHUDTweaksAnimationGroup then
-        if frame.__BlizzHUDTweaksAnimationGroup:IsPlaying() then
-          frame.__BlizzHUDTweaksAnimationGroup:Pause()
-        end
-      end
+    if frame and activeFades[frame] then
+      UIFrameFadeRemoveFrame(frame)
+      activeFades[frame] = nil
     end
   end
 end
