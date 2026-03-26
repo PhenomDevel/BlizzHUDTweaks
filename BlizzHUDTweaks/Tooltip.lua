@@ -9,7 +9,7 @@ local anchorHooked
 local function ensureTooltipAnchorHook()
     if not anchorHooked then
         hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-            if not InCombatLockdown() then
+            if not InCombatLockdown() and not IsInInstance() then
                 local profile = addon:GetProfileDB()
                 if profile["TooltipAnchorToMouse"] then
                     tooltip:SetOwner(parent, "ANCHOR_CURSOR")
@@ -60,10 +60,10 @@ end
 -- register the data processor hook only once to avoid duplicate lines
 local spellHooked
 local function showSpellIDOnTooltip()
-    if TooltipDataProcessor and not spellHooked then
+    if TooltipDataProcessor and not spellHooked and not IsInInstance() then
         TooltipDataProcessor.AddTooltipPostCall(TooltipDataProcessor.AllTypes,
             function(tooltip, data)
-                if isSecretValue(data.type) or isSecretValue(data.guid) then
+                if isSecretValue(data.type) or isSecretValue(data.guid) or isSecretValue(data.id) then
                     return
                 end
 
