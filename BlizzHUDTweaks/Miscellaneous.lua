@@ -20,6 +20,7 @@ end
 
 local function setActionbarWidth(actionbar, padding)
   if actionbar.settingMap and isActionbarInitialized(actionbar) then
+    padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
     local buttonSize = getButtonSizeForActionbar(actionbar)
     local buttonScale = (actionbar.settingMap[3].displayValue / 100)
     local newWidth
@@ -52,6 +53,7 @@ end
 
 local function setActionbarHeight(actionbar, padding)
   if actionbar.settingMap and isActionbarInitialized(actionbar) then
+    padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
     local buttonSize = getButtonSizeForActionbar(actionbar)
     local buttonScale = (actionbar.settingMap[3].displayValue / 100)
     local newHeight
@@ -158,6 +160,7 @@ function Miscellaneous:RestoreActionbarSize(profile, options, padding, forced)
 
   if isActionbarInitialized(actionbar) then
     if actionbar and (enabled or forced) and not InCombatLockdown() then
+      padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
       setActionbarWidth(actionbar, padding)
       setActionbarHeight(actionbar, padding)
     end
@@ -170,6 +173,7 @@ function Miscellaneous:RestoreActionbarPadding(profile, options, padding, forced
 
   if isActionbarInitialized(actionbar) then
     if actionbar and (enabled or forced) and not InCombatLockdown() then
+      padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
       if actionbar.isHorizontal then
         restoreActionbarButtonHorizontal(options, actionbar, padding)
       else
