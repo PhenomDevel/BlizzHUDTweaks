@@ -343,15 +343,16 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
         if currentAlpha ~= targetAlpha or forced then
           MouseoverFrameFading:TrackActiveFade(frame)
           local fadeFunc = function()
-            UIFrameFade(frame, {
-              mode = "IN",
+            local fadeInfo = {
               timeToFade = duration,
               startAlpha = currentAlpha,
               endAlpha = targetAlpha,
               finishedFunc = function()
                 MouseoverFrameFading:ClearActiveFade(frame)
               end
-            })
+            }
+
+            UIFrameFade(frame, fadeInfo)
           end
           if delay and delay > 0 then
             C_Timer.After(delay, fadeFunc)
