@@ -304,13 +304,55 @@ end
 
 
 local activeFades = {}
+local fadeTickers = {}
 
 function MouseoverFrameFading:ClearActiveFade(frame)
   activeFades[frame] = nil
+
+  if fadeTickers[frame] then
+    fadeTickers[frame]:Cancel()
+    fadeTickers[frame] = nil
+  end
 end
 
 function MouseoverFrameFading:TrackActiveFade(frame)
   activeFades[frame] = true
+end
+
+-- Blizzard's UIFrameFade unconditionally calls frame:Show(), which is now a
+-- protected call on frames like MainActionBar. We only ever fade frames that
+-- are already shown, so a self-contained alpha ticker avoids the taint entirely.
+local FADE_TICK_INTERVAL = 0.01
+
+local function StartFade(frame, startAlpha, endAlpha, duration, finishedFunc)
+  if fadeTickers[frame] then
+    fadeTickers[frame]:Cancel()
+    fadeTickers[frame] = nil
+  end
+
+  if not duration or duration <= 0 then
+    frame:SetAlpha(endAlpha)
+    if finishedFunc then
+      finishedFunc()
+    end
+    return
+  end
+
+  frame:SetAlpha(startAlpha)
+  local elapsed = 0
+  fadeTickers[frame] = C_Timer.NewTicker(FADE_TICK_INTERVAL, function(ticker)
+    elapsed = elapsed + FADE_TICK_INTERVAL
+    local progress = math.min(elapsed / duration, 1)
+    frame:SetAlpha(startAlpha + (endAlpha - startAlpha) * progress)
+
+    if progress >= 1 then
+      ticker:Cancel()
+      fadeTickers[frame] = nil
+      if finishedFunc then
+        finishedFunc()
+      end
+    end
+  end)
 end
 
 function MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
@@ -335,7 +377,6 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
       if (currentAlpha ~= targetAlpha) or forced then
         -- Cancel any existing fade for this frame
         if activeFades[frame] then
-          UIFrameFadeRemoveFrame(frame)
           MouseoverFrameFading:ClearActiveFade(frame)
         end
 
@@ -343,16 +384,9 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
         if currentAlpha ~= targetAlpha or forced then
           MouseoverFrameFading:TrackActiveFade(frame)
           local fadeFunc = function()
-            local fadeInfo = {
-              timeToFade = duration,
-              startAlpha = currentAlpha,
-              endAlpha = targetAlpha,
-              finishedFunc = function()
-                MouseoverFrameFading:ClearActiveFade(frame)
-              end
-            }
-
-            UIFrameFade(frame, fadeInfo)
+            StartFade(frame, currentAlpha, targetAlpha, duration, function()
+              MouseoverFrameFading:ClearActiveFade(frame)
+            end)
           end
           if delay and delay > 0 then
             C_Timer.After(delay, fadeFunc)
@@ -436,8 +470,7 @@ function MouseoverFrameFading:PauseAnimations()
   for _, frameMappingOptions in pairs(mapping) do
     local frame = frameMappingOptions.mainFrame
     if frame and activeFades[frame] then
-      UIFrameFadeRemoveFrame(frame)
-      activeFades[frame] = nil
+      MouseoverFrameFading:ClearActiveFade(frame)
     end
   end
 end
