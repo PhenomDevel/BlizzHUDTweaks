@@ -190,8 +190,13 @@ local function determineFadeDelay(globalOptions, frameOptions)
   return delay or 0
 end
 
+-- Returns nil if the alpha is a secret value (Midnight restrictions), in
+-- which case the frame is left alone.
 local function getNormalizedFrameAlpha(frame)
   local a = frame:GetAlpha()
+  if issecretvalue and issecretvalue(a) then
+    return nil
+  end
   return math.floor(a * 100 + 0.5) / 100
 end
 
@@ -206,6 +211,27 @@ local function fadeSubFrames(subFrames, currentAlpha, targetAlpha, fadeDuration)
   end
 end
 
+-- Profile keys of the frame links, built once per frame name instead of on
+-- every update tick.
+local linkedFramesKeys = setmetatable({}, {
+  __index = function(t, frameName)
+    local key = frameName .. "LinkedFrames"
+    t[frameName] = key
+    return key
+  end
+})
+
+-- Cache entries are reused, so the update ticker does not create garbage.
+local function setMouseoverCache(frameName, value, now)
+  local entry = mouseoverCache[frameName]
+  if entry then
+    entry.value, entry.ts = value, now
+  else
+    mouseoverCache[frameName] = { value = value, ts = now }
+  end
+  return value
+end
+
 local function determineMouseOver(profile, frameName, frameOptions)
   local now = GetTime()
   local entry = mouseoverCache[frameName]
@@ -214,13 +240,12 @@ local function determineMouseOver(profile, frameName, frameOptions)
   end
 
   local mapping = addon:GetFrameMapping()
-  local linkedFrames = profile[frameName .. "LinkedFrames"]
+  local linkedFrames = profile[linkedFramesKeys[frameName]]
   local mainFrame = frameOptions.mainFrame
   local fallback = mainFrame.__BlizzHUDTweaksForceMouseover or mainFrame:IsMouseOver()
 
   if fallback then
-    mouseoverCache[frameName] = { value = true, ts = now }
-    return true
+    return setMouseoverCache(frameName, true, now)
   end
 
   local hasMouseover = false
@@ -265,8 +290,7 @@ local function determineMouseOver(profile, frameName, frameOptions)
     end
   end
 
-  mouseoverCache[frameName] = { value = hasMouseover, ts = now }
-  return hasMouseover
+  return setMouseoverCache(frameName, hasMouseover, now)
 end
 
 local function SpellFlyoutOnLeave()
@@ -304,33 +328,75 @@ end
 
 
 local activeFades = {}
-local fadeTickers = {}
+
+-- Blizzard's UIFrameFade unconditionally calls frame:Show(), which is now a
+-- protected call on frames like MainActionBar. We only ever fade frames that
+-- are already shown, so a self-contained fade avoids the taint entirely.
+--
+-- All fades run on one OnUpdate driver that is only shown while something
+-- fades. It uses the real elapsed time (a fade takes as long as set at any
+-- frame rate), and a pending fade delay is cancelled together with the fade.
+-- Entries are reused per frame: fades[frame] = { from, to, startTime, duration, onFinished, running }
+local fades = {}
+local runningFades = 0
+local fadeDriver = CreateFrame("Frame")
+fadeDriver:Hide()
+
+local finishedFades = {}
+
+local function stopFade(frame)
+  local fade = fades[frame]
+  if fade and fade.running then
+    fade.running = false
+    fade.onFinished = nil
+    runningFades = runningFades - 1
+    if runningFades == 0 then
+      fadeDriver:Hide()
+    end
+  end
+end
+
+fadeDriver:SetScript("OnUpdate", function()
+  local now = GetTime()
+  for frame, fade in pairs(fades) do
+    if fade.running and now >= fade.startTime then
+      if not fade.started then
+        fade.started = true
+        frame:SetAlpha(fade.from)
+      end
+      local progress = math.min((now - fade.startTime) / fade.duration, 1)
+      frame:SetAlpha(fade.from + (fade.to - fade.from) * progress)
+      if progress >= 1 then
+        finishedFades[#finishedFades + 1] = frame
+      end
+    end
+  end
+
+  -- Finish after the loop, the callbacks may start new fades.
+  for i = #finishedFades, 1, -1 do
+    local frame = finishedFades[i]
+    finishedFades[i] = nil
+    local onFinished = fades[frame].onFinished
+    stopFade(frame)
+    if onFinished then
+      onFinished()
+    end
+  end
+end)
 
 function MouseoverFrameFading:ClearActiveFade(frame)
   activeFades[frame] = nil
-
-  if fadeTickers[frame] then
-    fadeTickers[frame]:Cancel()
-    fadeTickers[frame] = nil
-  end
+  stopFade(frame)
 end
 
 function MouseoverFrameFading:TrackActiveFade(frame)
   activeFades[frame] = true
 end
 
--- Blizzard's UIFrameFade unconditionally calls frame:Show(), which is now a
--- protected call on frames like MainActionBar. We only ever fade frames that
--- are already shown, so a self-contained alpha ticker avoids the taint entirely.
-local FADE_TICK_INTERVAL = 0.01
+local function StartFade(frame, startAlpha, endAlpha, duration, finishedFunc, delay)
+  stopFade(frame)
 
-local function StartFade(frame, startAlpha, endAlpha, duration, finishedFunc)
-  if fadeTickers[frame] then
-    fadeTickers[frame]:Cancel()
-    fadeTickers[frame] = nil
-  end
-
-  if not duration or duration <= 0 then
+  if (not delay or delay <= 0) and (not duration or duration <= 0 or startAlpha == endAlpha) then
     frame:SetAlpha(endAlpha)
     if finishedFunc then
       finishedFunc()
@@ -338,21 +404,19 @@ local function StartFade(frame, startAlpha, endAlpha, duration, finishedFunc)
     return
   end
 
-  frame:SetAlpha(startAlpha)
-  local elapsed = 0
-  fadeTickers[frame] = C_Timer.NewTicker(FADE_TICK_INTERVAL, function(ticker)
-    elapsed = elapsed + FADE_TICK_INTERVAL
-    local progress = math.min(elapsed / duration, 1)
-    frame:SetAlpha(startAlpha + (endAlpha - startAlpha) * progress)
-
-    if progress >= 1 then
-      ticker:Cancel()
-      fadeTickers[frame] = nil
-      if finishedFunc then
-        finishedFunc()
-      end
-    end
-  end)
+  local fade = fades[frame]
+  if not fade then
+    fade = {}
+    fades[frame] = fade
+  end
+  fade.from, fade.to = startAlpha, endAlpha
+  fade.startTime = GetTime() + (delay or 0)
+  fade.duration = (duration and duration > 0) and duration or 0.001
+  fade.onFinished = finishedFunc
+  fade.started = false
+  fade.running = true
+  runningFades = runningFades + 1
+  fadeDriver:Show()
 end
 
 function MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
@@ -383,16 +447,9 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
         -- If target alpha is different, start new fade
         if currentAlpha ~= targetAlpha or forced then
           MouseoverFrameFading:TrackActiveFade(frame)
-          local fadeFunc = function()
-            StartFade(frame, currentAlpha, targetAlpha, duration, function()
-              MouseoverFrameFading:ClearActiveFade(frame)
-            end)
-          end
-          if delay and delay > 0 then
-            C_Timer.After(delay, fadeFunc)
-          else
-            fadeFunc()
-          end
+          StartFade(frame, currentAlpha, targetAlpha, duration, function()
+            MouseoverFrameFading:ClearActiveFade(frame)
+          end, delay)
         end
       end
     end
@@ -482,30 +539,28 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
 
     local mapping = addon:GetFrameMapping()
     for frameName, frameMappingOptions in pairs(mapping) do
-      if shouldFade(frameMappingOptions.mainFrame, globalOptions, profile[frameName]) then
-        local frameOptions = profile[frameName]
+      local frameOptions = profile[frameName]
+      -- Disabled frames are skipped before their target alpha is computed.
+      if frameOptions and frameOptions.Enabled and shouldFade(frameMappingOptions.mainFrame, globalOptions, frameOptions) then
+        local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
 
-        if frameOptions.Enabled and frameMappingOptions.mainFrame then
-          local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
+        local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+        local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
+        local targetAlpha
 
-          local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
-          local currentAlpha = getNormalizedFrameAlpha(frameMappingOptions.mainFrame)
-          local targetAlpha
+        if isMouseover then
+          targetAlpha = 1
+        else
+          targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+        end
 
-          if isMouseover then
-            targetAlpha = 1
-          else
-            targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
+        if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
+          local fadeDelay = 0
+          if useFadeDelay then
+            fadeDelay = determineFadeDelay(globalOptions, frameOptions)
           end
-
-          if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
-            local fadeDelay = 0
-            if useFadeDelay then
-              fadeDelay = determineFadeDelay(globalOptions, frameOptions)
-            end
-            self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, fadeDelay, forced)
-            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
-          end
+          self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, fadeDelay, forced)
+          fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
         end
       end
     end

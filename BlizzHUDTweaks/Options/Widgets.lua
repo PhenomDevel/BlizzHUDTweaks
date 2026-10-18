@@ -610,11 +610,84 @@ function Widgets.CreateInput(parent, multiline)
   return input
 end
 
+-- Confirmation -------------------------------------------------------------------
+-- Asks inside `window` (dims it and blocks its controls) instead of using
+-- StaticPopup: addon code taints the shared StaticPopup frames, which can
+-- later block Blizzard's own popups. Closing the window cancels.
+
+local confirm
+
+local function CreateConfirm()
+  confirm = CreateFrame("Frame")
+  confirm:EnableMouse(true)
+  confirm:EnableMouseWheel(true)
+  confirm:SetScript("OnMouseWheel", function()
+  end)
+  Widgets.Fill(confirm, {0, 0, 0, 0.6})
+
+  local box = CreateFrame("Frame", nil, confirm)
+  box:SetSize(360, 124)
+  box:SetPoint("CENTER")
+  Widgets.Fill(box, colors.card)
+  Widgets.Border(box, colors.tooltipBorder)
+
+  confirm.Text = Widgets.Text(box, fonts.body, "CENTER")
+  confirm.Text:SetPoint("TOPLEFT", 20, -24)
+  confirm.Text:SetPoint("TOPRIGHT", -20, -24)
+  confirm.Text:SetWordWrap(true)
+
+  confirm.Accept = Widgets.CreateButton(box)
+  confirm.Accept:SetPoint("BOTTOMRIGHT", box, "BOTTOM", -6, 20)
+  confirm.Accept:SetScript(
+    "OnClick",
+    function()
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      local onAccept = confirm.onAccept
+      confirm:Hide()
+      if onAccept then
+        Widgets.SafeCall(onAccept)
+      end
+    end
+  )
+
+  confirm.Cancel = Widgets.CreateButton(box)
+  confirm.Cancel:SetPoint("BOTTOMLEFT", box, "BOTTOM", 6, 20)
+  confirm.Cancel:SetLabel("Cancel")
+  confirm.Cancel:SetScript(
+    "OnClick",
+    function()
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      confirm:Hide()
+    end
+  )
+  confirm:SetScript(
+    "OnHide",
+    function(self)
+      self.onAccept = nil
+    end
+  )
+end
+
+function Widgets.Confirm(window, text, acceptLabel, onAccept)
+  if not confirm then
+    CreateConfirm()
+  end
+  confirm:SetParent(window)
+  confirm:ClearAllPoints()
+  confirm:SetAllPoints(window)
+  confirm:SetFrameLevel(window:GetFrameLevel() + 100)
+  confirm.Text:SetText(Markup(text))
+  confirm.Accept:SetLabel(acceptLabel)
+  confirm.onAccept = onAccept
+  confirm:Show()
+end
+
 -- Keybind ------------------------------------------------------------------------
 -- keybind:SetBinding(getValue, setValue). Click to record the next key press
 -- (with modifiers, e.g. "SHIFT-F"); Esc while recording clears the binding,
--- another click cancels. Not available in combat, where the keyboard focus of
--- addon frames may not change.
+-- another click cancels. The button only takes keyboard input while
+-- recording and never propagates it, so SetPropagateKeyboardInput (blocked in
+-- combat) is not needed. Recording does not start in combat.
 
 local MODIFIER_KEYS = {
   LSHIFT = true,
@@ -646,7 +719,6 @@ end
 local function SetRecording(keybind, recording)
   keybind.recording = recording
   keybind:EnableKeyboard(recording)
-  keybind:SetPropagateKeyboardInput(not recording)
   Widgets.SetBorderColor(keybind.Edges, recording and {ACCENT[1], ACCENT[2], ACCENT[3], 0.9} or colors.border)
   UpdateKeybindText(keybind)
 end

@@ -57,6 +57,13 @@ local function showFrames(option)
   end
 end
 
+-- The OnShow hooks below keep a frame hidden, but only while its option
+-- (and the module) is on; hooks cannot be removed again.
+local function isOptionActive(option)
+  local profile = addon:GetProfileDB()
+  return addon:IsEnabled() and profile["GlobalOptionsMiscellaneousEnabled"] and profile[option.optionName]
+end
+
 local function resetFontSize(option)
   overwriteFontSize(option, nil, 10)
 end
@@ -112,9 +119,11 @@ Miscellaneous.options = {
         frame = PlayerFrame.PlayerFrameContent.PlayerFrameContentContextual.GroupIndicator,
         description = "Hides the players group indicator",
         type = "toggle",
-        setFn = function(option)
-          if IsInRaid() then
+        setFn = function(option, _, value)
+          if value then
             hideFrame(option)
+          elseif IsInRaid() then
+            showFrame(option)
           end
         end,
         restoreOriginalValueFn = function(option)
@@ -129,7 +138,9 @@ Miscellaneous.options = {
               frame:HookScript(
                 "OnShow",
                 function()
-                  hideFrame({frame = frame})
+                  if isOptionActive(option) then
+                    hideFrame({frame = frame})
+                  end
                 end
               )
               frame.__BlizzHUDTweaksOnShowHooked = true
@@ -295,7 +306,9 @@ Miscellaneous.options = {
                 frame:HookScript(
                   "OnShow",
                   function()
-                    hideFrame({frame = frame})
+                    if isOptionActive(option) then
+                      hideFrame({frame = frame})
+                    end
                   end
                 )
                 frame.__BlizzHUDTweaksOnShowHooked = true

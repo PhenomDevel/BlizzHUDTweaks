@@ -525,9 +525,8 @@ function addon:ResetFrame(frame)
     if frame.__BlizzHUDTweaksAnimationGroup then
       frame.__BlizzHUDTweaksAnimationGroup:Stop()
     end
-    if UIFrameFadeRemoveFrame then
-      UIFrameFadeRemoveFrame(frame)
-    end
+    -- No UIFrameFadeRemoveFrame here: fades no longer use UIFrameFade, and
+    -- writing to Blizzard's FADEFRAMES table from addon code taints it.
 
     if MouseoverFrameFading and MouseoverFrameFading.ClearActiveFade then
       MouseoverFrameFading:ClearActiveFade(frame)

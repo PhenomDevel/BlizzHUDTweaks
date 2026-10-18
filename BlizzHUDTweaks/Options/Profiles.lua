@@ -1,5 +1,3 @@
--- luacheck: globals StaticPopupDialogs
--- luacheck: read globals StaticPopup_Show YES NO
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local Profiles = addon:GetModule("Profiles")
@@ -86,20 +84,6 @@ end
 
 -------------------------------------------------------------------------------
 -- Options window
-
-StaticPopupDialogs["BLIZZHUDTWEAKS_DELETE_PROFILE"] = {
-  text = "Delete the profile \"%s\"?",
-  button1 = YES,
-  button2 = NO,
-  OnAccept = function(_, profileName)
-    addon.db:DeleteProfile(profileName)
-    Options:Refresh()
-  end,
-  timeout = 0,
-  whileDead = true,
-  hideOnEscape = true,
-  showAlert = true
-}
 
 local function toEntries(names)
   local entries = {}
@@ -200,7 +184,14 @@ local function getProfileCard()
           return nil
         end,
         set = function(value)
-          StaticPopup_Show("BLIZZHUDTWEAKS_DELETE_PROFILE", value, nil, value)
+          Options:Confirm(
+            ('Delete the profile "%s"?'):format(value),
+            "Delete",
+            function()
+              db:DeleteProfile(value)
+              Options:Refresh()
+            end
+          )
         end
       },
       {

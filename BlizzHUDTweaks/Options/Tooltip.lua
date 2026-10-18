@@ -56,8 +56,7 @@ local function getCards()
               Tooltip:ShowSpellID()
             end
           end
-        ),
-        {type = "hint", label = "Turning off {Show Spell ID in Tooltip} needs a /reload."}
+        )
       }
     }
   }

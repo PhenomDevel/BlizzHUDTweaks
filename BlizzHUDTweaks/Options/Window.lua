@@ -1267,6 +1267,13 @@ function Options:Toggle()
   end
 end
 
+-- Asks before a destructive action; the window must be open.
+function Options:Confirm(text, acceptLabel, onAccept)
+  if frame and frame:IsShown() then
+    Widgets.Confirm(frame, text, acceptLabel, onAccept)
+  end
+end
+
 -- Opens a page (or one of its detail views) in the open window.
 function Options:Navigate(page, detail)
   if frame and frame:IsShown() then
