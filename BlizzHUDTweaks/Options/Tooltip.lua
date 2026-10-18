@@ -1,48 +1,79 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local Tooltip = addon:GetModule("Tooltip")
-
+local Info = Options.Info
 
 -------------------------------------------------------------------------------
 -- Helper
 
-local function getGlobalOptions()
+local function getToggleRow(key, label, desc, apply)
   return {
-    ["TooltipAnchorToMouse"] = {
-      order = 1,
-      name = "Anchor Tooltip to Mouse",
-      desc = "If enabled, tooltips will be anchored to the mouse cursor.",
-      width = "full",
-      type = "toggle",
-      get = "GetValue",
-      set = function(option, value)
-        Options:SetValue(option, value)
-        if not value then
-          Tooltip:ResetTooltipAnchor()
-        else
-          Tooltip:AnchorTooltipToMouse()
-        end
-      end
-    },
-    ["TooltipShowSpellID"] = {
-      order = 1,
-      name = "Show Spell ID in Tooltip",
-      desc = "If enabled, tooltips will show the spell ID.",
-      width = "full",
-      type = "toggle",
-      get = "GetValue",
-      set = function(option, value)
-        Options:SetValue(option, value)
-        if not value then
-          Tooltip:HideSpellID()
-        else
-          Tooltip:ShowSpellID()
-        end
-      end
+    type = "checkbox",
+    label = label,
+    tooltip = desc,
+    get = function()
+      return Options:GetValue(Info(key))
+    end,
+    set = function(value)
+      Options:SetValue(Info(key), value)
+      apply(value)
+    end
+  }
+end
+
+local function getCards()
+  local moduleCard = Options:GetModuleCard("tooltip")
+  local notice = Options:GetModuleOffNotice("tooltip")
+  if notice then
+    moduleCard.rows = {notice}
+  end
+
+  return {
+    moduleCard,
+    {
+      title = "Tooltip",
+      rows = {
+        getToggleRow(
+          "TooltipAnchorToMouse",
+          "Anchor Tooltip to Mouse",
+          "If enabled, tooltips will be anchored to the mouse cursor.",
+          function(value)
+            if not value then
+              Tooltip:ResetTooltipAnchor()
+            else
+              Tooltip:AnchorTooltipToMouse()
+            end
+          end
+        ),
+        getToggleRow(
+          "TooltipShowSpellID",
+          "Show Spell ID in Tooltip",
+          "If enabled, tooltips will show the spell ID.",
+          function(value)
+            if not value then
+              Tooltip:HideSpellID()
+            else
+              Tooltip:ShowSpellID()
+            end
+          end
+        ),
+        {type = "hint", label = "Turning off {Show Spell ID in Tooltip} needs a /reload."}
+      }
     }
   }
 end
 
+Options:RegisterPage(
+  {
+    id = "tooltip",
+    label = "Tooltip",
+    order = 40,
+    searchable = true,
+    build = function()
+      return "Tooltip", "Tooltip position and extra information", getCards()
+    end
+  }
+)
 
 -------------------------------------------------------------------------------
 -- Public API
@@ -53,14 +84,4 @@ end
 
 function Tooltip:SetValue(info, value)
   Options:SetValue(info, value)
-end
-
-function Tooltip:GetOptionsTable()
-  local options = {
-    name = "Tooltip",
-    type = "group",
-    handler = Options,
-    args = getGlobalOptions()
-  }
-  return options
 end

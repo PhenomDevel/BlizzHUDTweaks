@@ -14,7 +14,7 @@ Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
 For more details see `Features`.
 
 # Usage
-Open the options via the in game options menu or by typing `/bht` or `/blizzhudtweaks` and navigate through the options. Make sure you expand the options, since each "module" is in its own sub category.
+The options have their own window. Open it by typing `/bht` or `/blizzhudtweaks`, by left-clicking the minimap icon or via the in game options menu (Options > AddOns > BlizzHUDTweaks). The sidebar lists the pages (General, Frame Fading, Miscellaneous, Tooltip, Profiles), the search box in the header finds options on every page.
 
 ## Chat commands
 - Toggle minimap icon: `/bht minimap`
