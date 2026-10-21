@@ -1,15 +1,12 @@
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
-local AceConfig = LibStub("AceConfig-3.0")
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-
 local EventHandler = addon:NewModule("EventHandler", "AceEvent-3.0")
 local Options = addon:NewModule("Options")
 local MouseoverFrameFading = addon:NewModule("MouseoverFrameFading")
 local Miscellaneous = addon:NewModule("Miscellaneous")
-local Tooltip = addon:NewModule("Tooltip")
-local Profiles = addon:NewModule("Profiles")
+addon:NewModule("Tooltip")
+addon:NewModule("Profiles")
 local LibDBIcon = LibStub:GetLibrary("LibDBIcon-1.0", true)
 
 local function getBlizzHUDTweaksLibDbIconData(db)
@@ -23,8 +20,7 @@ local function getBlizzHUDTweaksLibDbIconData(db)
         icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
         OnClick = function(self, button)
           if button == "LeftButton" then
-            Profiles:ClearInputs()
-            Settings.OpenToCategory(BlizzHUDTweaks.optionsCategoryID)
+            Options:Toggle()
           elseif button == "RightButton" then
             if addon:IsEnabled() then
               addon:Disable()
@@ -510,37 +506,17 @@ function addon:OnInitialize()
 end
 
 function addon:InitializeOptions()
-  addon:RefreshOptionTables()
-  local optionsFrame, categoryId = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_options", "BlizzHUDTweaks")
-  self.optionsFrame = optionsFrame
-
-  self.mouseoverFrameFadingOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_MouseoverFrameFading", "Actionbar/Frame Fading", "BlizzHUDTweaks")
-  self.miscellaneousOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Miscellaneous", "Miscellaneous", "BlizzHUDTweaks")
-  self.tooltipOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Tooltip", "Tooltip", "BlizzHUDTweaks")
-  self.profileOptionsFrame = AceConfigDialog:AddToBlizOptions("BlizzHUDTweaks_Profiles", "Profiles", "BlizzHUDTweaks")
+  Options:RegisterBlizzardSettings()
 
   addon.db.RegisterCallback(self, "OnProfileChanged", "LoadProfile")
   addon.db.RegisterCallback(self, "OnProfileCopied", "LoadProfile")
   addon.db.RegisterCallback(self, "OnProfileReset", "LoadProfile")
-
-  BlizzHUDTweaks.optionsCategoryID = categoryId
 end
 
+-- The options window builds its pages from the profile on every render, so
+-- refreshing means re-rendering the visible page (Options/Window.lua).
 function addon:RefreshOptionTables()
-local globalOptions = Options:GetOptionsTable()
-  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_options", globalOptions)
-
-  local mouseoverFrameFadingOptions = MouseoverFrameFading:GetOptionsTable(self.db.profile)
-  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_MouseoverFrameFading", mouseoverFrameFadingOptions)
-
-  local profiles = addon:GetOptionsTable()
-  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Profiles", profiles)
-
-  local miscellaneousOptions = Miscellaneous:GetOptionsTable()
-  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Miscellaneous", miscellaneousOptions)
-
-  local tooltipOptions = Tooltip:GetOptionsTable()
-  AceConfig:RegisterOptionsTable("BlizzHUDTweaks_Tooltip", tooltipOptions)
+  Options:Refresh()
 end
 
 
@@ -549,9 +525,8 @@ function addon:ResetFrame(frame)
     if frame.__BlizzHUDTweaksAnimationGroup then
       frame.__BlizzHUDTweaksAnimationGroup:Stop()
     end
-    if UIFrameFadeRemoveFrame then
-      UIFrameFadeRemoveFrame(frame)
-    end
+    -- No UIFrameFadeRemoveFrame here: fades no longer use UIFrameFade, and
+    -- writing to Blizzard's FADEFRAMES table from addon code taints it.
 
     if MouseoverFrameFading and MouseoverFrameFading.ClearActiveFade then
       MouseoverFrameFading:ClearActiveFade(frame)
@@ -595,8 +570,7 @@ end
 
 function addon:ExecuteChatCommand(input)
   if input == "" or input == nil then
-    Profiles:ClearInputs()
-    Settings.OpenToCategory(1, "BlizzHUDTweaks")
+    Options:Toggle()
   elseif input == "minimap" then
     addon:ToggleMinimapIcon()
   end

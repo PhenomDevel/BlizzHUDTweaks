@@ -27,8 +27,12 @@ end
 -- https://github.com/Gethe/wow-ui-source/blob/live/Interface/AddOns/Blizzard_APIDocumentationGenerated/TooltipInfoSharedDocumentation.lua
 -- HUGE THANKS TO idTip where the initial idea came from and just simplified it to my usecase
 -- For a much more advanced tooltip info processor, check out idTip: https://www.curseforge.com/wow/addons/idtip
+-- Enum.TooltipDataType values whose data.id is a spell ID: Spell, UnitAura,
+-- AzeriteEssence, PetAction, EnhancedConduit, RecipeRankInfo, Totem. A set,
+-- so the lookup checks the type itself (as a list, types 1-7 matched, e.g.
+-- currencies and objects).
 local tooltipSpellTypeIds = {
-    1, 7, 8, 11, 13, 17, 18
+    [1] = true, [7] = true, [8] = true, [11] = true, [13] = true, [17] = true, [18] = true
 }
 
 local function getTooltipName(tooltip)
@@ -36,7 +40,7 @@ local function getTooltipName(tooltip)
 end
 
 local function addSpellID(tooltip, spellID)
-    if InCombatLockdown() then
+    if InCombatLockdown() or IsInInstance() then
         return
     end
 
@@ -57,17 +61,19 @@ local function isSecretValue(value)
   return issecretvalue(value) or issecrettable(value)
 end
 
--- register the data processor hook only once to avoid duplicate lines
+-- register the data processor hook only once to avoid duplicate lines. The
+-- instance check happens per tooltip (addSpellID): checked here, logging in
+-- inside an instance kept spell IDs off for the whole session.
 local spellHooked
 local function showSpellIDOnTooltip()
-    if TooltipDataProcessor and not spellHooked and not IsInInstance() then
+    if TooltipDataProcessor and not spellHooked then
         TooltipDataProcessor.AddTooltipPostCall(TooltipDataProcessor.AllTypes,
             function(tooltip, data)
                 if isSecretValue(data.type) or isSecretValue(data.guid) or isSecretValue(data.id) then
                     return
                 end
 
-                if tooltipSpellTypeIds[tonumber(data.type)] then
+                if tooltipSpellTypeIds[data.type] and Tooltip:IsEnabled() and addon:GetProfileDB()["TooltipShowSpellID"] then
                     addSpellID(tooltip, data.id)
                 end
             end)
@@ -88,9 +94,8 @@ function Tooltip:ShowSpellID()
 end
 
 function Tooltip:HideSpellID()
-    if Tooltip:IsEnabled() then
-        addon:Print("You have to /reload for this option to take effect.", addon:ColoredString("Tooltip", "fcba03"))
-    end
+    -- The data processor hook checks the option on every tooltip, so turning
+    -- it off needs no /reload.
 end
 
 function Tooltip:AnchorTooltipToMouse()

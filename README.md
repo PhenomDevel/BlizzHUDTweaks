@@ -14,7 +14,7 @@ Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
 For more details see `Features`.
 
 # Usage
-Open the options via the in game options menu or by typing `/bht` or `/blizzhudtweaks` and navigate through the options. Make sure you expand the options, since each "module" is in its own sub category.
+The options have their own window. Open it by typing `/bht` or `/blizzhudtweaks`, by left-clicking the minimap icon or via the in game options menu (Options > AddOns > BlizzHUDTweaks). The sidebar lists the pages (General, Frame Fading, Miscellaneous, Tooltip, Profiles), the search box in the header finds options on every page.
 
 ## Chat commands
 - Toggle minimap icon: `/bht minimap`
@@ -69,7 +69,7 @@ Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` si
 ## Known Issues
 - When reloading the UI while having a target the alpha will only applied once the target changes
 - When using `Minimap` fading the textures do not get loaded by blizzard for indoors maps
-- When moving an ability when in combat, the actionbar padding will *not* be applied since it would use protected functions while in combat
+- When moving an ability when in combat, the actionbar padding is applied once combat ends, since it uses protected functions
 
 # Support
 If you'd like to support me just leave a star on Github :)

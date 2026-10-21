@@ -19,17 +19,101 @@ local eventsToRegister = {
   "ACTIONBAR_SHOWGRID"
 }
 
-local function getGlobalOptions()
+-------------------------------------------------------------------------------
+-- Options window: General page and the module cards shared with the module pages
+
+-- The handlers below were written for AceConfig and read the option key from
+-- an `info` table; the window passes the same shape.
+function Options.Info(key, arg)
+  return {key, arg = arg}
+end
+local Info = Options.Info
+
+local function getVersion()
+  local version = C_AddOns.GetAddOnMetadata("BlizzHUDTweaks", "Version")
+  if not version or version:find("@project%-version@") then
+    return "Development version"
+  end
+  return "Version " .. version
+end
+
+local moduleCards = {
+  fading = {
+    title = "Actionbar/Frame Fading",
+    note = "Fades action bars and frames depending on combat, target, area and mouseover.",
+    key = "GlobalOptionsMouseoverFrameFadingEnabled",
+    module = MouseoverFrameFading,
+    rows = {
+      {
+        type = "keybind",
+        label = "Toggle Keybind",
+        tooltip = "Turns frame fading on or off. Click to set a key, press Esc while setting to clear it.",
+        get = function()
+          return Options:GetValue(Info("GlobalOptionsMouseoverFrameFadingToggleKeybind"))
+        end,
+        set = function(value)
+          Options:SetValue(Info("GlobalOptionsMouseoverFrameFadingToggleKeybind"), value)
+        end
+      }
+    }
+  },
+  miscellaneous = {
+    title = "Miscellaneous",
+    note = "Hides names and levels, changes font sizes and action bar padding.",
+    key = "GlobalOptionsMiscellaneousEnabled",
+    module = Miscellaneous
+  },
+  tooltip = {
+    title = "Tooltip",
+    note = "Anchors tooltips to the mouse and shows spell IDs.",
+    key = "GlobalOptionsTooltipEnabled",
+    module = Tooltip
+  }
+}
+
+-- Card with the module's on/off switch (and its general options).
+function Options:GetModuleCard(id)
+  local spec = moduleCards[id]
   return {
-    ["Enabled"] = {
-      order = 1,
-      name = "Enabled",
-      desc = "Enables or disables the whole addon and all of it's sub modules.",
-      width = "full",
-      type = "toggle",
-      get = "GetValue",
-      set = function(info, value)
-        Options:SetValue(info, value)
+    title = spec.title,
+    note = spec.note,
+    tooltip = "Enable/Disable this sub module",
+    toggle = {
+      get = function()
+        return Options:GetValue(Info(spec.key))
+      end,
+      set = function(value)
+        Options:SetValue(Info(spec.key), value)
+        if not value then
+          spec.module:Disable()
+        else
+          spec.module:Enable()
+        end
+      end
+    },
+    rows = spec.rows
+  }
+end
+
+-- Notice for module pages while the module is turned off.
+function Options:GetModuleOffNotice(id)
+  local spec = moduleCards[id]
+  if not Options:GetValue(Info(spec.key)) then
+    return {type = "notice", label = "This module is turned off. Changes are saved and take effect once it is on again."}
+  end
+end
+
+local function getAddonCard()
+  return {
+    title = "BlizzHUDTweaks",
+    note = "Turns the whole addon and all of its modules on or off.",
+    tooltip = "Enables or disables the whole addon and all of it's sub modules.",
+    toggle = {
+      get = function()
+        return Options:GetValue(Info("Enabled"))
+      end,
+      set = function(value)
+        Options:SetValue(Info("Enabled"), value)
         if not value then
           Options:DisableAll()
         else
@@ -37,95 +121,53 @@ local function getGlobalOptions()
         end
       end
     },
-    ["Description"] = {
-      order = 2,
-      name = addon:ColoredString("\n\nNOTE: ", "eb4034") .. "The actual settings are in sub categories. Please make sure you have expanded BlizzHUDTweaks's options.",
-      width = "full",
-      type = "description",
-      fontSize = "medium"
-    },
-    ["GlobalOptionsMouseoverFrameFading"] = {
-      name = "Actionbar/Frame Fading",
-      order = 3,
-      type = "group",
-      guiInline = true,
-      args = {
-        ["GlobalOptionsMouseoverFrameFadingEnabled"] = {
-          order = 0,
-          name = "Enabled",
-          desc = "Enable/Disable this sub module",
-          width = "double",
-          type = "toggle",
-          get = "GetValue",
-          set = function(info, value)
-            Options:SetValue(info, value)
-            if not value then
-              MouseoverFrameFading:Disable()
-            else
-              MouseoverFrameFading:Enable()
-            end
+    rows = {
+      {
+        type = "checkbox",
+        label = "Minimap Icon",
+        tooltip = "Shows the addon icon at the minimap. Same as `/bht minimap`.",
+        get = function()
+          return not addon:GetGlobalProfileDB().minimap.hide
+        end,
+        set = function(value)
+          if value == addon:GetGlobalProfileDB().minimap.hide then
+            addon:ToggleMinimapIcon()
           end
-        },
-        ["GlobalOptionsMouseoverFrameFadingToggleKeybind"] = {
-          order = 0,
-          name = "Toggle Keybind",
-          width = "normal",
-          type = "keybinding",
-          get = "GetValue",
-          set = "SetValue"
-        }
-      }
-    },
-    ["GlobalOptionsMiscellaneous"] = {
-      name = "Miscellaneous",
-      order = 5,
-      type = "group",
-      guiInline = true,
-      args = {
-        ["GlobalOptionsMiscellaneousEnabled"] = {
-          order = 0,
-          name = "Enabled",
-          desc = "Enable/Disable this sub module",
-          width = "double",
-          type = "toggle",
-          get = "GetValue",
-          set = function(info, value)
-            Options:SetValue(info, value)
-            if not value then
-              Miscellaneous:Disable()
-            else
-              Miscellaneous:Enable()
-            end
-          end
-        }
-      }
-    },
-    ["GlobalOptionsTooltip"] = {
-      name = "Tooltip",
-      order = 6,
-      type = "group",
-      guiInline = true,
-      args = {
-        ["GlobalOptionsTooltipEnabled"] = {
-          order = 0,
-          name = "Enabled",
-          desc = "Enable/Disable this sub module",
-          width = "double",
-          type = "toggle",
-          get = "GetValue",
-          set = function(info, value)
-            Options:SetValue(info, value)
-            if not value then
-              Tooltip:Disable()
-            else
-              Tooltip:Enable()
-            end
-          end
-        }
+        end
+      },
+      {
+        type = "description",
+        label = "`/bht` opens this window, `/bht minimap` shows or hides the minimap icon."
       }
     }
   }
 end
+
+Options:RegisterPage(
+  {
+    id = "general",
+    label = "General",
+    order = 10,
+    searchable = true,
+    build = function()
+      return "General", getVersion(), {
+        getAddonCard(),
+        Options:GetModuleCard("fading"),
+        Options:GetModuleCard("miscellaneous"),
+        Options:GetModuleCard("tooltip")
+      }
+    end
+  }
+)
+
+-- The toggle keybind switches fading while the window may be open.
+hooksecurefunc(
+  MouseoverFrameFading,
+  "Toggle",
+  function()
+    Options:RefreshValues()
+  end
+)
 
 -------------------------------------------------------------------------------
 -- Public API
@@ -144,16 +186,6 @@ function Options:SetValue(info, value)
   else
     addon:GetProfileDB()[info[#info]] = value
   end
-end
-
-function Options:GetOptionsTable()
-  local options = {
-    name = "BlizzHUDTweaks",
-    type = "group",
-    handler = Options,
-    args = getGlobalOptions()
-  }
-  return options
 end
 
 function Options:DisableAll()

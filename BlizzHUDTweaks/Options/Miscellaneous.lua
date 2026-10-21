@@ -57,6 +57,13 @@ local function showFrames(option)
   end
 end
 
+-- The OnShow hooks below keep a frame hidden, but only while its option
+-- (and the module) is on; hooks cannot be removed again.
+local function isOptionActive(option)
+  local profile = addon:GetProfileDB()
+  return addon:IsEnabled() and profile["GlobalOptionsMiscellaneousEnabled"] and profile[option.optionName]
+end
+
 local function resetFontSize(option)
   overwriteFontSize(option, nil, 10)
 end
@@ -112,9 +119,11 @@ Miscellaneous.options = {
         frame = PlayerFrame.PlayerFrameContent.PlayerFrameContentContextual.GroupIndicator,
         description = "Hides the players group indicator",
         type = "toggle",
-        setFn = function(option)
-          if IsInRaid() then
+        setFn = function(option, _, value)
+          if value then
             hideFrame(option)
+          elseif IsInRaid() then
+            showFrame(option)
           end
         end,
         restoreOriginalValueFn = function(option)
@@ -129,7 +138,9 @@ Miscellaneous.options = {
               frame:HookScript(
                 "OnShow",
                 function()
-                  hideFrame({frame = frame})
+                  if isOptionActive(option) then
+                    hideFrame({frame = frame})
+                  end
                 end
               )
               frame.__BlizzHUDTweaksOnShowHooked = true
@@ -295,7 +306,9 @@ Miscellaneous.options = {
                 frame:HookScript(
                   "OnShow",
                   function()
-                    hideFrame({frame = frame})
+                    if isOptionActive(option) then
+                      hideFrame({frame = frame})
+                    end
                   end
                 )
                 frame.__BlizzHUDTweaksOnShowHooked = true
@@ -433,129 +446,184 @@ Miscellaneous.options = {
   }
 }
 
-local function addActionbarPaddingOption(profile, t, option, order)
-  t[option.optionName .. "Group"] = {
-    name = option.displayName or option.optionName,
-    order = order,
-    type = "group",
-    inline = true,
-    guiInline = true,
-    args = {
-      [option.optionName .. "Enabled"] = {
-        order = order,
-        name = "Enabled",
-        desc = option.description or "",
-        type = "toggle",
-        set = function(info, value)
-          Options:SetValue(info, value)
-          local padding
-          if value then
-            padding = addon:GetProfileDB()[option.optionName] or 2
-          else
-            padding = option.frame.buttonPadding
-          end
+-------------------------------------------------------------------------------
+-- Options window
 
-          if profile["GlobalOptionsMiscellaneousEnabled"] then
-            Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), option, padding, true)
-            Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), option, padding, true)
-          end
-        end
-      },
-      [option.optionName] = {
-        order = order,
-        name = "Padding",
-        desc = option.description or "",
-        type = "range",
-        min = -36,
-        max = 80,
-        step = 1,
-        set = function(info, value)
-          Options:SetValue(info, value)
-          if profile["GlobalOptionsMiscellaneousEnabled"] then
-            Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), option, value)
-            Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), option, value)
-          end
-        end
-      }
-    }
-  }
+local Info = Options.Info
+
+-- Card order on the page; groups missing here follow alphabetically.
+local groupOrder = {
+  "PlayerFrameOptions",
+  "TargetFrameOptions",
+  "FocusTargetOptions",
+  "TargetOfTargetOptions",
+  "PetFrameOptions",
+  "ObjectiveTrackerOptions",
+  "ExperienceBarOptions",
+  "ActionBarOptions"
+}
+
+-- Display only: unit and the value shown while a range was never set.
+local rangeDisplay = {
+  ["MiscellaneousShowHideObjectiveTrackerUpdateFlashDuration"] = {default = 5, unit = " s"},
+  ["MiscellaneousShowHideExperienceBarUpdateFlashDuration"] = {default = 5, unit = " s"}
+}
+
+local groupNotes = {
+  ["ActionBarOptions"] = "Overwrites the space between the buttons, also below Blizzard's minimum of 2."
+}
+
+local function isModuleEnabled()
+  return addon:GetProfileDB()["GlobalOptionsMiscellaneousEnabled"]
 end
 
-local function addRangeOption(profile, t, option, order)
-  t[option.optionName] = {
-    name = option.displayName,
-    order = order,
-    desc = option.description or "",
-    type = "range",
-    min = option.min or 0,
-    max = option.max or 100,
-    step = option.step or 1,
-    set = function(info, value)
+local function getValue(key)
+  return Options:GetValue(Info(key))
+end
+
+-- Toggle, range and input options: save, then apply while the module is on.
+local function getOptionRow(option)
+  local row = {
+    label = option.displayName or option.optionName,
+    tooltip = option.description,
+    get = function()
+      return getValue(option.optionName)
+    end,
+    set = function(value)
+      local info = Info(option.optionName)
       Options:SetValue(info, value)
-      if profile["GlobalOptionsMiscellaneousEnabled"] then
+      if isModuleEnabled() then
         option.setFn(option, info, value)
       end
     end
   }
-end
 
-local function addToggleOption(profile, t, option, order)
-  t[option.optionName] = {
-    name = option.displayName or option.optionName,
-    desc = option.description or "",
-    order = order,
-    type = "toggle",
-    width = "full",
-    set = function(info, value)
-      Options:SetValue(info, value)
-      if profile["GlobalOptionsMiscellaneousEnabled"] then
-        option.setFn(option, info, value)
-      end
-    end
-  }
-end
-
-local function addInputOption(profile, t, option, order)
-  t[option.optionName] = {
-    name = option.displayName or option.optionName,
-    desc = option.description or "",
-    order = order,
-    type = "input",
-    set = function(info, value)
-      Options:SetValue(info, value)
-      if profile["GlobalOptionsMiscellaneousEnabled"] then
-        option.setFn(option, info, value)
-      end
-    end
-  }
-end
-
-local function generateOptions(t)
-  local profile = addon:GetProfileDB()
-
-  for optionGroupName, groupOptions in pairs(Miscellaneous.options) do
-    local args = {}
-    t[optionGroupName] = {
-      type = "group",
-      name = groupOptions.name,
-      args = args
-    }
-
-    local order = 1
-    for _, option in ipairs(groupOptions.options) do
-      if option.type == "toggle" then
-        addToggleOption(profile, args, option, order)
-      elseif option.type == "range" then
-        addRangeOption(profile, args, option, order)
-      elseif option.type == "input" then
-        addInputOption(profile, args, option, order)
-      elseif option.type == "actionbarpaddinggroup" then
-        addActionbarPaddingOption(profile, args, option, order)
-      end
-      order = order + 1
+  if option.type == "toggle" then
+    row.type = "checkbox"
+  elseif option.type == "input" then
+    row.type = "text"
+    row.placeholder = option.getOriginalValueFn and option.getOriginalValueFn() or nil
+  elseif option.type == "range" then
+    local display = rangeDisplay[option.optionName] or (option.setFn == overwriteFontSize and {default = 10}) or {}
+    row.type = "slider"
+    row.min, row.max, row.step, row.default = option.min or 0, option.max or 100, option.step or 1, display.default
+    row.format = function(value)
+      return value .. (display.unit or "")
     end
   end
+  return row
 end
+
+local function getActionbarPaddingRows(option)
+  local enabledKey = option.optionName .. "Enabled"
+  local rows = {
+    {
+      type = "checkbox",
+      label = option.displayName or option.optionName,
+      tooltip = option.description,
+      layout = true,
+      get = function()
+        return getValue(enabledKey)
+      end,
+      set = function(value)
+        Options:SetValue(Info(enabledKey), value)
+        local padding
+        if value then
+          padding = addon:GetProfileDB()[option.optionName] or 2
+        else
+          padding = option.frame.buttonPadding
+        end
+
+        if isModuleEnabled() then
+          Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), option, padding, true)
+          Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), option, padding, true)
+        end
+      end
+    }
+  }
+
+  -- The padding only matters while the overwrite is on.
+  if getValue(enabledKey) then
+    rows[2] = {
+      type = "slider",
+      label = "Padding",
+      tooltip = option.description,
+      min = -36,
+      max = 80,
+      step = 1,
+      default = 2,
+      get = function()
+        return getValue(option.optionName)
+      end,
+      set = function(value)
+        Options:SetValue(Info(option.optionName), value)
+        if isModuleEnabled() then
+          Miscellaneous:RestoreActionbarPadding(addon:GetProfileDB(), option, value)
+          Miscellaneous:RestoreActionbarSize(addon:GetProfileDB(), option, value)
+        end
+      end
+    }
+  end
+  return rows
+end
+
+local function getSortedGroupNames()
+  local names, listed = {}, {}
+  for _, name in ipairs(groupOrder) do
+    if Miscellaneous.options[name] then
+      names[#names + 1] = name
+      listed[name] = true
+    end
+  end
+  local others = {}
+  for name in pairs(Miscellaneous.options) do
+    if not listed[name] then
+      others[#others + 1] = name
+    end
+  end
+  table.sort(others)
+  for _, name in ipairs(others) do
+    names[#names + 1] = name
+  end
+  return names
+end
+
+local function getCards()
+  local moduleCard = Options:GetModuleCard("miscellaneous")
+  local notice = Options:GetModuleOffNotice("miscellaneous")
+  if notice then
+    moduleCard.rows = {notice}
+  end
+  local cards = {moduleCard}
+
+  for _, groupName in ipairs(getSortedGroupNames()) do
+    local groupOptions = Miscellaneous.options[groupName]
+    local rows = {}
+    for _, option in ipairs(groupOptions.options) do
+      if option.type == "actionbarpaddinggroup" then
+        for _, row in ipairs(getActionbarPaddingRows(option)) do
+          rows[#rows + 1] = row
+        end
+      elseif option.type == "toggle" or option.type == "range" or option.type == "input" then
+        rows[#rows + 1] = getOptionRow(option)
+      end
+    end
+    cards[#cards + 1] = {title = groupOptions.name, note = groupNotes[groupName], rows = rows}
+  end
+  return cards
+end
+
+Options:RegisterPage(
+  {
+    id = "miscellaneous",
+    label = "Miscellaneous",
+    order = 30,
+    searchable = true,
+    build = function()
+      return "Miscellaneous", "Names, levels, font sizes and action bar padding", getCards()
+    end
+  }
+)
 
 -------------------------------------------------------------------------------
 -- Public API
@@ -566,22 +634,4 @@ end
 
 function Miscellaneous:SetValue(info, value)
   Options:SetValue(info, value)
-end
-
-function Miscellaneous:GetOptionsTable()
-  local args = {}
-  generateOptions(args)
-
-  return {
-    name = "Miscellaneous",
-    type = "group",
-    handler = Miscellaneous,
-    get = function(info)
-      return Options:GetValue(info)
-    end,
-    set = function(info, value)
-      Options:SetValue(info, value)
-    end,
-    args = args
-  }
 end

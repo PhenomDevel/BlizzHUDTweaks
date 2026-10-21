@@ -14,6 +14,9 @@ local parsedMods = { shift = false, ctrl = false, alt = false }
 local cachedInstanceInfo = nil
 
 local keyDownHandlerInstalled = false
+local keyDownHandlerPending = false
+local paddingRestoreQueued = false
+local paddingRestorePending = false
 local cachedIsResting = nil
 local cachedInNeighborhood = nil
 
@@ -72,6 +75,14 @@ local function installKeyDownHandler()
     return
   end
 
+  -- SetPropagateKeyboardInput is blocked in combat (e.g. a /reload or zoning
+  -- while in combat); install the handler once combat ends instead.
+  if InCombatLockdown() then
+    keyDownHandlerPending = true
+    return
+  end
+  keyDownHandlerPending = false
+
   blizzHUDTweaksFrame:SetPropagateKeyboardInput(true)
   blizzHUDTweaksFrame:SetScript("OnKeyDown", function(_, pressedKey)
     local profile = addon:GetProfileDB()
@@ -106,6 +117,35 @@ local function updateNeighborhoodCache()
   local _, instanceType = _IsInInstance()
   cachedInNeighborhood = (instanceType == "neighborhood" or instanceType == "interior")
   return cachedInNeighborhood
+end
+
+-- ACTIONBAR_SLOT_CHANGED and friends fire in bursts (login, paging, drag
+-- and drop). Apply the action bar padding once on the next frame instead of
+-- for every event; in combat the bars cannot be changed, so it is applied
+-- right after combat.
+local function restoreActionbarPaddings()
+  if InCombatLockdown() then
+    paddingRestorePending = true
+    return
+  end
+  paddingRestorePending = false
+  if addon:IsEnabled() and Miscellaneous:IsEnabled() then
+    Miscellaneous:RestoreActionbarPaddings(addon:GetProfileDB(), true, true)
+  end
+end
+
+local function queueActionbarPaddingRestore()
+  if paddingRestoreQueued then
+    return
+  end
+  paddingRestoreQueued = true
+  C_Timer.After(
+    0,
+    function()
+      paddingRestoreQueued = false
+      restoreActionbarPaddings()
+    end
+  )
 end
 
 local function restoreMouseoverFade(forced)
@@ -169,6 +209,13 @@ end
 function EventHandler:PLAYER_REGEN_ENABLED()
   BlizzHUDTweaks.inCombat = false
 
+  if keyDownHandlerPending then
+    installKeyDownHandler()
+  end
+  if paddingRestorePending then
+    restoreActionbarPaddings()
+  end
+
   if addon:IsEnabled() then
     if MouseoverFrameFading:IsEnabled() then
       MouseoverFrameFading:RefreshFrameAlphas(true, true)
@@ -199,6 +246,7 @@ function EventHandler:PLAYER_UPDATE_RESTING()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
+  cachedInstanceInfo = nil
   cachedIsResting = _IsResting("player")
   updateNeighborhoodCache()
 
@@ -244,50 +292,39 @@ function EventHandler:PLAYER_LOGIN()
 end
 
 function EventHandler:ACTIONBAR_SLOT_CHANGED()
-  if addon:IsEnabled() then
-    if Miscellaneous:IsEnabled() then
-      local profile = addon:GetProfileDB()
-      Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-    end
+  if addon:IsEnabled() and Miscellaneous:IsEnabled() then
+    queueActionbarPaddingRestore()
   end
 end
 
 function EventHandler:ACTIONBAR_SHOWGRID()
-  if addon:IsEnabled() then
-    if Miscellaneous:IsEnabled() then
-      local profile = addon:GetProfileDB()
-
-      Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-    end
+  if addon:IsEnabled() and Miscellaneous:IsEnabled() then
+    queueActionbarPaddingRestore()
   end
 end
 
 function EventHandler:ACTIONBAR_HIDEGRID()
-  if addon:IsEnabled() then
-    if Miscellaneous:IsEnabled() then
-      local profile = addon:GetProfileDB()
-
-      Miscellaneous:RestoreActionbarPaddings(profile, true, true)
-    end
+  if addon:IsEnabled() and Miscellaneous:IsEnabled() then
+    queueActionbarPaddingRestore()
   end
 end
 
 function EventHandler:UNIT_PET(_, unit)
   if unit == "player" then
     if addon:IsEnabled() then
-      local profile = addon:GetProfileDB()
-
       restoreMouseoverFade()
 
       if Miscellaneous:IsEnabled() then
-        Miscellaneous:RestoreActionbarPaddings(profile, true, true)
+        queueActionbarPaddingRestore()
       end
     end
   end
 end
 
-function EventHandler:UNIT_QUEST_LOG_CHANGED()
-  if addon:IsEnabled() then
+-- Fires for party and raid members as well; only the player's quest log
+-- matters for the objective tracker.
+function EventHandler:UNIT_QUEST_LOG_CHANGED(_, unit)
+  if unit == "player" and addon:IsEnabled() then
     local profile = addon:GetProfileDB()
     Miscellaneous:FlashObjectiveTracker(profile)
   end
