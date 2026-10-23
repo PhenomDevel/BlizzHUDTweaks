@@ -263,6 +263,7 @@ local conditions = {
     label = "Neighborhood",
     key = "FadeInNeighborhood",
     alphaKey = "NeighborhoodAlpha",
+    retailOnly = true,
     desc = "When active this fade will be applied when you're in a neighborhood area.",
     alphaDesc = "Set the alpha value of the frame while in a neighborhood area."
   },
@@ -442,14 +443,20 @@ end
 local function getConditionsCard(frameName)
   local frameOptions = addon:GetProfileDB()[frameName]
   local rows = {}
-  for index, condition in ipairs(conditions) do
-    rows[#rows + 1] = {type = "header", label = index .. "  ·  " .. condition.label}
-    local toggle = valueRow("checkbox", frameName, condition.key, condition.toggleLabel or "Enabled", condition.desc)
-    toggle.layout = true
-    rows[#rows + 1] = toggle
+  local index = 0
+  for _, condition in ipairs(conditions) do
+    -- Housing conditions are skipped in WoW: Forever, which has no housing.
+    local available = not condition.retailOnly or addon:HasHousing()
+    if available then
+      index = index + 1
+      rows[#rows + 1] = {type = "header", label = index .. "  ·  " .. condition.label}
+      local toggle = valueRow("checkbox", frameName, condition.key, condition.toggleLabel or "Enabled", condition.desc)
+      toggle.layout = true
+      rows[#rows + 1] = toggle
+    end
 
     -- Values of a condition only matter while it is on.
-    if frameOptions[condition.key] then
+    if available and frameOptions[condition.key] then
       if condition.alphaKey then
         rows[#rows + 1] = alphaRow(frameName, condition.alphaKey, condition.alphaDesc)
       end

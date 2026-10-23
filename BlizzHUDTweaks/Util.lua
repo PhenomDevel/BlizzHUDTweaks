@@ -69,3 +69,10 @@ end
 function addon:IsMounted()
   return IsMounted() or ( GetShapeshiftForm() == 3 )
 end
+-- Player housing (neighborhoods) only exists in Retail. WoW: Forever runs on
+-- the mainline client too, but with a 1.x interface version.
+local hasHousing = select(4, GetBuildInfo()) >= 110000
+
+function addon:HasHousing()
+  return hasHousing
+end
