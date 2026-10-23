@@ -1,3 +1,4 @@
+-- luacheck: read globals C_SwingTimer SwingTimerMainHandFrame SwingTimerOffHandFrame SwingTimerRangedFrame WorldFrame
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
@@ -197,6 +198,15 @@ local defaultConfig = {
     },
     ["DamageMeterSessionWindow3"] = {
       displayName = "Damage Meter Frame 3",
+    },
+    ["SwingTimerMainHandFrame"] = {
+      displayName = "Swing Timer Main Hand"
+    },
+    ["SwingTimerOffHandFrame"] = {
+      displayName = "Swing Timer Off Hand"
+    },
+    ["SwingTimerRangedFrame"] = {
+      displayName = "Swing Timer Ranged"
     }
   }
 }
@@ -245,8 +255,15 @@ local frameMapping = {
   ["PersonalResourceDisplayFrame"] = {mainFrame = PersonalResourceDisplayFrame},
   ["DamageMeterSessionWindow1"] = {mainFrame = DamageMeterSessionWindow1},
   ["DamageMeterSessionWindow2"] = {mainFrame = DamageMeterSessionWindow2},
-  ["DamageMeterSessionWindow3"] = {mainFrame = DamageMeterSessionWindow3}
+  ["DamageMeterSessionWindow3"] = {mainFrame = DamageMeterSessionWindow3},
+  -- WoW: Forever only. `lookup` resolves the frame later if it does not exist
+  -- yet when this file loads (see resolvePendingFrames).
+  ["SwingTimerMainHandFrame"] = {mainFrame = SwingTimerMainHandFrame, lookup = "SwingTimerMainHandFrame"},
+  ["SwingTimerOffHandFrame"] = {mainFrame = SwingTimerOffHandFrame, lookup = "SwingTimerOffHandFrame"},
+  ["SwingTimerRangedFrame"] = {mainFrame = SwingTimerRangedFrame, lookup = "SwingTimerRangedFrame"}
 }
+
+local swingTimerFrames = {"SwingTimerMainHandFrame", "SwingTimerOffHandFrame", "SwingTimerRangedFrame"}
 
 local function setFrameDefaultOptions(frameOptions)
   frameOptions["Enabled"] = true
@@ -380,6 +397,82 @@ local function updateFramesForLoadedAddons(profile)
   end
 end
 
+-- The swing timer only exists in WoW: Forever, hide its frames elsewhere.
+local function updateSwingTimerFrames(profile)
+  local available = C_SwingTimer ~= nil or SwingTimerMainHandFrame ~= nil
+  for _, frameName in ipairs(swingTimerFrames) do
+    if profile[frameName] then
+      profile[frameName]["Hidden"] = not available
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Frame lookup
+
+-- Resolves a frame by its global name or a path like "BuffFrame.CollapseAndExpandButton".
+-- Returns nil if there is no such frame (yet) or it is forbidden.
+local function resolveFramePath(path)
+  local object = _G
+  for part in string.gmatch(path, "[^%.]+") do
+    if type(object) ~= "table" then
+      return nil
+    end
+    object = object[part]
+  end
+
+  if object ~= _G and type(object) == "table" and type(object.GetObjectType) == "function" then
+    if object.IsForbidden and object:IsForbidden() then
+      return nil
+    end
+    return object
+  end
+end
+
+-- Frames that did not exist when they were mapped (e.g. created by another
+-- addon or on demand) are looked up again at most once per second.
+local RESOLVE_INTERVAL = 1
+local nextResolve = 0
+
+local function resolvePendingFrames()
+  for _, frameMappingOptions in pairs(frameMapping) do
+    if not frameMappingOptions.mainFrame and frameMappingOptions.lookup then
+      frameMappingOptions.mainFrame = resolveFramePath(frameMappingOptions.lookup)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Custom frames
+--
+-- Any named frame can be added with the frame picker or by name. A custom
+-- frame is a normal frame entry in the profile (marked with `Custom`), its
+-- key is the frame name or path, so it is exported with the profile.
+
+local CUSTOM_DESCRIPTION = "Custom frame, added with the frame picker or by name."
+local LINKED_FRAMES_SUFFIX = "LinkedFrames"
+
+-- Names in frameMapping that belong to the custom frames of the current profile.
+local customFrameNames = {}
+
+-- Frame name -> display name of all visible frames, see addon:GetFrameTable().
+local frameTable
+
+local function loadCustomFrames(profile)
+  for frameName in pairs(customFrameNames) do
+    addon:ResetFrameByMappingOptions(frameMapping[frameName])
+    frameMapping[frameName] = nil
+    customFrameNames[frameName] = nil
+  end
+
+  for frameName, frameOptions in pairs(profile) do
+    if type(frameOptions) == "table" and frameOptions.Custom and not frameMapping[frameName] then
+      frameMapping[frameName] = {mainFrame = resolveFramePath(frameName), lookup = frameName}
+      customFrameNames[frameName] = true
+    end
+  end
+end
+
 local function cleanupNonsense(profile)
   -- Make durabilityFrame and VehicleFrame accessable everytime not only when EME is loaded
   showFrameOptions(profile, {{name = "DurabilityFrame"}, {name = "VehicleSeatIndicator"}})
@@ -395,10 +488,100 @@ end
 -- Public API
 
 function addon:GetFrameMapping()
+  local now = GetTime()
+  if now >= nextResolve then
+    nextResolve = now + RESOLVE_INTERVAL
+    resolvePendingFrames()
+  end
   return frameMapping
 end
 
-local frameTable
+function addon:ResolveFramePath(path)
+  return resolveFramePath(path)
+end
+
+function addon:IsCustomFrame(frameName)
+  local frameOptions = self.db.profile[frameName]
+  return type(frameOptions) == "table" and frameOptions.Custom or false
+end
+
+-- Returns the frame if `frameName` can be added as a custom frame, otherwise
+-- nil and the reason.
+function addon:ValidateCustomFrame(frameName)
+  frameName = frameName and strtrim(frameName) or ""
+  if frameName == "" then
+    return nil, "Enter the name of a frame."
+  end
+  if self.db.profile[frameName] ~= nil or frameName:sub(-#LINKED_FRAMES_SUFFIX) == LINKED_FRAMES_SUFFIX then
+    return nil, "`" .. frameName .. "` is already in the list or a reserved name."
+  end
+
+  local frame = resolveFramePath(frameName)
+  if not frame then
+    return nil, "There is no frame named `" .. frameName .. "`. Frames of other addons may only exist once they were shown."
+  end
+  if frame == UIParent or frame == WorldFrame then
+    return nil, "`" .. frameName .. "` is the whole screen and can not be faded."
+  end
+
+  for mappedName, frameMappingOptions in pairs(frameMapping) do
+    if frameMappingOptions.mainFrame == frame then
+      local frameOptions = self.db.profile[mappedName]
+      local displayName = type(frameOptions) == "table" and frameOptions.displayName or mappedName
+      return nil, "`" .. frameName .. "` is already in the list as " .. displayName .. "."
+    end
+  end
+
+  return frame
+end
+
+-- Returns true, or false and the reason.
+function addon:AddCustomFrame(frameName, displayName)
+  frameName = frameName and strtrim(frameName) or ""
+  local frame, reason = addon:ValidateCustomFrame(frameName)
+  if not frame then
+    return false, reason
+  end
+
+  local frameOptions = {
+    displayName = displayName or frameName,
+    description = CUSTOM_DESCRIPTION,
+    Custom = true
+  }
+  setFrameDefaultOptions(frameOptions)
+  frameOptions["UseGlobalOptions"] = true
+
+  self.db.profile[frameName] = frameOptions
+  frameMapping[frameName] = {mainFrame = frame, lookup = frameName}
+  customFrameNames[frameName] = true
+  frameTable = nil
+
+  MouseoverFrameFading:RefreshFrameAlphas()
+  return true
+end
+
+function addon:RemoveCustomFrame(frameName)
+  if not addon:IsCustomFrame(frameName) then
+    return
+  end
+
+  local profile = self.db.profile
+  if frameMapping[frameName] then
+    addon:ResetFrameByMappingOptions(frameMapping[frameName])
+  end
+  frameMapping[frameName] = nil
+  customFrameNames[frameName] = nil
+  profile[frameName] = nil
+
+  -- Links are shared between the linked frames, remove the frame from all of them.
+  profile[frameName .. LINKED_FRAMES_SUFFIX] = nil
+  for key, value in pairs(profile) do
+    if type(key) == "string" and type(value) == "table" and key:sub(-#LINKED_FRAMES_SUFFIX) == LINKED_FRAMES_SUFFIX then
+      value[frameName] = nil
+    end
+  end
+  frameTable = nil
+end
 
 function addon:GetFrameTable()
   if not frameTable then
@@ -411,6 +594,13 @@ function addon:GetFrameTable()
         end
       end
     end
+
+    for frameName in pairs(customFrameNames) do
+      local frameOptions = self.db.profile[frameName]
+      if frameOptions and not frameOptions.Hidden then
+        frameTable[frameName] = frameOptions.displayName or frameName
+      end
+    end
   end
 
   return frameTable
@@ -419,6 +609,8 @@ end
 function addon:LoadProfile()
   frameTable = nil
   updateFramesForLoadedAddons(self.db.profile)
+  updateSwingTimerFrames(self.db.profile)
+  loadCustomFrames(self.db.profile)
 
   if addon:IsEnabled() then
     MouseoverFrameFading:RefreshFrameAlphas()
@@ -477,6 +669,8 @@ end
 function addon:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, "Default")
   updateFramesForLoadedAddons(self.db.profile)
+  updateSwingTimerFrames(self.db.profile)
+  loadCustomFrames(self.db.profile)
 
   -- Remove in the future
   cleanupNonsense(self.db.profile)

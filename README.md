@@ -9,6 +9,8 @@ Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
 - Action bar padding below blizzard minimum of 2
 - Hide unused actionbar 1 buttons
 - Repositioning / Scaling of class resources and totem bar (For example combo points, arcane charges etc.)
+- Fading for the swing timer frames of WoW: Forever
+- Fading for custom frames, e.g. of other addons (frame picker or by name)
 - Small quality of life improvements
 
 For more details see `Features`.
@@ -35,6 +37,14 @@ You can fade out most of the actions bars and frames for different scenarios. Yo
 - Set options globally or for each frame
 - Treat targeting as in combat fade
 - Be able to link frames together for fading
+
+### Custom frames
+Besides the built-in list you can fade any other frame that has a name, e.g. a frame of another addon. Open `Frame Fading > Frames` and use the `Custom Frames` card:
+
+- **Pick a frame**: the options window hides and the frame under the cursor is highlighted. The mouse wheel switches between the frames under the cursor (smallest to largest), left click adds the frame, right click or `Esc` cancels.
+- **Add by name**: enter the global name of a frame (e.g. `MyAddonMainFrame`) or a path to a child frame (e.g. `BuffFrame.CollapseAndExpandButton`).
+
+Custom frames have the same options as the built-in frames, can be renamed and removed, and are saved in the profile (also when exporting it). A frame that does not exist yet (e.g. because its addon creates it later) is faded as soon as it exists.
 
 #### The priority of the checks is as follows
 1. In Combat Fade
@@ -73,3 +83,12 @@ Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` si
 
 # Support
 If you'd like to support me just leave a star on Github :)
+
+# License
+[MIT](LICENSE)
+
+---
+
+Developed with the help of AI ([Claude](https://claude.ai) by Anthropic).
+Every change is reviewed by a professional software developer before it is
+merged.

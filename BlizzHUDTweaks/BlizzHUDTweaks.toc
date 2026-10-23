@@ -46,6 +46,7 @@ EventHandler.lua
 
 # Options window (widgets and window first, then the pages)
 Options/Widgets.lua
+FramePicker.lua
 Options/Window.lua
 Options.lua
 Options/MouseoverFrameFading.lua

@@ -1,13 +1,17 @@
+-- luacheck: read globals InCombatLockdown
+local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
 local Info = Options.Info
+local FramePicker = BlizzHUDTweaks.FramePicker
 
 local GLOBAL = "*Global*"
 local SECTION = "Frame Fading"
 
--- Groups for the frame lists (presentation only). Frames that are not listed
--- here, e.g. the ones added for other addons, end up in "Other".
+-- Groups for the frame lists (presentation only). Custom frames get their own
+-- group; frames that are not listed here, e.g. the ones added for other
+-- addons, end up in "Other".
 local frameGroups = {
   {
     name = "Unit Frames",
@@ -42,6 +46,10 @@ local frameGroups = {
   {
     name = "Status Bars",
     frames = {"MainStatusTrackingBarContainer", "SecondaryStatusTrackingBarContainer", "PlayerCastingBarFrame", "UIWidgetPowerBarContainerFrame"}
+  },
+  {
+    name = "Swing Timer",
+    frames = {"SwingTimerMainHandFrame", "SwingTimerOffHandFrame", "SwingTimerRangedFrame"}
   },
   {
     name = "Interface",
@@ -106,9 +114,17 @@ local function getFrameGroups(exclude)
     end
   end
 
-  local others = {}
+  local custom, others = {}, {}
   for frameName in pairs(visible) do
-    others[#others + 1] = frameName
+    if addon:IsCustomFrame(frameName) then
+      custom[#custom + 1] = frameName
+    else
+      others[#others + 1] = frameName
+    end
+  end
+  if #custom > 0 then
+    sortByDisplayName(custom)
+    groups[#groups + 1] = {name = "Custom Frames", frames = custom, custom = true}
   end
   if #others > 0 then
     sortByDisplayName(others)
@@ -122,6 +138,12 @@ local function getFrameDescription(frameName)
   local desc = "Frame: `" .. frameName .. "`"
   if frameOptions.description then
     desc = desc .. "\n" .. frameOptions.description
+  end
+  if frameOptions.Custom then
+    local frameMappingOptions = addon:GetFrameMapping()[frameName]
+    if not (frameMappingOptions and frameMappingOptions.mainFrame) then
+      desc = desc .. "\nThe frame does not exist right now. It is faded as soon as it does."
+    end
   end
   return desc
 end
@@ -287,6 +309,39 @@ local function getFrameCard(frameName)
   }
   local card = {title = getDisplayName(frameName), note = getFrameDescription(frameName), rows = rows}
 
+  if frameOptions.Custom then
+    rows[#rows + 1] = {
+      type = "text",
+      label = "Display name",
+      tooltip = "The name shown in the frame lists.",
+      layout = true,
+      get = function()
+        return getDisplayName(frameName)
+      end,
+      set = function(value)
+        value = value and strtrim(value) or ""
+        addon:GetProfileDB()[frameName].displayName = value ~= "" and value or frameName
+        addon:RefreshOptionTables()
+      end
+    }
+    rows[#rows + 1] = {
+      type = "button",
+      label = "Remove custom frame",
+      tooltip = "Removes the frame from the list and shows it at full alpha again.",
+      buttonText = "Remove",
+      onClick = function()
+        Options:Confirm(
+          "Remove the custom frame " .. getDisplayName(frameName) .. "?",
+          "Remove",
+          function()
+            addon:RemoveCustomFrame(frameName)
+            Options:Navigate("fading-frames")
+          end
+        )
+      end
+    }
+  end
+
   if not frameOptions.Enabled then
     card.hint = "Turn on {Enabled} to set up fading for this frame."
     return card
@@ -448,11 +503,89 @@ local function getFrameSettingsCards(frameName)
 end
 
 -------------------------------------------------------------------------------
+-- Custom frames
+
+-- Last reason why a frame could not be added, shown in the Custom Frames card.
+local customFrameError
+
+local function addCustomFrame(frameName)
+  local added, reason = addon:AddCustomFrame(frameName)
+  if added then
+    customFrameError = nil
+    Options:Navigate("fading-frames", strtrim(frameName))
+  else
+    customFrameError = reason
+    Options:Navigate("fading-frames")
+  end
+end
+
+local function startFramePicker()
+  if InCombatLockdown() then
+    customFrameError = "The frame picker is not available in combat."
+    return
+  end
+  customFrameError = nil
+  -- The window would cover the frames; it opens again afterwards.
+  Options:Toggle()
+  FramePicker:Start(
+    function(frameName)
+      local frame, reason = addon:ValidateCustomFrame(frameName)
+      return frame ~= nil, reason
+    end,
+    addCustomFrame,
+    function()
+      Options:Navigate("fading-frames")
+    end
+  )
+end
+
+local function getCustomFramesCard()
+  local rows = {
+    {
+      type = "button",
+      label = "Pick a frame",
+      tooltip = "Hides this window and lets you click the frame you want to fade. " ..
+        "The mouse wheel switches between the frames under the cursor, right click or Esc cancels.",
+      buttonText = "Pick",
+      layout = true,
+      onClick = startFramePicker
+    },
+    {
+      type = "text",
+      label = "Add by name",
+      tooltip = "The global name of a frame, e.g. `MyAddonMainFrame`, or a path to a child frame like `BuffFrame.CollapseAndExpandButton`. " ..
+        "Press Enter to add it.",
+      placeholder = "Frame name",
+      layout = true,
+      get = function()
+        return ""
+      end,
+      set = function(value)
+        if value and strtrim(value) ~= "" then
+          addCustomFrame(value)
+        end
+      end
+    }
+  }
+  if customFrameError then
+    rows[#rows + 1] = {type = "notice", label = customFrameError}
+  end
+
+  return {
+    title = "Custom Frames",
+    note = "Fade any other frame, e.g. one of another addon. Custom frames are saved in the profile.",
+    rows = rows
+  }
+end
+
+-------------------------------------------------------------------------------
 -- Frame overview
 
 local function getFramesOverview()
   local cards = getModuleCards()
   local total, enabled, global = 0, 0, 0
+  local customCard = getCustomFramesCard()
+  cards[#cards + 1] = customCard
 
   for _, group in ipairs(getFrameGroups()) do
     local rows = {}
@@ -485,7 +618,13 @@ local function getFramesOverview()
         end
       }
     end
-    cards[#cards + 1] = {title = group.name, rows = rows}
+    if group.custom then
+      for _, row in ipairs(rows) do
+        customCard.rows[#customCard.rows + 1] = row
+      end
+    else
+      cards[#cards + 1] = {title = group.name, rows = rows}
+    end
   end
 
   local subtitle = ("%d of %d frames enabled, %d of them use the global settings"):format(enabled, total, global)
@@ -670,8 +809,13 @@ function MouseoverFrameFading:CopyFrom(info, value)
   end
 
   if fromFrameOptions then
+    local toFrameOptions = addon:GetProfileDB()[info.arg]
     local copy = addon:tClone(fromFrameOptions)
-    copy.displayName = addon:GetProfileDB()[info.arg].displayName
+    -- Only the fade settings are copied, not what the frame is.
+    copy.displayName = toFrameOptions.displayName
+    copy.description = toFrameOptions.description
+    copy.Custom = toFrameOptions.Custom
+    copy.Hidden = toFrameOptions.Hidden
     copy.UseGlobalOptions = false
     addon:GetProfileDB()[info.arg] = copy
     MouseoverFrameFading:RefreshFrameAlphas()
