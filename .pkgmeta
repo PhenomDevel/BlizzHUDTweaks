@@ -26,6 +26,7 @@ ignore:
   - ldoc
   - scripts
   - changelog.sh
+  - media-src
 
 manual-changelog:
     filename: CHANGELOG.md
