@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+  <radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop offset="0" stop-color="#1c2f42"/><stop offset="1" stop-color="#0a1119"/></radialGradient>
+  <linearGradient id="btn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fe3fb"/><stop offset="1" stop-color="#3d9cc4"/></linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fdaf6"/><stop offset="1" stop-color="#2b6f8e"/></linearGradient>
+</defs>
+<rect x="4" y="4" width="248" height="248" rx="36" fill="url(#bg)" stroke="url(#rim)" stroke-width="6"/>
+<defs><linearGradient id="fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#69ccf0" stop-opacity="1"/><stop offset="0.45" stop-color="#69ccf0" stop-opacity="0.9"/><stop offset="1" stop-color="#69ccf0" stop-opacity="0.08"/></linearGradient>
+<linearGradient id="fadeS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#cfefff" stop-opacity="1"/><stop offset="1" stop-color="#cfefff" stop-opacity="0.1"/></linearGradient></defs>
+<!-- portrait -->
+<circle cx="76" cy="104" r="34" fill="url(#fade)" stroke="url(#fadeS)" stroke-width="5"/>
+<circle cx="76" cy="96" r="11" fill="#0a1119" opacity="0.55"/><path d="M56 122 a20 15 0 0 1 40 0 z" fill="#0a1119" opacity="0.55"/>
+<!-- bars -->
+<rect x="116" y="80" width="112" height="26" rx="6" fill="url(#fade)"/>
+<rect x="116" y="114" width="112" height="16" rx="5" fill="url(#fade)" opacity="0.7"/>
+<!-- action buttons row -->
+<rect x="42" y="158" width="38" height="38" rx="7" fill="url(#fade)"/>
+<rect x="88" y="158" width="38" height="38" rx="7" fill="#69ccf0" opacity="0.55"/>
+<rect x="134" y="158" width="38" height="38" rx="7" fill="#69ccf0" opacity="0.25"/>
+<rect x="180" y="158" width="38" height="38" rx="7" fill="#69ccf0" opacity="0.1"/>
+<!-- cursor -->
+<path d="M150 128 L150 214 L170 196 L184 228 L200 221 L186 190 L213 189 Z" fill="#ffffff" stroke="#0a1119" stroke-width="7" stroke-linejoin="round" paint-order="stroke"/>
+</svg>
