@@ -15,7 +15,7 @@ Classic Era, Cataclysm/Mists Classic and other clients are not supported.
 ### Frame fading
 Set an alpha value per situation for action bars, unit frames, auras, status bars, the minimap, the objective tracker, the cooldown manager and more:
 
-- **Situations**: In Combat, Has Target (friendly, hostile or both), Vehicle, Neighborhood, Instanced Area, Rested Area, Out of Combat
+- **Situations**: In Combat, Has Target (friendly, hostile or both), Vehicle, Neighborhood (Retail only), Instanced Area, Rested Area, Out of Combat
 - **Mouseover**: shows a faded frame at full alpha, optionally also in combat
 - **Fade duration** and **out of combat delay**
 - **Global settings** for all frames, or own settings per frame (copy from another frame)

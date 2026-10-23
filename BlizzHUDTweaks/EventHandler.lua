@@ -115,7 +115,7 @@ end
 
 local function updateNeighborhoodCache()
   local _, instanceType = _IsInInstance()
-  cachedInNeighborhood = (instanceType == "neighborhood" or instanceType == "interior")
+  cachedInNeighborhood = addon:HasHousing() and (instanceType == "neighborhood" or instanceType == "interior")
   return cachedInNeighborhood
 end
 
