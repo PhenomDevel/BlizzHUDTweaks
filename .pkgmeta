@@ -16,6 +16,7 @@ enable-nolib-creation: no
 
 ignore:
   - README.md
+  - CLAUDE.md
   - .luacheckrc
   - doc
   - LICENSE
