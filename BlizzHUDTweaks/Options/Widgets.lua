@@ -724,7 +724,7 @@ local function SetRecording(keybind, recording)
 end
 
 local function OnKeybindKeyDown(self, key)
-  if MODIFIER_KEYS[key] then
+  if not self.recording or MODIFIER_KEYS[key] then
     return
   end
   local value = ""
@@ -780,6 +780,10 @@ function Widgets.CreateKeybind(parent)
     end
   )
   keybind:SetScript("OnKeyDown", OnKeybindKeyDown)
+  -- Setting an OnKeyDown script implicitly enables keyboard input, which
+  -- would capture every key press as soon as the page is shown. Only take
+  -- keyboard input while recording (see SetRecording).
+  keybind:EnableKeyboard(false)
   keybind:SetScript(
     "OnHide",
     function(self)
