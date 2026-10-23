@@ -1,8 +1,8 @@
 # BlizzHUDTweaks – notes for Claude
 
 World of Warcraft addon that fades and tweaks the default Blizzard HUD. The
-`.toc` targets **WoW: Forever** (Interface 16001) and **Retail** (120007,
-120100). Both run on the modern mainline API (`C_*` namespaces, Settings API)
+`.toc` targets **WoW: Forever** (Interface 16001) and **Retail** (120105 live,
+120107 PTR). Both run on the modern mainline API (`C_*` namespaces, Settings API)
 including the Midnight addon restrictions (secret values, more protected
 calls). Do not assume the old Classic Era API. Features that only exist in one
 client (e.g. the Forever swing timer) must be hidden or skipped in the other.
