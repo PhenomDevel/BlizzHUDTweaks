@@ -1,4 +1,4 @@
-## Interface: 16001, 120007, 120100
+## Interface: 16001, 120105, 120107
 ## Title: BlizzHUDTweaks
 ## Version: @project-version@
 ## Author: @project-author@
