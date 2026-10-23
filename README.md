@@ -1,90 +1,62 @@
 [![Build](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml) [![Discord General](https://img.shields.io/discord/596662921753526275?label=discord)](https://discord.gg/4fSVKCVJWy)
 
 # BlizzHUDTweaks
-Provides tweaks to the newly introduced Blizzard HUD in Dragonflight:
+Fade the Blizzard default frames by situation (combat, mouseover, target, rested area and more) and tweak the default HUD, without replacing it.
 
-- Out of combat fading for action bars / frames
-- Rested area fading for action bars / frames
-- In combat fading for action bars / frames
-- Action bar padding below blizzard minimum of 2
-- Hide unused actionbar 1 buttons
-- Repositioning / Scaling of class resources and totem bar (For example combo points, arcane charges etc.)
-- Fading for the swing timer frames of WoW: Forever
-- Fading for custom frames, e.g. of other addons (frame picker or by name)
-- Small quality of life improvements
+## Supported versions
+| Client | Interface |
+| --- | --- |
+| WoW: Forever | 16001 |
+| Retail | 120105 (12.1.5) and 120107 (12.1.7 PTR) |
 
-For more details see `Features`.
+Classic Era, Cataclysm/Mists Classic and other clients are not supported.
 
-# Usage
-The options have their own window. Open it by typing `/bht` or `/blizzhudtweaks`, by left-clicking the minimap icon or via the in game options menu (Options > AddOns > BlizzHUDTweaks). The sidebar lists the pages (General, Frame Fading, Miscellaneous, Tooltip, Profiles), the search box in the header finds options on every page.
+## Features
+### Frame fading
+Set an alpha value per situation for action bars, unit frames, auras, status bars, the minimap, the objective tracker, the cooldown manager and more:
 
-## Chat commands
-- Toggle minimap icon: `/bht minimap`
+- **Situations**: In Combat, Has Target (friendly, hostile or both), Vehicle, Neighborhood, Instanced Area, Rested Area, Out of Combat
+- **Mouseover**: shows a faded frame at full alpha, optionally also in combat
+- **Fade duration** and **out of combat delay**
+- **Global settings** for all frames, or own settings per frame (copy from another frame)
+- **Frame links**: hovering one frame also shows its linked frames (e.g. all action bars at once)
+- **Swing timer** frames (WoW: Forever only)
 
-# Features
-## Mouseover Fade (action bars, frames)
-You can fade out most of the actions bars and frames for different scenarios. You can set different alpha values for `In Combat`, `Out of Combat`, and `In Resting Area`. You also can set the options globally and use them for each action bar/frame.
+If several situations apply, the first one wins: Vehicle > In Combat > Has Target > Neighborhood > Instanced Area > Rested Area > Out of Combat.
 
-### Configuration options
-- Allow mouseover in combat
-- Fade Duration
-- In Combat Fade
-- Out of Combat Fade
-- Fade based on health percentage
-- Neighborhood fade
-- Instanced Area fade
-- Rested Area Fade
-- Set options globally or for each frame
-- Treat targeting as in combat fade
-- Be able to link frames together for fading
+### Custom frames (frame picker)
+Fade any named frame, e.g. one of another addon, under `Frame Fading > Frames > Custom Frames`:
 
-### Custom frames
-Besides the built-in list you can fade any other frame that has a name, e.g. a frame of another addon. Open `Frame Fading > Frames` and use the `Custom Frames` card:
+- **Pick a frame**: the frame under the cursor is highlighted. Mouse wheel switches between overlapping frames, left click adds it, right click or `Esc` cancels.
+- **Add by name**: enter a global frame name (`MyAddonMainFrame`) or a path to a child frame (`BuffFrame.CollapseAndExpandButton`).
 
-- **Pick a frame**: the options window hides and the frame under the cursor is highlighted. The mouse wheel switches between the frames under the cursor (smallest to largest), left click adds the frame, right click or `Esc` cancels.
-- **Add by name**: enter the global name of a frame (e.g. `MyAddonMainFrame`) or a path to a child frame (e.g. `BuffFrame.CollapseAndExpandButton`).
+Custom frames have the same options as built-in ones, can be renamed and are saved in the profile. Frames created later by their addon are faded as soon as they exist.
 
-Custom frames have the same options as the built-in frames, can be renamed and removed, and are saved in the profile (also when exporting it). A frame that does not exist yet (e.g. because its addon creates it later) is faded as soon as it exists.
+### Miscellaneous
+- Action bar button padding, also below Blizzard's minimum of 2
+- Hide name, level or group indicator on player, target, focus, target of target and pet frames, overwrite the player name
+- Font size of health and mana texts
+- Flash the objective tracker and experience bar at full alpha after an update
 
-#### The priority of the checks is as follows
-1. In Combat Fade
-2. Has Target Fade (which uses the `In Combat Fade` values)
-3. Health percentage
-4. Neighborhood fade
-5. Instanced Area fade
-6. Rested Area Fade
-7. Out Of Combat Fade
+### Tooltip
+- Anchor tooltips to the mouse
+- Show spell IDs
 
-# Performance
-Even though the add-on has to check more or less in a set interval, it is very performant. It only uses memory if there are fades being performed and checks in a smart way if there is something to render. If you have any trouble, you can manually set the interval which is used for the fading checks.
+### Profiles
+Create, copy, reset and delete profiles, and share them via import/export strings (custom frames included).
 
-# Help
-## Discord
-If you have any question and want fast answers, please check the [Discord](https://discord.gg/4fSVKCVJWy). I made it for another add-on, but there is a sub category to ask your questions. The link should already point to the corresponding channel.
+## Usage
+Open the options with `/bht` (or `/blizzhudtweaks`), the minimap icon or `Options > AddOns > BlizzHUDTweaks`. The search box finds options on every page. `/bht minimap` toggles the minimap icon.
 
 ## FAQ
-### Frame not showing even though it should
-Please ensure you have enabled the wanted option for the given action bar or frame. Also, make sure you haven't set the `Bar Visible` option in the Blizzard Edit Mode to something else than `Always visible`
-- If set to `Out of Combat` you might be missing the frame or can't mouseover it since the blizzard option overwrites everything else
+- **A frame does not fade**: check that fading is `Enabled` for that frame.
+- **A frame does not show**: set `Bar Visible` in Blizzard's Edit Mode to `Always visible`, otherwise the Edit Mode setting wins.
+- **Fade delay is ignored**: mouseover cancels the delay once you leave the frame.
+- **Padding changes in combat**: they are applied after combat (protected functions).
 
-### Frame fading out when fade delay is set
-Usually this only happens when you mouseover a frame. Mouseover overwrites the fade animation, which has a set delay and will not maintain the delay after you leave the frame.
+Questions: [Discord](https://discord.gg/4fSVKCVJWy). If you like the addon, leave a star on GitHub :)
 
-### Fading is setup but nothing happens
-Make sure you have `Enabled` the fading for the given frame
-
-### I have setup the position of class resources but it won't move
-Make sure you have set atleast the `anchor` and either `xOffset` or `yOffset` since any combination is needed to actually move the resource frame.
-
-## Known Issues
-- When reloading the UI while having a target the alpha will only applied once the target changes
-- When using `Minimap` fading the textures do not get loaded by blizzard for indoors maps
-- When moving an ability when in combat, the actionbar padding is applied once combat ends, since it uses protected functions
-
-# Support
-If you'd like to support me just leave a star on Github :)
-
-# License
+## License
 [MIT](LICENSE)
 
 ---
