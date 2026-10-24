@@ -17,6 +17,7 @@ Widgets.BRAND_HEX = "69ccf0"
 
 local accent = CreateColorFromHexString("ff" .. Widgets.ACCENT_HEX)
 local ACCENT = {accent:GetRGB()}
+Widgets.brand = {CreateColorFromHexString("ff" .. Widgets.BRAND_HEX):GetRGB()}
 
 -- All surfaces are opaque; text colors keep at least ~4.5:1 contrast on the
 -- card background (dim text is for hints and placeholders only).

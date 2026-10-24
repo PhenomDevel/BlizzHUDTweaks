@@ -69,7 +69,6 @@ local frameGroups = {
   }
 }
 
-local GLOBAL_COLOR = "|cffa0a832"
 local CUSTOM_COLOR = "|cff8cc4ff"
 local OFF_COLOR = "|cff8f8f94"
 
@@ -148,14 +147,18 @@ local function getFrameDescription(frameName)
   return desc
 end
 
-local function getFrameStatus(frameName)
+local GLOBAL_PILL = {0.63, 0.66, 0.2, 1}
+local OWN_PILL = {0.55, 0.77, 1, 1}
+
+-- Tag for the frame lists: "Own" or "Global" for enabled frames.
+local function getFramePill(frameName)
   local frameOptions = addon:GetProfileDB()[frameName]
   if not frameOptions.Enabled then
-    return OFF_COLOR .. "Off|r"
+    return nil
   elseif frameOptions.UseGlobalOptions then
-    return GLOBAL_COLOR .. "Global|r"
+    return "Global", GLOBAL_PILL
   end
-  return CUSTOM_COLOR .. "Own|r"
+  return "Own", OWN_PILL
 end
 
 local function getModuleCards()
@@ -743,52 +746,129 @@ local function countFrames()
   return total, enabled, global
 end
 
+-- Filter of the frame list: "all", "on", "own" or "global".
+local frameFilter = "all"
+
+local function matchesFilter(frameName)
+  local frameOptions = addon:GetProfileDB()[frameName]
+  if frameFilter == "on" then
+    return frameOptions.Enabled
+  elseif frameFilter == "own" then
+    return frameOptions.Enabled and not frameOptions.UseGlobalOptions
+  elseif frameFilter == "global" then
+    return frameOptions.Enabled and frameOptions.UseGlobalOptions
+  end
+  return true
+end
+
+local function getFilterCard()
+  local total, enabled, global = countFrames()
+  return {
+    fullWidth = true,
+    rows = {
+      {
+        type = "chips",
+        values = {
+          {value = "all", label = ("All  %d"):format(total)},
+          {value = "on", label = ("Enabled  %d"):format(enabled)},
+          {value = "own", label = ("Own settings  %d"):format(enabled - global)},
+          {value = "global", label = ("Global settings  %d"):format(global)}
+        },
+        get = function()
+          return frameFilter
+        end,
+        set = function(value)
+          frameFilter = value
+        end
+      }
+    }
+  }
+end
+
+local function getFrameRow(frameName)
+  return {
+    type = "nav",
+    label = getDisplayName(frameName),
+    tooltip = getFrameDescription(frameName),
+    dim = function()
+      return not Options:GetValue(Info("Enabled", frameName))
+    end,
+    pill = function()
+      return getFramePill(frameName)
+    end,
+    -- The alpha the frame has right now (without mouseover).
+    meter = function()
+      if not Options:GetValue(Info("Enabled", frameName)) or not Options:IsModuleOn("fading") then
+        return nil
+      end
+      local _, alpha = MouseoverFrameFading:GetActiveCondition(frameName)
+      return alpha
+    end,
+    toggle = {
+      get = function()
+        return Options:GetValue(Info("Enabled", frameName))
+      end,
+      set = function(value)
+        setFrameEnabled(frameName, value)
+      end
+    },
+    onClick = function()
+      Options:Navigate("fading-frames", frameName)
+    end
+  }
+end
+
+-- Card of one group with a switch for all of its frames.
+local function getGroupCard(group, rows)
+  local enabled = 0
+  for _, frameName in ipairs(group.frames) do
+    if addon:GetProfileDB()[frameName].Enabled then
+      enabled = enabled + 1
+    end
+  end
+  return {
+    title = group.name,
+    note = ("%d of %d enabled"):format(enabled, #group.frames),
+    tooltip = "The switch turns fading on or off for every frame of this group.",
+    toggle = {
+      get = function()
+        return enabled == #group.frames
+      end,
+      set = function(value)
+        for _, frameName in ipairs(group.frames) do
+          if (not not addon:GetProfileDB()[frameName].Enabled) ~= value then
+            setFrameEnabled(frameName, value)
+          end
+        end
+      end
+    },
+    rows = rows
+  }
+end
+
 local function getFramesOverview()
   local cards = getModuleCards()
-  local total, enabled, global = 0, 0, 0
+  cards[#cards + 1] = getFilterCard()
   local customCard = getCustomFramesCard()
   cards[#cards + 1] = customCard
 
   for _, group in ipairs(getFrameGroups()) do
     local rows = {}
     for _, frameName in ipairs(group.frames) do
-      local frameOptions = addon:GetProfileDB()[frameName]
-      total = total + 1
-      if frameOptions.Enabled then
-        enabled = enabled + 1
-        if frameOptions.UseGlobalOptions then
-          global = global + 1
-        end
+      if matchesFilter(frameName) then
+        rows[#rows + 1] = getFrameRow(frameName)
       end
-      rows[#rows + 1] = {
-        type = "nav",
-        label = getDisplayName(frameName),
-        tooltip = getFrameDescription(frameName),
-        value = function()
-          return getFrameStatus(frameName)
-        end,
-        toggle = {
-          get = function()
-            return Options:GetValue(Info("Enabled", frameName))
-          end,
-          set = function(value)
-            setFrameEnabled(frameName, value)
-          end
-        },
-        onClick = function()
-          Options:Navigate("fading-frames", frameName)
-        end
-      }
     end
     if group.custom then
       for _, row in ipairs(rows) do
         customCard.rows[#customCard.rows + 1] = row
       end
-    else
-      cards[#cards + 1] = {title = group.name, rows = rows}
+    elseif #rows > 0 then
+      cards[#cards + 1] = getGroupCard(group, rows)
     end
   end
 
+  local total, enabled, global = countFrames()
   local subtitle = ("%d of %d frames enabled, %d of them use the global settings"):format(enabled, total, global)
   return "Frames", subtitle, cards
 end

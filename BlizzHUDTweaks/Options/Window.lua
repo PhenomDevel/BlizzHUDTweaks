@@ -124,6 +124,18 @@ end
 
 local rowTypes = {}
 
+-- Rows that show live state update themselves twice a second.
+local LIVE_INTERVAL = 0.5
+
+local function OnLiveUpdate(row, elapsed)
+  row.sinceUpdate = (row.sinceUpdate or 0) + elapsed
+  if row.sinceUpdate >= LIVE_INTERVAL then
+    row.sinceUpdate = 0
+    row:Update()
+  end
+end
+
+
 -- On/off switch.
 rowTypes.checkbox = {
   create = function(parent)
@@ -337,10 +349,15 @@ rowTypes.textarea = {
   end
 }
 
--- Link to another page or a detail view ({ onClick, value, toggle = { get, set } }):
--- label, optional status text, optional switch and a chevron. The whole row
--- is clickable; the switch keeps its own click.
+-- Link to another page or a detail view ({ onClick, value, toggle = { get, set },
+-- pill, meter, dim }): label, optional status text, optional switch and a
+-- chevron. The whole row is clickable; the switch keeps its own click.
+--   pill()  -> text, color      small tag, e.g. "Own" / "Global"
+--   meter() -> 0..1 or nil      alpha bar with percent, updated live
+--   dim()   -> true             gray label, e.g. for a disabled frame
 local NAV_CHEVRON = 12
+local PILL_WIDTH = 50
+local METER_WIDTH = 74
 
 rowTypes.nav = {
   create = function(parent)
@@ -361,6 +378,31 @@ rowTypes.nav = {
     row.Toggle = Widgets.CreateToggle(row)
     row.Toggle:SetPoint("RIGHT", row, "TOPRIGHT", -(NAV_CHEVRON + 8), -ROW_HEIGHT / 2)
     Widgets.ForwardHover(row.Toggle, row)
+
+    row.Pill = CreateFrame("Frame", nil, row)
+    row.Pill:SetSize(PILL_WIDTH, 16)
+    row.Pill.Background = Widgets.Fill(row.Pill, colors.hover)
+    row.Pill.Edges = Widgets.Border(row.Pill)
+    row.Pill.Text = Widgets.Text(row.Pill, fonts.small, "CENTER")
+    row.Pill.Text:SetAllPoints()
+    row.Pill.Text:SetJustifyV("MIDDLE")
+
+    row.Meter = CreateFrame("Frame", nil, row)
+    row.Meter:SetSize(METER_WIDTH, 16)
+    row.Meter.Text = Widgets.Text(row.Meter, fonts.small, "RIGHT")
+    row.Meter.Text:SetPoint("RIGHT")
+    row.Meter.Text:SetWidth(32)
+    row.Meter.Text:SetJustifyV("MIDDLE")
+    row.Meter.Track = row.Meter:CreateTexture(nil, "ARTWORK")
+    row.Meter.Track:SetColorTexture(unpack(colors.control))
+    row.Meter.Track:SetPoint("LEFT")
+    row.Meter.Track:SetPoint("RIGHT", row.Meter.Text, "LEFT", -6, 0)
+    row.Meter.Track:SetHeight(5)
+    row.Meter.Fill = row.Meter:CreateTexture(nil, "OVERLAY")
+    row.Meter.Fill:SetColorTexture(Widgets.brand[1], Widgets.brand[2], Widgets.brand[3], 0.85)
+    row.Meter.Fill:SetPoint("LEFT", row.Meter.Track)
+    row.Meter.Fill:SetHeight(5)
+
     row:SetScript(
       "OnClick",
       function(self)
@@ -370,9 +412,31 @@ rowTypes.nav = {
       end
     )
     row.Update = function(self)
-      self.Value:SetText(Markup(Resolve(self.spec.value) or ""))
-      if self.spec.toggle then
-        self.Toggle:SetChecked(not not self.spec.toggle.get())
+      local spec = self.spec
+      self.Value:SetText(Markup(Resolve(spec.value) or ""))
+      if spec.toggle then
+        self.Toggle:SetChecked(not not spec.toggle.get())
+      end
+      self.Label:SetTextColor(unpack(Resolve(spec.dim) and colors.dim or colors.text))
+
+      local pillText, pillColor
+      if spec.pill then
+        pillText, pillColor = spec.pill()
+      end
+      self.Pill:SetShown(pillText ~= nil)
+      if pillText then
+        self.Pill.Text:SetText(pillText)
+        self.Pill.Text:SetTextColor(unpack(pillColor))
+        Widgets.SetBorderColor(self.Pill.Edges, {pillColor[1], pillColor[2], pillColor[3], 0.5})
+        self.Pill.Background:SetColorTexture(pillColor[1], pillColor[2], pillColor[3], 0.08)
+      end
+
+      local meter = spec.meter and spec.meter()
+      self.Meter:SetShown(meter ~= nil)
+      if meter then
+        local trackWidth = METER_WIDTH - 32 - 6
+        self.Meter.Fill:SetWidth(math.max(1, trackWidth * meter))
+        self.Meter.Text:SetText(("%d%%"):format(math.floor(meter * 100 + 0.5)))
       end
     end
     return row
@@ -380,19 +444,95 @@ rowTypes.nav = {
   setup = function(row, spec)
     local controlWidth = NAV_CHEVRON + 70
     row.Value:ClearAllPoints()
+    row.Pill:ClearAllPoints()
+    row.Meter:ClearAllPoints()
+    -- Right to left: chevron, switch, pill, meter (or the status text).
+    local anchor, anchorPoint, offset = row, "TOPRIGHT", -(NAV_CHEVRON + 4)
     if spec.toggle then
       row.Toggle:Show()
       row.Toggle.onToggle = function(value)
         Widgets.SafeCall(spec.toggle.set, value)
         Render()
       end
-      row.Value:SetPoint("RIGHT", row.Toggle, "LEFT", -8, 0)
+      anchor, anchorPoint, offset = row.Toggle, "LEFT", -8
       controlWidth = controlWidth + 40
     else
       row.Toggle:Hide()
-      row.Value:SetPoint("RIGHT", row, "TOPRIGHT", -(NAV_CHEVRON + 4), -ROW_HEIGHT / 2)
     end
+    if spec.pill then
+      row.Pill:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
+      anchor, anchorPoint, offset = row.Pill, "LEFT", -10
+      controlWidth = controlWidth + PILL_WIDTH + 10
+    end
+    if spec.meter then
+      row.Meter:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
+      controlWidth = controlWidth + METER_WIDTH + 10
+    end
+    row.Value:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
+    row:SetScript("OnUpdate", spec.meter and OnLiveUpdate or nil)
     return SetupRow(row, spec, controlWidth, ROW_HEIGHT)
+  end
+}
+
+-- Segmented filter ({ values = { { value, label } }, get, set }): one
+-- button per value, the current one highlighted. Always rebuilds the page.
+local CHIP_HEIGHT = 22
+local CHIP_GAP = 6
+
+local function CreateChip(row)
+  local chip = CreateFrame("Button", nil, row)
+  chip:SetHeight(CHIP_HEIGHT)
+  chip.Background = Widgets.Fill(chip, colors.control)
+  chip.Edges = Widgets.Border(chip)
+  chip.Text = Widgets.Text(chip, fonts.small, "CENTER")
+  chip.Text:SetPoint("LEFT", 10, 0)
+  chip.Text:SetPoint("RIGHT", -10, 0)
+  chip.Text:SetJustifyV("MIDDLE")
+  chip:SetScript(
+    "OnClick",
+    function(self)
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      Widgets.SafeCall(row.spec.set, self.value)
+      Render()
+    end
+  )
+  return chip
+end
+
+rowTypes.chips = {
+  create = function(parent)
+    local row = CreateFrame("Frame", nil, parent)
+    row.Chips = {}
+    row.Update = function(self)
+      local current = self.spec.get()
+      for _, chip in ipairs(self.Chips) do
+        local selected = chip:IsShown() and chip.value == current
+        chip.Background:SetColorTexture(colors.accent[1], colors.accent[2], colors.accent[3], selected and 0.3 or 0)
+        Widgets.SetBorderColor(chip.Edges, selected and colors.accent or colors.border)
+        chip.Text:SetTextColor(unpack(selected and colors.text or colors.muted))
+      end
+    end
+    return row
+  end,
+  setup = function(row, spec)
+    local values = Resolve(spec.values) or {}
+    local x = 0
+    for index, entry in ipairs(values) do
+      local chip = row.Chips[index] or CreateChip(row)
+      row.Chips[index] = chip
+      chip.value = entry.value
+      chip.Text:SetText(entry.label)
+      chip:SetWidth(chip.Text:GetUnboundedStringWidth() + 20)
+      chip:ClearAllPoints()
+      chip:SetPoint("LEFT", x, 0)
+      chip:Show()
+      x = x + chip:GetWidth() + CHIP_GAP
+    end
+    for index = #values + 1, #row.Chips do
+      row.Chips[index]:Hide()
+    end
+    row:SetSize(rowWidth, CHIP_HEIGHT + 12)
+    return CHIP_HEIGHT + 12
   end
 }
 
@@ -488,17 +628,6 @@ rowTypes.hint = {
     return height
   end
 }
-
--- Rows that show live state update themselves twice a second.
-local LIVE_INTERVAL = 0.5
-
-local function OnLiveUpdate(row, elapsed)
-  row.sinceUpdate = (row.sinceUpdate or 0) + elapsed
-  if row.sinceUpdate >= LIVE_INTERVAL then
-    row.sinceUpdate = 0
-    row:Update()
-  end
-end
 
 -- One fade condition in a single line ({ index, label, detail, value, toggle,
 -- active, expanded, onClick }): priority, name, gray detail, alpha, switch.
@@ -680,10 +809,10 @@ local function AddRow(card, spec, y)
 end
 
 -- Builds a card at (left, top) of the content frame; returns its height.
-local function AddCard(spec, left, top)
+local function AddCard(spec, left, top, width)
   local card = Widgets.Acquire(cardPool, content)
   card.spec = spec
-  card:SetWidth(columnWidth)
+  card:SetWidth(width or columnWidth)
   card:SetPoint("TOPLEFT", left, -top)
   -- Room for the toggle switch on the right.
   card.Title:SetWidth(rowWidth - 48)
@@ -1265,19 +1394,33 @@ Render = function()
   local title, subtitle, cards = GetPage()
   UpdateTitle(title, subtitle)
 
+  -- Cards with { fullWidth } (e.g. filters) span all columns above the others.
+  local top = 0
+  for _, card in ipairs(cards) do
+    if card.fullWidth then
+      local width = content:GetWidth()
+      local columnRowWidth = rowWidth
+      rowWidth = width - 2 * CARD_PADDING
+      top = top + AddCard(card, 0, top, width) + CARD_GAP
+      rowWidth = columnRowWidth
+    end
+  end
+
   local columns = {}
   for i = 1, columnCount do
-    columns[i] = 0
+    columns[i] = top
   end
   for _, card in ipairs(cards) do
-    local column = 1
+    if not card.fullWidth then
+      local column = 1
     for i = 2, columnCount do
       if columns[i] < columns[column] then
         column = i
       end
     end
-    local left = (column - 1) * (columnWidth + CARD_GAP)
-    columns[column] = columns[column] + AddCard(card, left, columns[column]) + CARD_GAP
+      local left = (column - 1) * (columnWidth + CARD_GAP)
+      columns[column] = columns[column] + AddCard(card, left, columns[column]) + CARD_GAP
+    end
   end
   content:SetHeight(math.max(1, math.max(unpack(columns)) - CARD_GAP))
   scroll:UpdateScrollChildRect()
