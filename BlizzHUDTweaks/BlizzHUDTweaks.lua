@@ -19,15 +19,24 @@ local function getBlizzHUDTweaksLibDbIconData(db)
         type = "data source",
         text = "BlizzHUDTweaks",
         icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
-        OnClick = function(self, button)
+        OnClick = function(_, button)
           if button == "LeftButton" then
             Options:Toggle()
           elseif button == "RightButton" then
-            if addon:IsEnabled() then
-              addon:Disable()
+            -- The whole addon only with Shift: turning it off needs a /reload
+            -- to restore everything, so a plain right click must not do it.
+            if IsShiftKeyDown() then
+              if addon:IsEnabled() then
+                addon:Disable()
+              else
+                addon:Enable()
+              end
+              local state = addon:IsEnabled() and "|cff8fe3a8on|r" or "|cff8f8f94off|r"
+              BlizzHUDTweaks.Toast:Show("BlizzHUDTweaks " .. state)
             else
-              addon:Enable()
+              MouseoverFrameFading:Toggle()
             end
+            Options:Refresh()
           elseif button == "MiddleButton" then
             db.global.minimap.hide = true
             LibDBIcon:Hide("BlizzHUDTweaks")
@@ -35,10 +44,18 @@ local function getBlizzHUDTweaksLibDbIconData(db)
           end
         end,
         OnEnter = function()
+          local function State(on)
+            return on and "|cff8fe3a8On|r" or "|cff8f8f94Off|r"
+          end
           GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
           GameTooltip:AddDoubleLine("|cFF69CCF0BlizzHUDTweaks|r", "v" .. db.global.version)
+          GameTooltip:AddDoubleLine("Addon", State(addon:IsEnabled()), 1, 1, 1)
+          GameTooltip:AddDoubleLine("Frame Fading", State(addon:IsEnabled() and MouseoverFrameFading:IsEnabled()), 1, 1, 1)
+          GameTooltip:AddDoubleLine("Profile", db:GetCurrentProfile(), 1, 1, 1, 1, 1, 1)
+          GameTooltip:AddLine(" ")
           GameTooltip:AddDoubleLine("|cFFdcabffLeft-Click|r", "Open Options")
-          GameTooltip:AddDoubleLine("|cFFdcabffRight-Click|r", "Toggle Addon")
+          GameTooltip:AddDoubleLine("|cFFdcabffRight-Click|r", "Toggle Frame Fading")
+          GameTooltip:AddDoubleLine("|cFFdcabffShift-Right-Click|r", "Toggle Addon")
           GameTooltip:AddDoubleLine("|cFFdcabffMiddle-Click|r", "Hide minimap icon")
           GameTooltip:Show()
         end,

@@ -597,6 +597,9 @@ function MouseoverFrameFading:Toggle()
     profile["GlobalOptionsMouseoverFrameFadingEnabled"] = true
     MouseoverFrameFading:Enable()
   end
+  -- The toggle (keybind, minimap icon) has no other visible feedback.
+  local state = MouseoverFrameFading:IsEnabled() and "|cff8fe3a8on|r" or "|cff8f8f94off|r"
+  BlizzHUDTweaks.Toast:Show("Frame Fading " .. state, profile["GlobalOptionsMouseoverFrameFadingToggleKeybind"])
   --@debug@
   addon:Print("Toggle Module", addon:ColoredString("MouseoverFrameFading", "fcba03"))
   --@end-debug@
