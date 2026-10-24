@@ -69,7 +69,6 @@ local frameGroups = {
   }
 }
 
-local GLOBAL_COLOR = "|cffa0a832"
 local CUSTOM_COLOR = "|cff8cc4ff"
 local OFF_COLOR = "|cff8f8f94"
 
@@ -148,14 +147,18 @@ local function getFrameDescription(frameName)
   return desc
 end
 
-local function getFrameStatus(frameName)
+local GLOBAL_PILL = {0.63, 0.66, 0.2, 1}
+local OWN_PILL = {0.55, 0.77, 1, 1}
+
+-- Tag for the frame lists: "Own" or "Global" for enabled frames.
+local function getFramePill(frameName)
   local frameOptions = addon:GetProfileDB()[frameName]
   if not frameOptions.Enabled then
-    return OFF_COLOR .. "Off|r"
+    return nil
   elseif frameOptions.UseGlobalOptions then
-    return GLOBAL_COLOR .. "Global|r"
+    return "Global", GLOBAL_PILL
   end
-  return CUSTOM_COLOR .. "Own|r"
+  return "Own", OWN_PILL
 end
 
 local function getModuleCards()
@@ -235,14 +238,16 @@ end
 -------------------------------------------------------------------------------
 -- Frame settings (one frame or the global settings)
 
+local targetTypes = {{value = "friendly", label = "Friendly"}, {value = "hostile", label = "Hostile"}, {value = "both", label = "Both"}}
+
 -- Fade conditions in the order they are checked.
 local conditions = {
   {
     label = "Vehicle",
     key = "FadeVehicle",
     alphaKey = "VehicleAlpha",
-    desc = "When active the fade value will be applied when you're in an vehicle.",
-    alphaDesc = "Set the alpha value of the frame when on an vehicle."
+    desc = "When active the fade value will be applied when you're in a vehicle.",
+    alphaDesc = "Set the alpha value of the frame when in a vehicle."
   },
   {
     label = "In Combat",
@@ -255,7 +260,7 @@ local conditions = {
     label = "Has Target",
     key = "TreatTargetLikeInCombat",
     toggleLabel = "Treat target as in combat",
-    desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." ..
+    desc = "When active the fade will change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." ..
       "\n\nUses the {In Combat} alpha and only works while {In Combat} is enabled.",
     targetType = true
   },
@@ -365,11 +370,26 @@ local function getFrameCard(frameName)
 
   if frameOptions.UseGlobalOptions then
     rows[#rows + 1] = {
+      type = "notice",
+      label = "This frame uses the global settings. The cards below show them read-only."
+    }
+    rows[#rows + 1] = {
       type = "nav",
       label = "Edit Global Settings",
-      tooltip = "The values below come from the global settings while {Use global options} is on.",
+      tooltip = "Changes there apply to every frame with {Use global options} turned on.",
       onClick = function()
         Options:Navigate("fading-global")
+      end
+    }
+    rows[#rows + 1] = {
+      type = "button",
+      label = "Use own settings",
+      tooltip = "Turns off {Use global options} and starts with a copy of the global values for this frame.",
+      buttonText = "Override",
+      layout = true,
+      onClick = function()
+        MouseoverFrameFading:CopyFrom(Info("CopyFrom", frameName), "Global")
+        addon:RefreshOptionTables()
       end
     }
   else
@@ -386,14 +406,23 @@ local function getFrameCard(frameName)
         return Options:GetValue(Info("CopyFrom", frameName))
       end,
       set = function(value)
-        MouseoverFrameFading:CopyFrom(Info("CopyFrom", frameName), value)
+        local source = value == "Global" and "Global Settings" or getDisplayName(value)
+        Options:Confirm(
+          ("Copy all fade settings of %s to %s?\nThe current settings of %s are lost."):format(source, getDisplayName(frameName), getDisplayName(frameName)),
+          "Copy",
+          function()
+            MouseoverFrameFading:CopyFrom(Info("CopyFrom", frameName), value)
+            Options:Refresh()
+          end
+        )
       end
     }
   end
   return card
 end
 
-local function getMouseoverCard(frameName)
+-- readOnly: shown on a frame that uses the global settings.
+local function getMouseoverCard(frameName, readOnly)
   local rows = {
     valueRow("checkbox", frameName, "MouseOverFadeEnabled", "Fade on mouseover", "When activated you can mouseover action bars and frames to show the frame with full alpha."),
     valueRow(
@@ -407,14 +436,66 @@ local function getMouseoverCard(frameName)
   local duration = valueRow("slider", frameName, "FadeDuration", "Fade Duration", "The duration how long the fade should take (fade in and out).")
   duration.min, duration.max, duration.step, duration.format = 0.05, 2, 0.05, secondsFormat(2)
   rows[#rows + 1] = duration
+  for _, row in ipairs(rows) do
+    row.disabled = readOnly
+  end
 
-  return {title = "Mouseover", note = "Shows the frame at full alpha while the mouse is over it.", rows = rows}
+  return {
+    title = readOnly and "Mouseover  |cffa0a832· Global|r" or "Mouseover",
+    note = "Shows the frame at full alpha while the mouse is over it.",
+    rows = rows
+  }
 end
 
+-- Update interval presets; any other value shows as "Custom".
+local intervalPresets = {
+  {value = 0.1, label = "Responsive (0.1 s)"},
+  {value = 0.2, label = "Balanced (0.2 s)"},
+  {value = 0.5, label = "Light (0.5 s)"}
+}
+
 local function getPerformanceCard(frameName)
+  local function getInterval()
+    return MouseoverFrameFading:GetUpdateTickerValue(Info("UpdateInterval", frameName))
+  end
   return {
     title = "Performance",
     rows = {
+      {
+        type = "dropdown",
+        label = "Mouseover checks",
+        tooltip = "How often the addon checks whether the mouse is over a frame. Shorter intervals react faster and cost more CPU.",
+        values = function()
+          local values = {}
+          for _, preset in ipairs(intervalPresets) do
+            values[#values + 1] = preset
+          end
+          local current = getInterval()
+          local isPreset = false
+          for _, preset in ipairs(intervalPresets) do
+            if math.abs(preset.value - current) < 0.001 then
+              isPreset = true
+            end
+          end
+          if not isPreset then
+            values[#values + 1] = {value = current, label = ("Custom (%.2f s)"):format(current)}
+          end
+          return values
+        end,
+        layout = true,
+        get = function()
+          local current = getInterval()
+          for _, preset in ipairs(intervalPresets) do
+            if math.abs(preset.value - current) < 0.001 then
+              return preset.value
+            end
+          end
+          return current
+        end,
+        set = function(value)
+          MouseoverFrameFading:SetUpdateTickerValue(Info("UpdateInterval", frameName), value)
+        end
+      },
       {
         type = "slider",
         label = "Update Interval",
@@ -424,68 +505,168 @@ local function getPerformanceCard(frameName)
         max = 1,
         step = 0.01,
         format = secondsFormat(2),
-        get = function()
-          return MouseoverFrameFading:GetUpdateTickerValue(Info("UpdateInterval", frameName))
-        end,
+        get = getInterval,
         set = function(value)
           MouseoverFrameFading:SetUpdateTickerValue(Info("UpdateInterval", frameName), value)
         end
       },
       {
         type = "notice",
-        label = "Caution: If the value is decreased, the CPU load increases exponentially. Recommended value is 0.2. " ..
-          "If you decrease this value and experience any FPS drops, please consider increasing the value again."
+        label = "Values below 0.1 s raise the CPU load a lot. If you notice FPS drops, choose {Balanced} again."
       }
     }
   }
 end
 
-local function getConditionsCard(frameName)
-  local frameOptions = addon:GetProfileDB()[frameName]
+-- The condition whose values are shown, per frame (one at a time).
+local expandedCondition = {}
+
+local function isConditionAvailable(condition)
+  -- Housing conditions are skipped in WoW: Forever, which has no housing.
+  return not condition.retailOnly or addon:HasHousing()
+end
+
+local function getConditionLabel(key)
+  for _, condition in ipairs(conditions) do
+    if condition.key == key then
+      return condition.label
+    end
+  end
+end
+
+-- "Active now: Rested Area · 40%" for the frame (or the global settings).
+local function getLiveText(frameName, liveFrame)
+  if not Options:IsModuleOn("fading") then
+    return "|cff8f8f94Frame fading is turned off.|r"
+  end
+  local key, alpha = MouseoverFrameFading:GetActiveCondition(liveFrame or frameName)
+  local percent = ("%d%%"):format(math.floor((alpha or 1) * 100 + 0.5))
+  local text
+  if key then
+    text = ("Active now: |cff8fe3a8%s|r  ·  %s"):format(getConditionLabel(key), percent)
+  else
+    text = ("No condition applies  ·  %s"):format(percent)
+  end
+  if MouseoverFrameFading:GetValue(Info("MouseOverFadeEnabled", frameName)) then
+    text = text .. "     |cff8f8f94Mouseover: 100%|r"
+  end
+  return text
+end
+
+local function getConditionValueRows(frameName, condition, readOnly)
   local rows = {}
+  if condition.alphaKey then
+    rows[#rows + 1] = alphaRow(frameName, condition.alphaKey, condition.alphaDesc)
+  end
+  if condition.targetType then
+    local targetType =
+      valueRow("dropdown", frameName, "TreatTargetLikeInCombatTargetType", "Target type", "Choose the target type for which {Treat target as in combat} should be applied.")
+    targetType.values = targetTypes
+    rows[#rows + 1] = targetType
+  end
+  if condition.fadeDelay then
+    local delay =
+      valueRow(
+      "slider",
+      frameName,
+      "OutOfCombatFadeDelay",
+      "Fade Delay",
+      "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha. " ..
+        "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing` " ..
+          "action bars or frames when entering/leaving combat fast, e.g. while questing.\n\nNOTE: Mouseover a frame will interrupt the delay and use the normal alpha values instead."
+    )
+    delay.min, delay.max, delay.step, delay.format = 0, 60, 0.5, secondsFormat(1)
+    rows[#rows + 1] = delay
+  end
+  for _, row in ipairs(rows) do
+    row.indent = 26
+    row.disabled = readOnly
+  end
+  return rows
+end
+
+-- Short summary next to the name, e.g. "hostile" or "2.0 s delay".
+local function getConditionDetail(frameName, condition)
+  if condition.targetType then
+    local targetType = MouseoverFrameFading:GetValue(Info("TreatTargetLikeInCombatTargetType", frameName)) or "both"
+    return targetType .. " targets, uses In Combat"
+  end
+  if condition.fadeDelay then
+    local delay = MouseoverFrameFading:GetValue(Info("OutOfCombatFadeDelay", frameName)) or 0
+    if delay > 0 then
+      return ("%.1f s delay"):format(delay)
+    end
+  end
+end
+
+-- readOnly: the global settings shown on a frame that uses them; liveFrame is
+-- then the frame whose current state is shown.
+local function getConditionsCard(frameName, readOnly, liveFrame)
+  local frameOptions = addon:GetProfileDB()[frameName]
+  local rows = {
+    {
+      type = "live",
+      get = function()
+        return getLiveText(frameName, liveFrame)
+      end
+    }
+  }
   local index = 0
   for _, condition in ipairs(conditions) do
-    -- Housing conditions are skipped in WoW: Forever, which has no housing.
-    local available = not condition.retailOnly or addon:HasHousing()
-    if available then
+    if isConditionAvailable(condition) then
       index = index + 1
-      rows[#rows + 1] = {type = "header", label = index .. "  ·  " .. condition.label}
-      local toggle = valueRow("checkbox", frameName, condition.key, condition.toggleLabel or "Enabled", condition.desc)
-      toggle.layout = true
-      rows[#rows + 1] = toggle
-    end
-
-    -- Values of a condition only matter while it is on.
-    if available and frameOptions[condition.key] then
-      if condition.alphaKey then
-        rows[#rows + 1] = alphaRow(frameName, condition.alphaKey, condition.alphaDesc)
-      end
-      if condition.targetType then
-        local targetType =
-          valueRow("dropdown", frameName, "TreatTargetLikeInCombatTargetType", "Target type", "Choose the target type for which {Treat target as in combat} should be applied.")
-        targetType.values = {{value = "friendly", label = "Friendly"}, {value = "hostile", label = "Hostile"}, {value = "both", label = "Both"}}
-        rows[#rows + 1] = targetType
-      end
-      if condition.fadeDelay then
-        local delay =
-          valueRow(
-          "slider",
-          frameName,
-          "OutOfCombatFadeDelay",
-          "Fade Delay",
-          "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha. " ..
-            "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing` " ..
-              "action bars or frames when entering/leaving combat fast, e.g. while questing.\n\nNOTE: Mouseover a frame will interrupt the delay and use the normal alpha values instead."
-        )
-        delay.min, delay.max, delay.step, delay.format = 0, 60, 0.5, secondsFormat(1)
-        rows[#rows + 1] = delay
+      local key = condition.key
+      local searching = Options:IsSearching()
+      local expanded = not readOnly and (searching or expandedCondition[frameName] == key)
+      rows[#rows + 1] = {
+        type = "condition",
+        index = index,
+        label = condition.label,
+        tooltip = condition.desc .. (readOnly and "" or "\n\nClick the row to change its values."),
+        disabled = readOnly,
+        detail = function()
+          return getConditionDetail(frameName, condition)
+        end,
+        value = condition.alphaKey and function()
+            return ("%d%%"):format(MouseoverFrameFading:GetFadeSliderValue(Info(condition.alphaKey, frameName)))
+          end,
+        toggle = {
+          get = function()
+            return MouseoverFrameFading:GetValue(Info(key, frameName))
+          end,
+          set = function(value)
+            MouseoverFrameFading:SetValue(Info(key, frameName), value)
+            -- Turning a condition on shows its values right away.
+            expandedCondition[frameName] = value and key or nil
+          end
+        },
+        active = function()
+          if not Options:IsModuleOn("fading") then
+            return false
+          end
+          return (MouseoverFrameFading:GetActiveCondition(liveFrame or frameName)) == key
+        end,
+        onClick = function()
+          expandedCondition[frameName] = not expanded and key or nil
+          Options:Refresh()
+        end
+      }
+      if expanded and frameOptions[key] then
+        for _, row in ipairs(getConditionValueRows(frameName, condition, readOnly)) do
+          -- Search results list the row alone, so it names its condition.
+          if searching then
+            row.note = condition.label
+          end
+          rows[#rows + 1] = row
+        end
       end
     end
   end
 
   return {
-    title = "Fade Conditions",
-    note = "Mouseover always comes first. Otherwise the first enabled condition that applies, from top to bottom, sets the alpha.",
+    title = readOnly and "Fade Conditions  |cffa0a832· Global|r" or "Fade Conditions",
+    note = "Mouseover always comes first. Otherwise the first enabled condition that applies, from top to bottom, sets the alpha." ..
+      (readOnly and "" or " Click a condition to change its values."),
     rows = rows
   }
 end
@@ -496,7 +677,13 @@ local function getFrameSettingsCards(frameName)
 
   if not isGlobal then
     cards[1] = getFrameCard(frameName)
-    if MouseoverFrameFading:GetDisabledFrameOptions(Info(nil, frameName)) then
+    local frameOptions = addon:GetProfileDB()[frameName]
+    if not frameOptions.Enabled then
+      return cards
+    end
+    if frameOptions.UseGlobalOptions then
+      cards[#cards + 1] = getMouseoverCard(GLOBAL, true)
+      cards[#cards + 1] = getConditionsCard(GLOBAL, true, frameName)
       return cards
     end
   end
@@ -588,14 +775,10 @@ end
 -------------------------------------------------------------------------------
 -- Frame overview
 
-local function getFramesOverview()
-  local cards = getModuleCards()
+-- Listed frames: total, enabled, enabled with the global settings.
+local function countFrames()
   local total, enabled, global = 0, 0, 0
-  local customCard = getCustomFramesCard()
-  cards[#cards + 1] = customCard
-
   for _, group in ipairs(getFrameGroups()) do
-    local rows = {}
     for _, frameName in ipairs(group.frames) do
       local frameOptions = addon:GetProfileDB()[frameName]
       total = total + 1
@@ -605,35 +788,134 @@ local function getFramesOverview()
           global = global + 1
         end
       end
-      rows[#rows + 1] = {
-        type = "nav",
-        label = getDisplayName(frameName),
-        tooltip = getFrameDescription(frameName),
-        value = function()
-          return getFrameStatus(frameName)
-        end,
-        toggle = {
-          get = function()
-            return Options:GetValue(Info("Enabled", frameName))
-          end,
-          set = function(value)
-            setFrameEnabled(frameName, value)
-          end
+    end
+  end
+  return total, enabled, global
+end
+
+-- Filter of the frame list: "all", "on", "own" or "global".
+local frameFilter = "all"
+
+local function matchesFilter(frameName)
+  local frameOptions = addon:GetProfileDB()[frameName]
+  if frameFilter == "on" then
+    return frameOptions.Enabled
+  elseif frameFilter == "own" then
+    return frameOptions.Enabled and not frameOptions.UseGlobalOptions
+  elseif frameFilter == "global" then
+    return frameOptions.Enabled and frameOptions.UseGlobalOptions
+  end
+  return true
+end
+
+local function getFilterCard()
+  local total, enabled, global = countFrames()
+  return {
+    fullWidth = true,
+    rows = {
+      {
+        type = "chips",
+        values = {
+          {value = "all", label = ("All  %d"):format(total)},
+          {value = "on", label = ("Enabled  %d"):format(enabled)},
+          {value = "own", label = ("Own settings  %d"):format(enabled - global)},
+          {value = "global", label = ("Global settings  %d"):format(global)}
         },
-        onClick = function()
-          Options:Navigate("fading-frames", frameName)
+        get = function()
+          return frameFilter
+        end,
+        set = function(value)
+          frameFilter = value
         end
       }
+    }
+  }
+end
+
+local function getFrameRow(frameName)
+  return {
+    type = "nav",
+    label = getDisplayName(frameName),
+    tooltip = getFrameDescription(frameName),
+    dim = function()
+      return not Options:GetValue(Info("Enabled", frameName))
+    end,
+    pill = function()
+      return getFramePill(frameName)
+    end,
+    -- The alpha the frame has right now (without mouseover).
+    meter = function()
+      if not Options:GetValue(Info("Enabled", frameName)) or not Options:IsModuleOn("fading") then
+        return nil
+      end
+      local _, alpha = MouseoverFrameFading:GetActiveCondition(frameName)
+      return alpha
+    end,
+    toggle = {
+      get = function()
+        return Options:GetValue(Info("Enabled", frameName))
+      end,
+      set = function(value)
+        setFrameEnabled(frameName, value)
+      end
+    },
+    onClick = function()
+      Options:Navigate("fading-frames", frameName)
+    end
+  }
+end
+
+-- Card of one group with a switch for all of its frames.
+local function getGroupCard(group, rows)
+  local enabled = 0
+  for _, frameName in ipairs(group.frames) do
+    if addon:GetProfileDB()[frameName].Enabled then
+      enabled = enabled + 1
+    end
+  end
+  return {
+    title = group.name,
+    note = ("%d of %d enabled"):format(enabled, #group.frames),
+    tooltip = "The switch turns fading on or off for every frame of this group.",
+    toggle = {
+      get = function()
+        return enabled == #group.frames
+      end,
+      set = function(value)
+        for _, frameName in ipairs(group.frames) do
+          if (not not addon:GetProfileDB()[frameName].Enabled) ~= value then
+            setFrameEnabled(frameName, value)
+          end
+        end
+      end
+    },
+    rows = rows
+  }
+end
+
+local function getFramesOverview()
+  local cards = getModuleCards()
+  cards[#cards + 1] = getFilterCard()
+  local customCard = getCustomFramesCard()
+  cards[#cards + 1] = customCard
+
+  for _, group in ipairs(getFrameGroups()) do
+    local rows = {}
+    for _, frameName in ipairs(group.frames) do
+      if matchesFilter(frameName) then
+        rows[#rows + 1] = getFrameRow(frameName)
+      end
     end
     if group.custom then
       for _, row in ipairs(rows) do
         customCard.rows[#customCard.rows + 1] = row
       end
-    else
-      cards[#cards + 1] = {title = group.name, rows = rows}
+    elseif #rows > 0 then
+      cards[#cards + 1] = getGroupCard(group, rows)
     end
   end
 
+  local total, enabled, global = countFrames()
   local subtitle = ("%d of %d frames enabled, %d of them use the global settings"):format(enabled, total, global)
   return "Frames", subtitle, cards
 end
@@ -649,14 +931,29 @@ local function resetAllFrameLinks(profile, frameTable)
   end
 end
 
-local function getLinkCount(frameName)
-  local count = 0
-  for _, linked in pairs(addon:GetProfileDB()[frameName .. "LinkedFrames"] or {}) do
-    if linked then
-      count = count + 1
+-- "Action Bar 1, Action Bar 2 +3" for the links overview.
+local LINK_NAMES_SHOWN = 2
+
+local function getLinkSummary(frameName)
+  local names = {}
+  for linkedName, linked in pairs(addon:GetProfileDB()[frameName .. "LinkedFrames"] or {}) do
+    if linked and linkedName ~= frameName and type(addon:GetProfileDB()[linkedName]) == "table" then
+      names[#names + 1] = getDisplayName(linkedName)
     end
   end
-  return count
+  if #names == 0 then
+    return OFF_COLOR .. "None|r"
+  end
+  table.sort(names)
+  local shown = {}
+  for i = 1, math.min(LINK_NAMES_SHOWN, #names) do
+    shown[i] = names[i]
+  end
+  local text = table.concat(shown, ", ")
+  if #names > LINK_NAMES_SHOWN then
+    text = text .. "  +" .. (#names - LINK_NAMES_SHOWN)
+  end
+  return CUSTOM_COLOR .. text .. "|r"
 end
 
 local linksDescription =
@@ -689,12 +986,9 @@ local function getLinksOverview()
         label = getDisplayName(frameName),
         tooltip = getFrameDescription(frameName),
         value = function()
-          local count = getLinkCount(frameName)
-          if count == 0 then
-            return OFF_COLOR .. "None|r"
-          end
-          return CUSTOM_COLOR .. count .. (count == 1 and " link" or " links") .. "|r"
+          return getLinkSummary(frameName)
         end,
+        valueWidth = 190,
         onClick = function()
           Options:Navigate("fading-links", frameName)
         end
@@ -761,6 +1055,9 @@ Options:RegisterPage(
     label = "Global Settings",
     order = 20,
     searchable = true,
+    status = function()
+      return Options:IsModuleOn("fading")
+    end,
     build = function()
       local cards = getModuleCards()
       for _, card in ipairs(getFrameSettingsCards(GLOBAL)) do
@@ -778,6 +1075,10 @@ Options:RegisterPage(
     label = "Frames",
     order = 21,
     searchable = true,
+    badge = function()
+      local total, enabled = countFrames()
+      return enabled .. "/" .. total
+    end,
     build = function(frameName)
       local profile = addon:GetProfileDB()
       if frameName and type(profile[frameName]) == "table" then

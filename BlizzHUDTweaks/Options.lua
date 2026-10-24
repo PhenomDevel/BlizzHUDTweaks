@@ -1,3 +1,4 @@
+local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
@@ -95,6 +96,11 @@ function Options:GetModuleCard(id)
   }
 end
 
+-- Whether the module (and the addon) is on; shown as a dot in the sidebar.
+function Options:IsModuleOn(id)
+  return addon:IsEnabled() and Options:GetValue(Info(moduleCards[id].key)) and true or false
+end
+
 -- Notice for module pages while the module is turned off.
 function Options:GetModuleOffNotice(id)
   local spec = moduleCards[id]
@@ -107,7 +113,7 @@ local function getAddonCard()
   return {
     title = "BlizzHUDTweaks",
     note = "Turns the whole addon and all of its modules on or off.",
-    tooltip = "Enables or disables the whole addon and all of it's sub modules.",
+    tooltip = "Enables or disables the whole addon and all of its sub modules.",
     toggle = {
       get = function()
         return Options:GetValue(Info("Enabled"))
@@ -136,8 +142,28 @@ local function getAddonCard()
         end
       },
       {
+        type = "checkbox",
+        label = "What's new after updates",
+        tooltip = "After an update, shows a window with the most important changes once. Same switch as in that window.",
+        get = function()
+          return addon:GetGlobalProfileDB().whatsNew ~= false
+        end,
+        set = function(value)
+          addon:GetGlobalProfileDB().whatsNew = value
+        end
+      },
+      {
+        type = "button",
+        label = "What's new",
+        tooltip = "Shows the changes of the current version. Same as `/bht news`.",
+        buttonText = "Show",
+        onClick = function()
+          BlizzHUDTweaks.WhatsNew:Show()
+        end
+      },
+      {
         type = "description",
-        label = "`/bht` opens this window, `/bht minimap` shows or hides the minimap icon."
+        label = "`/bht` opens this window, `/bht minimap` shows or hides the minimap icon, `/bht news` shows what's new."
       }
     }
   }

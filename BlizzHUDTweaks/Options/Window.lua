@@ -56,7 +56,7 @@ local TITLE = ("Blizz|cff%sHUD|rTweaks"):format(Widgets.BRAND_HEX)
 -- Derived from the window width by UpdateLayout() before every render.
 local columnCount, columnWidth, rowWidth
 
-local frame, scroll, content, sidebar, searchBox, backButton, pageTitle, pageSubtitle
+local frame, scroll, content, sidebar, searchBox, profileButton, backButton, pageTitle, pageSubtitle
 local pages = {}
 local state = {page = nil, detail = nil, search = ""}
 
@@ -85,8 +85,47 @@ end
 -- A row = label (+ gray note) on the left, a control on the right. Each row
 -- type has its own pool and an Update() that reads the bound value.
 
+local RESET_ICON = "Interface\\Buttons\\UI-RefreshButton"
+
 local function CreateRowBase(parent)
   local row = CreateFrame("Button", nil, parent)
+  -- Search hit ({ highlight }).
+  row.Highlight = row:CreateTexture(nil, "BACKGROUND")
+  row.Highlight:SetPoint("TOPLEFT", -6, 0)
+  row.Highlight:SetPoint("BOTTOMRIGHT", 6, 0)
+  row.Highlight:SetColorTexture(colors.accent[1], colors.accent[2], colors.accent[3], 0.12)
+  row.Highlight:Hide()
+
+  -- Back to the default ({ reset = { changed, reset } }), only while changed.
+  row.Reset = CreateFrame("Button", nil, row)
+  row.Reset:SetSize(16, 16)
+  row.Reset.Icon = row.Reset:CreateTexture(nil, "ARTWORK")
+  row.Reset.Icon:SetAllPoints()
+  row.Reset.Icon:SetTexture(RESET_ICON)
+  row.Reset.Icon:SetVertexColor(unpack(colors.muted))
+  row.Reset:SetScript(
+    "OnEnter",
+    function(self)
+      self.Icon:SetVertexColor(unpack(colors.text))
+      Widgets.ShowTooltipAt(self, "BOTTOM", "TOP", 0, 4, "Reset", "Back to the default value.")
+    end
+  )
+  row.Reset:SetScript(
+    "OnLeave",
+    function(self)
+      self.Icon:SetVertexColor(unpack(colors.muted))
+      Widgets.HideTooltip()
+    end
+  )
+  row.Reset:SetScript(
+    "OnClick",
+    function()
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      Widgets.SafeCall(row.spec.reset.reset)
+      Render()
+    end
+  )
+  row.Reset:Hide()
   row.Label = Widgets.Text(row, fonts.body)
   row.Label:SetPoint("TOPLEFT", 0, -9)
   row.Note = Widgets.Text(row, fonts.small)
@@ -118,6 +157,17 @@ end
 
 local rowTypes = {}
 
+-- Rows that show live state update themselves twice a second.
+local LIVE_INTERVAL = 0.5
+
+local function OnLiveUpdate(row, elapsed)
+  row.sinceUpdate = (row.sinceUpdate or 0) + elapsed
+  if row.sinceUpdate >= LIVE_INTERVAL then
+    row.sinceUpdate = 0
+    row:Update()
+  end
+end
+
 -- On/off switch.
 rowTypes.checkbox = {
   create = function(parent)
@@ -128,7 +178,9 @@ rowTypes.checkbox = {
     row:SetScript(
       "OnClick",
       function(self)
-        self.Control:Click()
+        if not self.spec.disabled then
+          self.Control:Click()
+        end
       end
     )
     row.Update = function(self)
@@ -265,6 +317,7 @@ rowTypes.button = {
   end,
   setup = function(row, spec)
     row.Control:SetLabel(spec.buttonText or spec.label)
+    row.Control:SetDanger(spec.danger)
     return SetupRow(row, spec, row.Control:GetWidth(), ROW_HEIGHT)
   end
 }
@@ -328,10 +381,15 @@ rowTypes.textarea = {
   end
 }
 
--- Link to another page or a detail view ({ onClick, value, toggle = { get, set } }):
--- label, optional status text, optional switch and a chevron. The whole row
--- is clickable; the switch keeps its own click.
+-- Link to another page or a detail view ({ onClick, value, toggle = { get, set },
+-- pill, meter, dim, valueWidth }): label, optional status text, optional switch and a
+-- chevron. The whole row is clickable; the switch keeps its own click.
+--   pill()  -> text, color      small tag, e.g. "Own" / "Global"
+--   meter() -> 0..1 or nil      alpha bar with percent, updated live
+--   dim()   -> true             gray label, e.g. for a disabled frame
 local NAV_CHEVRON = 12
+local PILL_WIDTH = 50
+local METER_WIDTH = 74
 
 rowTypes.nav = {
   create = function(parent)
@@ -352,6 +410,31 @@ rowTypes.nav = {
     row.Toggle = Widgets.CreateToggle(row)
     row.Toggle:SetPoint("RIGHT", row, "TOPRIGHT", -(NAV_CHEVRON + 8), -ROW_HEIGHT / 2)
     Widgets.ForwardHover(row.Toggle, row)
+
+    row.Pill = CreateFrame("Frame", nil, row)
+    row.Pill:SetSize(PILL_WIDTH, 16)
+    row.Pill.Background = Widgets.Fill(row.Pill, colors.hover)
+    row.Pill.Edges = Widgets.Border(row.Pill)
+    row.Pill.Text = Widgets.Text(row.Pill, fonts.small, "CENTER")
+    row.Pill.Text:SetAllPoints()
+    row.Pill.Text:SetJustifyV("MIDDLE")
+
+    row.Meter = CreateFrame("Frame", nil, row)
+    row.Meter:SetSize(METER_WIDTH, 16)
+    row.Meter.Text = Widgets.Text(row.Meter, fonts.small, "RIGHT")
+    row.Meter.Text:SetPoint("RIGHT")
+    row.Meter.Text:SetWidth(32)
+    row.Meter.Text:SetJustifyV("MIDDLE")
+    row.Meter.Track = row.Meter:CreateTexture(nil, "ARTWORK")
+    row.Meter.Track:SetColorTexture(unpack(colors.control))
+    row.Meter.Track:SetPoint("LEFT")
+    row.Meter.Track:SetPoint("RIGHT", row.Meter.Text, "LEFT", -6, 0)
+    row.Meter.Track:SetHeight(5)
+    row.Meter.Fill = row.Meter:CreateTexture(nil, "OVERLAY")
+    row.Meter.Fill:SetColorTexture(Widgets.brand[1], Widgets.brand[2], Widgets.brand[3], 0.85)
+    row.Meter.Fill:SetPoint("LEFT", row.Meter.Track)
+    row.Meter.Fill:SetHeight(5)
+
     row:SetScript(
       "OnClick",
       function(self)
@@ -361,55 +444,156 @@ rowTypes.nav = {
       end
     )
     row.Update = function(self)
-      self.Value:SetText(Markup(Resolve(self.spec.value) or ""))
-      if self.spec.toggle then
-        self.Toggle:SetChecked(not not self.spec.toggle.get())
+      local spec = self.spec
+      self.Value:SetText(Markup(Resolve(spec.value) or ""))
+      if spec.toggle then
+        self.Toggle:SetChecked(not not spec.toggle.get())
+      end
+      self.Label:SetTextColor(unpack(Resolve(spec.dim) and colors.dim or colors.text))
+
+      local pillText, pillColor
+      if spec.pill then
+        pillText, pillColor = spec.pill()
+      end
+      self.Pill:SetShown(pillText ~= nil)
+      if pillText then
+        self.Pill.Text:SetText(pillText)
+        self.Pill.Text:SetTextColor(unpack(pillColor))
+        Widgets.SetBorderColor(self.Pill.Edges, {pillColor[1], pillColor[2], pillColor[3], 0.5})
+        self.Pill.Background:SetColorTexture(pillColor[1], pillColor[2], pillColor[3], 0.08)
+      end
+
+      local meter = spec.meter and spec.meter()
+      self.Meter:SetShown(meter ~= nil)
+      if meter then
+        local trackWidth = METER_WIDTH - 32 - 6
+        self.Meter.Fill:SetWidth(math.max(1, trackWidth * meter))
+        self.Meter.Text:SetText(("%d%%"):format(math.floor(meter * 100 + 0.5)))
       end
     end
     return row
   end,
   setup = function(row, spec)
-    local controlWidth = NAV_CHEVRON + 70
+    -- { valueWidth } for longer status texts (cut off with "...").
+    local valueWidth = spec.valueWidth or 70
+    local controlWidth = NAV_CHEVRON + valueWidth
+    row.Value:SetWidth(valueWidth - 8)
     row.Value:ClearAllPoints()
+    row.Pill:ClearAllPoints()
+    row.Meter:ClearAllPoints()
+    -- Right to left: chevron, switch, pill, meter (or the status text).
+    local anchor, anchorPoint, offset = row, "TOPRIGHT", -(NAV_CHEVRON + 4)
     if spec.toggle then
       row.Toggle:Show()
       row.Toggle.onToggle = function(value)
         Widgets.SafeCall(spec.toggle.set, value)
         Render()
       end
-      row.Value:SetPoint("RIGHT", row.Toggle, "LEFT", -8, 0)
+      anchor, anchorPoint, offset = row.Toggle, "LEFT", -8
       controlWidth = controlWidth + 40
     else
       row.Toggle:Hide()
-      row.Value:SetPoint("RIGHT", row, "TOPRIGHT", -(NAV_CHEVRON + 4), -ROW_HEIGHT / 2)
     end
+    if spec.pill then
+      row.Pill:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
+      anchor, anchorPoint, offset = row.Pill, "LEFT", -10
+      controlWidth = controlWidth + PILL_WIDTH + 10
+    end
+    if spec.meter then
+      row.Meter:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
+      controlWidth = controlWidth + METER_WIDTH + 10
+    end
+    row.Value:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
+    row:SetScript("OnUpdate", spec.meter and OnLiveUpdate or nil)
     return SetupRow(row, spec, controlWidth, ROW_HEIGHT)
   end
 }
 
--- Section title inside a card.
+-- Segmented filter ({ values = { { value, label } }, get, set }): one
+-- button per value, the current one highlighted. Always rebuilds the page.
+local CHIP_HEIGHT = 22
+local CHIP_GAP = 6
+
+local function CreateChip(row)
+  local chip = CreateFrame("Button", nil, row)
+  chip:SetHeight(CHIP_HEIGHT)
+  chip.Background = Widgets.Fill(chip, colors.control)
+  chip.Edges = Widgets.Border(chip)
+  chip.Text = Widgets.Text(chip, fonts.small, "CENTER")
+  chip.Text:SetPoint("LEFT", 10, 0)
+  chip.Text:SetPoint("RIGHT", -10, 0)
+  chip.Text:SetJustifyV("MIDDLE")
+  chip:SetScript(
+    "OnClick",
+    function(self)
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      Widgets.SafeCall(row.spec.set, self.value)
+      Render()
+    end
+  )
+  return chip
+end
+
+rowTypes.chips = {
+  create = function(parent)
+    local row = CreateFrame("Frame", nil, parent)
+    row.Chips = {}
+    row.Update = function(self)
+      local current = self.spec.get()
+      for _, chip in ipairs(self.Chips) do
+        local selected = chip:IsShown() and chip.value == current
+        chip.Background:SetColorTexture(colors.accent[1], colors.accent[2], colors.accent[3], selected and 0.3 or 0)
+        Widgets.SetBorderColor(chip.Edges, selected and colors.accent or colors.border)
+        chip.Text:SetTextColor(unpack(selected and colors.text or colors.muted))
+      end
+    end
+    return row
+  end,
+  setup = function(row, spec)
+    local values = Resolve(spec.values) or {}
+    local x = 0
+    for index, entry in ipairs(values) do
+      local chip = row.Chips[index] or CreateChip(row)
+      row.Chips[index] = chip
+      chip.value = entry.value
+      chip.Text:SetText(entry.label)
+      chip:SetWidth(chip.Text:GetUnboundedStringWidth() + 20)
+      chip:ClearAllPoints()
+      chip:SetPoint("LEFT", x, 0)
+      chip:Show()
+      x = x + chip:GetWidth() + CHIP_GAP
+    end
+    for index = #values + 1, #row.Chips do
+      row.Chips[index]:Hide()
+    end
+    row:SetSize(rowWidth, CHIP_HEIGHT + 12)
+    return CHIP_HEIGHT + 12
+  end
+}
+
+-- Section title inside a card ({ danger } marks actions that overwrite settings).
 rowTypes.header = {
   create = function(parent)
     local row = CreateFrame("Frame", nil, parent)
-    local marker = row:CreateTexture(nil, "ARTWORK")
-    marker:SetColorTexture(unpack(colors.accent))
-    marker:SetSize(2, 12)
-    marker:SetPoint("BOTTOMLEFT", 0, 4)
+    row.Marker = row:CreateTexture(nil, "ARTWORK")
+    row.Marker:SetSize(2, 12)
+    row.Marker:SetPoint("BOTTOMLEFT", 0, 4)
     row.Label = Widgets.Text(row, fonts.section)
-    row.Label:SetPoint("BOTTOMLEFT", marker, "BOTTOMRIGHT", 6, 0)
+    row.Label:SetPoint("BOTTOMLEFT", row.Marker, "BOTTOMRIGHT", 6, 0)
     row.Update = function()
     end
     return row
   end,
   setup = function(row, spec)
     row:SetSize(rowWidth, 28)
+    row.Marker:SetColorTexture(unpack(spec.danger and colors.danger or colors.accent))
     row.Label:SetText(spec.label)
     return 28
   end
 }
 
--- Highlighted, wrapping hint (e.g. "needs a /reload", "module is off").
-local NOTICE_COLOR = {1, 0.82, 0.3, 1}
+-- Highlighted, wrapping hint (e.g. "needs a /reload", "module is off");
+-- { tone = "ok" | "danger" } for results like a checked import string.
 local NOTICE_BAR = 2
 local NOTICE_INDENT = NOTICE_BAR + 8
 
@@ -417,12 +601,10 @@ rowTypes.notice = {
   create = function(parent)
     local row = CreateFrame("Frame", nil, parent)
     row.Bar = row:CreateTexture(nil, "ARTWORK")
-    row.Bar:SetColorTexture(unpack(NOTICE_COLOR))
     row.Bar:SetWidth(NOTICE_BAR)
     row.Label = Widgets.Text(row, fonts.small)
     row.Label:SetPoint("TOPLEFT", NOTICE_INDENT, -8)
     row.Label:SetWordWrap(true)
-    row.Label:SetTextColor(unpack(NOTICE_COLOR))
     row.Bar:SetPoint("TOPLEFT", 0, -6)
     row.Bar:SetPoint("BOTTOMLEFT", 0, 4)
     row.Update = function()
@@ -430,6 +612,9 @@ rowTypes.notice = {
     return row
   end,
   setup = function(row, spec)
+    local color = colors[spec.tone or "notice"]
+    row.Bar:SetColorTexture(unpack(color))
+    row.Label:SetTextColor(unpack(color))
     row.Label:SetWidth(rowWidth - NOTICE_INDENT)
     row.Label:SetText(Markup(spec.label))
     local height = row.Label:GetStringHeight() + 14
@@ -479,6 +664,118 @@ rowTypes.hint = {
   end
 }
 
+-- One fade condition in a single line ({ index, label, detail, value, toggle,
+-- active, expanded, onClick }): priority, name, gray detail, alpha, switch.
+-- `active()` marks the condition that applies right now; a click on the row
+-- shows or hides its values (rows below with { indent }).
+rowTypes.condition = {
+  create = function(parent)
+    local row = CreateRowBase(parent)
+    row.Active = row:CreateTexture(nil, "BACKGROUND")
+    row.Active:SetPoint("TOPLEFT", -6, 0)
+    row.Active:SetPoint("BOTTOMRIGHT", 6, 0)
+    row.Active:SetColorTexture(colors.ok[1], colors.ok[2], colors.ok[3], 0.08)
+    row.ActiveBar = row:CreateTexture(nil, "ARTWORK")
+    row.ActiveBar:SetPoint("TOPLEFT", -6, 0)
+    row.ActiveBar:SetPoint("BOTTOMLEFT", -6, 0)
+    row.ActiveBar:SetWidth(2)
+    row.ActiveBar:SetColorTexture(unpack(colors.ok))
+
+    row.Number = CreateFrame("Frame", nil, row)
+    row.Number:SetSize(18, 18)
+    row.Number:SetPoint("LEFT", row, "TOPLEFT", 0, -ROW_HEIGHT / 2)
+    Widgets.Border(row.Number)
+    row.Number.Text = Widgets.Text(row.Number, fonts.dim, "CENTER")
+    row.Number.Text:SetAllPoints()
+    row.Number.Text:SetJustifyV("MIDDLE")
+
+    row.Label:ClearAllPoints()
+    row.Label:SetPoint("LEFT", row.Number, "RIGHT", 8, 0)
+    row.Label:SetJustifyV("MIDDLE")
+
+    row.Toggle = Widgets.CreateToggle(row)
+    row.Toggle:SetPoint("RIGHT", row, "TOPRIGHT", 0, -ROW_HEIGHT / 2)
+    Widgets.ForwardHover(row.Toggle, row)
+    row.Value = Widgets.Text(row, fonts.value, "RIGHT")
+    row.Value:SetPoint("RIGHT", row.Toggle, "LEFT", -10, 0)
+    row.Value:SetJustifyV("MIDDLE")
+
+    row.Hover = row:CreateTexture(nil, "BACKGROUND")
+    row.Hover:SetPoint("TOPLEFT", -6, 0)
+    row.Hover:SetPoint("BOTTOMRIGHT", 6, 0)
+    row.Hover:SetColorTexture(unpack(colors.hover))
+    row.Hover:Hide()
+    row.OnHoverChanged = function(self, hovered)
+      self.Hover:SetShown(hovered and self.spec.onClick ~= nil and not self.spec.disabled)
+    end
+
+    row:SetScript(
+      "OnClick",
+      function(self)
+        if self.spec.onClick and not self.spec.disabled then
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+          self.spec.onClick()
+        end
+      end
+    )
+    row:SetScript("OnUpdate", OnLiveUpdate)
+    row.Update = function(self)
+      local spec = self.spec
+      local on = not not spec.toggle.get()
+      self.Toggle:SetChecked(on)
+      local label = spec.label
+      local detail = on and Resolve(spec.detail)
+      if detail and detail ~= "" then
+        label = ("%s  |cff8f8f94· %s|r"):format(label, detail)
+      end
+      self.Label:SetText(label)
+      self.Label:SetTextColor(unpack(on and colors.text or colors.dim))
+      self.Value:SetText(on and Resolve(spec.value) or "")
+      local active = spec.active and spec.active() or false
+      self.Active:SetShown(active)
+      self.ActiveBar:SetShown(active)
+    end
+    return row
+  end,
+  setup = function(row, spec)
+    row.Number.Text:SetText(spec.index)
+    row.Toggle.onToggle = function(value)
+      Widgets.SafeCall(spec.toggle.set, value)
+      Render()
+    end
+    local height = SetupRow(row, spec, 32 + 50, ROW_HEIGHT)
+    row.Label:SetWidth(rowWidth - 26 - 32 - 50 - 16)
+    return height
+  end
+}
+
+-- What applies right now ({ get = function() return text end }), in a green box.
+rowTypes.live = {
+  create = function(parent)
+    local row = CreateFrame("Frame", nil, parent)
+    Widgets.Fill(row, {colors.ok[1], colors.ok[2], colors.ok[3], 0.06})
+    Widgets.Border(row, {colors.ok[1], colors.ok[2], colors.ok[3], 0.3})
+    row.Dot = row:CreateTexture(nil, "ARTWORK")
+    row.Dot:SetSize(6, 6)
+    row.Dot:SetPoint("LEFT", 10, 0)
+    row.Dot:SetColorTexture(unpack(colors.ok))
+    row.Label = Widgets.Text(row, fonts.small)
+    row.Label:SetPoint("LEFT", row.Dot, "RIGHT", 8, 0)
+    row.Label:SetPoint("RIGHT", -10, 0)
+    row.Label:SetJustifyV("MIDDLE")
+    row:SetScript("OnUpdate", OnLiveUpdate)
+    row.Update = function(self)
+      self.Label:SetText(Markup(self.spec.get() or ""))
+    end
+    return row
+  end,
+  setup = function(row)
+    row:SetSize(rowWidth, 26)
+    -- Gap above and below inside the card.
+    return 34
+  end
+}
+
 for _, rowType in pairs(rowTypes) do
   rowType.pool = Widgets.NewPool(rowType.create)
 end
@@ -520,22 +817,55 @@ local cardPool =
 
 local activeRows, activeCards = {}, {}
 
+local function UpdateReset(row)
+  if not row.Reset then
+    return
+  end
+  local spec = row.spec
+  row.Reset:SetShown(spec.reset ~= nil and not spec.disabled and spec.reset.changed() and true or false)
+  if row.Value and spec.reset then
+    row.Reset:ClearAllPoints()
+    row.Reset:SetPoint("TOPRIGHT", row, "TOPRIGHT", -(row.Value:GetStringWidth() + 8), -7)
+  end
+end
+
+-- Rows can be indented ({ indent }, e.g. values below a condition) and
+-- shown read-only ({ disabled }: dimmed, controls ignore the mouse).
 local function AddRow(card, spec, y)
   local rowType = rowTypes[spec.type]
   local row = Widgets.Acquire(rowType.pool, card)
   row.spec = spec
+  local indent = spec.indent or 0
+  rowWidth = rowWidth - indent
   local height = rowType.setup(row, spec)
-  row:SetPoint("TOPLEFT", CARD_PADDING, -y)
+  rowWidth = rowWidth + indent
+  row:SetPoint("TOPLEFT", CARD_PADDING + indent, -y)
+  row:SetAlpha(spec.disabled and 0.45 or 1)
+  if row.Control then
+    row.Control:EnableMouse(not spec.disabled)
+  end
+  if row.Toggle then
+    row.Toggle:EnableMouse(not spec.disabled)
+  end
+  if row.Highlight then
+    row.Highlight:SetShown(spec.highlight and true or false)
+  end
+  -- Left of the control; sliders place it next to their value (UpdateReset).
+  if row.Reset and spec.reset and row.Control and not row.Value then
+    row.Reset:ClearAllPoints()
+    row.Reset:SetPoint("RIGHT", row.Control, "LEFT", -8, 0)
+  end
   row:Update()
+  UpdateReset(row)
   activeRows[#activeRows + 1] = row
   return height
 end
 
 -- Builds a card at (left, top) of the content frame; returns its height.
-local function AddCard(spec, left, top)
+local function AddCard(spec, left, top, width)
   local card = Widgets.Acquire(cardPool, content)
   card.spec = spec
-  card:SetWidth(columnWidth)
+  card:SetWidth(width or columnWidth)
   card:SetPoint("TOPLEFT", left, -top)
   -- Room for the toggle switch on the right.
   card.Title:SetWidth(rowWidth - 48)
@@ -617,39 +947,82 @@ local function SortedPages()
   return list
 end
 
-local function Matches(card, query)
-  local function Has(text)
-    return type(text) == "string" and text:lower():find(query, 1, true)
-  end
-  if Has(card.title) or Has(card.note) or Has(card.tooltip) then
-    return true
-  end
-  for _, row in ipairs(card.rows or {}) do
-    if Has(row.label) or Has(row.tooltip) or Has(row.note) then
-      return true
-    end
-  end
-  return false
+local function Has(text, query)
+  return type(text) == "string" and text:lower():find(query, 1, true) ~= nil
 end
 
--- Cards of every searchable page that mention the query, tagged with the page.
+local function RowMatches(row, query)
+  return Has(row.label, query) or Has(row.tooltip, query) or Has(row.note, query)
+end
+
+-- Marks the query in a plain label; labels with color codes stay as they are.
+local MARK_COLOR = "|cffffd14d"
+
+local function MarkMatch(text, query)
+  if type(text) ~= "string" or text:find("|", 1, true) then
+    return text
+  end
+  local first, last = text:lower():find(query, 1, true)
+  if not first then
+    return text
+  end
+  return text:sub(1, first - 1) .. MARK_COLOR .. text:sub(first, last) .. "|r" .. text:sub(last + 1)
+end
+
+-- Matching settings of every searchable page. A card that matches in its
+-- rows shows only those rows (highlighted); a card that only matches in its
+-- title or description is shown whole. Each result links to its page.
 local function SearchPage()
   local query = state.search:lower()
-  local cards = {}
+  local cards, pageCount, settingCount = {}, 0, 0
   for _, page in ipairs(SortedPages()) do
     if page.searchable then
+      local found = false
       local _, _, pageCards = page.build()
       for _, card in ipairs(pageCards) do
-        if Matches(card, query) then
-          local label = page.section and (page.section .. " › " .. page.label) or page.label
-          card.note = card.note and card.note ~= "" and (label .. "  ·  " .. card.note) or label
+        local rows = {}
+        for _, row in ipairs(card.rows or {}) do
+          if row.label and RowMatches(row, query) then
+            row.highlight = true
+            row.indent = nil
+            row.label = MarkMatch(row.label, query)
+            rows[#rows + 1] = row
+          end
+        end
+        local headerMatch = Has(card.title, query) or Has(card.note, query) or Has(card.tooltip, query)
+        if #rows > 0 or headerMatch then
+          found = true
+          settingCount = settingCount + math.max(1, #rows)
+          if #rows > 0 then
+            card.rows = rows
+            card.hint = nil
+          end
           card.title = card.title or page.label
+          card.note = page.section and (page.section .. " › " .. page.label) or page.label
+          card.fullWidth = nil
+          card.rows = card.rows or {}
+          local pageId = page.id
+          card.rows[#card.rows + 1] = {
+            type = "nav",
+            label = "Open " .. page.label,
+            onClick = function()
+              Options:Navigate(pageId)
+            end
+          }
           cards[#cards + 1] = card
         end
       end
+      if found then
+        pageCount = pageCount + 1
+      end
     end
   end
-  local subtitle = #cards > 0 and ("%d found"):format(#cards) or ('Nothing matches "%s".'):format(state.search)
+  local subtitle
+  if #cards > 0 then
+    subtitle = ("%d %s on %d %s"):format(settingCount, settingCount == 1 and "match" or "matches", pageCount, pageCount == 1 and "page" or "pages")
+  else
+    subtitle = ('Nothing matches "%s".'):format(state.search)
+  end
   return "Search results", subtitle, cards
 end
 
@@ -759,21 +1132,54 @@ end
 -- Sidebar
 --------------------------------------------------------------------------------
 -- One entry per page; a page's `section` puts it under a small gray label.
+-- `page.status()` (module on/off) adds a dot, on the section label for pages
+-- in a section; `page.badge()` adds a small count on the right.
 
 local SIDEBAR_BUTTON_HEIGHT = 28
-local sidebarButtons = {}
+local DOT_SIZE = 6
+local sidebarButtons, sidebarSections = {}, {}
+
+local function SetDot(dot, on)
+  dot:SetColorTexture(unpack(on and colors.ok or colors.control))
+end
 
 local function UpdateSidebar()
   for _, button in ipairs(sidebarButtons) do
+    local page = pages[button.page]
     local selected = state.search == "" and state.page == button.page
     button.Selected:SetShown(selected)
     button.Marker:SetShown(selected)
     button.Label:SetTextColor(unpack(selected and colors.text or colors.muted))
+
+    local status
+    if page.status and not page.section then
+      status = page.status()
+      button.Dot:Show()
+      SetDot(button.Dot, status)
+    else
+      button.Dot:Hide()
+    end
+    local badge = page.badge and page.badge()
+    if page.status and not page.section and not status then
+      badge = "Off"
+    end
+    button.Badge:SetText(badge or "")
+  end
+  for _, section in ipairs(sidebarSections) do
+    if section.page.status then
+      section.Dot:Show()
+      SetDot(section.Dot, section.page.status())
+    else
+      section.Dot:Hide()
+    end
   end
 end
 
 local function SelectPage(page, detail)
   state.page, state.detail = page, detail
+  -- Opens there again next time, also after a reload.
+  local db = addon:GetGlobalProfileDB()
+  db.optionsPage, db.optionsDetail = page, detail
   if state.search ~= "" then
     state.search = ""
     searchBox:SetText("")
@@ -799,9 +1205,21 @@ local function AddSidebarButton(page, y)
   button.Marker:SetPoint("BOTTOMLEFT")
   button.Marker:SetWidth(2)
 
+  button.Dot = button:CreateTexture(nil, "ARTWORK")
+  button.Dot:SetSize(DOT_SIZE, DOT_SIZE)
+  button.Dot:SetPoint("LEFT", 12, 0)
+
+  button.Badge = Widgets.Text(button, fonts.dim, "RIGHT")
+  button.Badge:SetPoint("RIGHT", -8, 0)
+  button.Badge:SetJustifyV("MIDDLE")
+
   button.Label = Widgets.Text(button, fonts.body)
-  button.Label:SetPoint("LEFT", page.section and 20 or 12, 0)
-  button.Label:SetPoint("RIGHT", -8, 0)
+  local left = page.section and 20 or 12
+  if page.status and not page.section then
+    left = left + DOT_SIZE + 6
+  end
+  button.Label:SetPoint("LEFT", left, 0)
+  button.Label:SetPoint("RIGHT", button.Badge, "LEFT", -6, 0)
   button.Label:SetJustifyV("MIDDLE")
   button.Label:SetText(page.label)
 
@@ -827,10 +1245,16 @@ local function AddSidebarButton(page, y)
   sidebarButtons[#sidebarButtons + 1] = button
 end
 
-local function AddSidebarSection(label, y)
+-- The section's first page decides its dot.
+local function AddSidebarSection(label, page, y)
+  local section = {page = page}
+  section.Dot = sidebar:CreateTexture(nil, "ARTWORK")
+  section.Dot:SetSize(DOT_SIZE, DOT_SIZE)
+  section.Dot:SetPoint("TOPLEFT", 20, -(y + 10))
   local text = Widgets.Text(sidebar, fonts.dim)
-  text:SetPoint("TOPLEFT", 20, -(y + 8))
+  text:SetPoint("TOPLEFT", page.status and 20 + DOT_SIZE + 6 or 20, -(y + 8))
   text:SetText(label:upper())
+  sidebarSections[#sidebarSections + 1] = section
 end
 
 -- Returns the height the sidebar needs.
@@ -855,7 +1279,7 @@ local function CreateSidebar(parent)
         y = y + 8
       end
       if section then
-        AddSidebarSection(section, y)
+        AddSidebarSection(section, page, y)
         y = y + 24
       end
     end
@@ -871,7 +1295,7 @@ end
 
 local function CreateSearchBox(parent)
   searchBox = CreateFrame("EditBox", nil, parent)
-  searchBox:SetSize(220, 26)
+  searchBox:SetSize(180, 26)
   searchBox:SetAutoFocus(false)
   searchBox:SetFontObject(fonts.body)
   searchBox:SetTextInsets(10, 10, 0, 0)
@@ -943,6 +1367,43 @@ local function CreateIconButton(parent, lineSpecs, onClick)
   return button
 end
 
+-- Every setting belongs to the active profile, so it is always in view; a
+-- click opens the profile page.
+local function CreateProfileButton(parent)
+  profileButton = CreateFrame("Button", nil, parent)
+  profileButton:SetHeight(26)
+  profileButton.Background = Widgets.Fill(profileButton, colors.window)
+  Widgets.Border(profileButton)
+  profileButton.Text = Widgets.Text(profileButton, fonts.small)
+  profileButton.Text:SetPoint("LEFT", 10, 0)
+  profileButton.Text:SetJustifyV("MIDDLE")
+  profileButton.Update = function(self)
+    self.Text:SetText(("Profile: |cffffffff%s|r"):format(addon.db:GetCurrentProfile()))
+    self:SetWidth(math.min(160, self.Text:GetUnboundedStringWidth() + 20))
+    self.Text:SetWidth(self:GetWidth() - 20)
+  end
+  profileButton:SetScript(
+    "OnClick",
+    function()
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      SelectPage("profiles")
+    end
+  )
+  profileButton:SetScript(
+    "OnEnter",
+    function(self)
+      self.Background:SetColorTexture(unpack(colors.controlHover))
+    end
+  )
+  profileButton:SetScript(
+    "OnLeave",
+    function(self)
+      self.Background:SetColorTexture(unpack(colors.window))
+    end
+  )
+  return profileButton
+end
+
 local function CreateHeader(parent)
   local header = CreateFrame("Frame", nil, parent)
   header:SetPoint("TOPLEFT")
@@ -987,6 +1448,7 @@ local function CreateHeader(parent)
   )
   close:SetPoint("RIGHT", -PADDING + 4, 0)
   CreateSearchBox(header):SetPoint("RIGHT", close, "LEFT", -10, 0)
+  CreateProfileButton(header):SetPoint("RIGHT", searchBox, "LEFT", -10, 0)
 
   local edge = header:CreateTexture(nil, "BORDER")
   edge:SetColorTexture(unpack(colors.border))
@@ -1031,29 +1493,46 @@ Render = function()
   local title, subtitle, cards = GetPage()
   UpdateTitle(title, subtitle)
 
+  -- Cards with { fullWidth } (e.g. filters) span all columns above the others.
+  local top = 0
+  for _, card in ipairs(cards) do
+    if card.fullWidth then
+      local width = content:GetWidth()
+      local columnRowWidth = rowWidth
+      rowWidth = width - 2 * CARD_PADDING
+      top = top + AddCard(card, 0, top, width) + CARD_GAP
+      rowWidth = columnRowWidth
+    end
+  end
+
   local columns = {}
   for i = 1, columnCount do
-    columns[i] = 0
+    columns[i] = top
   end
   for _, card in ipairs(cards) do
-    local column = 1
+    if not card.fullWidth then
+      local column = 1
     for i = 2, columnCount do
       if columns[i] < columns[column] then
         column = i
       end
     end
-    local left = (column - 1) * (columnWidth + CARD_GAP)
-    columns[column] = columns[column] + AddCard(card, left, columns[column]) + CARD_GAP
+      local left = (column - 1) * (columnWidth + CARD_GAP)
+      columns[column] = columns[column] + AddCard(card, left, columns[column]) + CARD_GAP
+    end
   end
   content:SetHeight(math.max(1, math.max(unpack(columns)) - CARD_GAP))
   scroll:UpdateScrollChildRect()
   SetScroll(offset)
   UpdateSidebar()
+  profileButton:Update()
 end
 
 RefreshValues = function()
+  UpdateSidebar()
   for _, row in ipairs(activeRows) do
     row:Update()
+    UpdateReset(row)
   end
   for _, card in ipairs(activeCards) do
     if card.spec.toggle then
@@ -1142,6 +1621,10 @@ local function CreateWindow()
   tinsert(UISpecialFrames, frame:GetName())
 
   CreateHeader(frame)
+  local saved = addon:GetGlobalProfileDB()
+  if saved.optionsPage and pages[saved.optionsPage] then
+    state.page, state.detail = saved.optionsPage, saved.optionsDetail
+  end
   -- Never shorter than the sidebar's page list.
   local minHeight = math.max(MIN_HEIGHT, HEADER_HEIGHT + CreateSidebar(frame))
   local db = addon:GetGlobalProfileDB()
@@ -1225,7 +1708,13 @@ end
 -- API
 --------------------------------------------------------------------------------
 
--- page = { id, label, order, section, searchable, build = function(detail) return title, subtitle, cards end }
+-- While searching, pages build every row (e.g. values that are folded away).
+function Options:IsSearching()
+  return state.search ~= ""
+end
+
+-- page = { id, label, order, section, searchable, status, badge,
+--          build = function(detail) return title, subtitle, cards end }
 function Options:RegisterPage(page)
   pages[page.id] = page
 end

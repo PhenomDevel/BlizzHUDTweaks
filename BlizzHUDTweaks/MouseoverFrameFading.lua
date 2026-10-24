@@ -145,6 +145,8 @@ local function neighborhoodFadeActive(globalOptions, frameOptions)
   end
 end
 
+-- Returns the alpha and the key of the condition that set it (nil when no
+-- condition applies and the frame is shown at full alpha).
 local function determineTargetAlpha(globalOptions, frameOptions)
   local inCombat = BlizzHUDTweaks.inCombat
   local isResting = BlizzHUDTweaks.isResting
@@ -152,30 +154,46 @@ local function determineTargetAlpha(globalOptions, frameOptions)
   local hasTarget = BlizzHUDTweaks.hasTarget
   local hasBonusActionBar = addon:IsMounted() and HasBonusActionBar()
 
-  local alpha
+  local alpha, condition
 
   if hasBonusActionBar and vehicleFadeActive(globalOptions, frameOptions) then
-    alpha = vehicleAlphaValue(globalOptions, frameOptions)
+    alpha, condition = vehicleAlphaValue(globalOptions, frameOptions), "FadeVehicle"
   elseif inCombat and inCombatFadeActive(globalOptions, frameOptions) then
-    alpha = inCombatAlphaValue(globalOptions, frameOptions)
+    alpha, condition = inCombatAlphaValue(globalOptions, frameOptions), "FadeInCombat"
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
-    alpha = treatTargetAsCombatAlphaValue(globalOptions, frameOptions)
+    alpha, condition = treatTargetAsCombatAlphaValue(globalOptions, frameOptions), "TreatTargetLikeInCombat"
   elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then
-    alpha = neighborhoodAlphaValue(globalOptions, frameOptions)
+    alpha, condition = neighborhoodAlphaValue(globalOptions, frameOptions), "FadeInNeighborhood"
   elseif select(2, EventHandler:GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then
-    alpha = instancedAreaAlphaValue(globalOptions, frameOptions)
+    alpha, condition = instancedAreaAlphaValue(globalOptions, frameOptions), "FadeInInstancedArea"
   elseif isResting and restedAreaFadeActive(globalOptions, frameOptions) then
-    alpha = restedAreaAlphaValue(globalOptions, frameOptions)
+    alpha, condition = restedAreaAlphaValue(globalOptions, frameOptions), "FadeInRestedArea"
   else
     alpha = outOfCombatAlphaValue(globalOptions, frameOptions)
+    if alpha then
+      condition = "FadeOutOfCombat"
+    end
   end
 
   if not alpha then
     -- Always fallback to 1 if nothing else did match
-    alpha = 1
+    alpha, condition = 1, nil
   end
 
-  return alpha
+  return alpha, condition
+end
+
+-- For the options: the condition that currently sets the alpha of a frame
+-- (or of the global settings) and that alpha, ignoring mouseover.
+function MouseoverFrameFading:GetActiveCondition(frameName)
+  local profile = addon:GetProfileDB()
+  local globalOptions = profile["*Global*"]
+  local frameOptions = profile[frameName]
+  if not globalOptions or not frameOptions then
+    return nil, 1
+  end
+  local alpha, condition = determineTargetAlpha(globalOptions, frameOptions)
+  return condition, alpha
 end
 
 local function determineFadeDelay(globalOptions, frameOptions)
@@ -597,6 +615,9 @@ function MouseoverFrameFading:Toggle()
     profile["GlobalOptionsMouseoverFrameFadingEnabled"] = true
     MouseoverFrameFading:Enable()
   end
+  -- The toggle (keybind, minimap icon) has no other visible feedback.
+  local state = MouseoverFrameFading:IsEnabled() and "|cff8fe3a8on|r" or "|cff8f8f94off|r"
+  BlizzHUDTweaks.Toast:Show("Frame Fading " .. state, profile["GlobalOptionsMouseoverFrameFadingToggleKeybind"])
   --@debug@
   addon:Print("Toggle Module", addon:ColoredString("MouseoverFrameFading", "fcba03"))
   --@end-debug@

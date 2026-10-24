@@ -17,6 +17,7 @@ Widgets.BRAND_HEX = "69ccf0"
 
 local accent = CreateColorFromHexString("ff" .. Widgets.ACCENT_HEX)
 local ACCENT = {accent:GetRGB()}
+Widgets.brand = {CreateColorFromHexString("ff" .. Widgets.BRAND_HEX):GetRGB()}
 
 -- All surfaces are opaque; text colors keep at least ~4.5:1 contrast on the
 -- card background (dim text is for hints and placeholders only).
@@ -35,7 +36,11 @@ local colors = {
   tooltipBorder = {1, 1, 1, 0.22},
   text = {0.95, 0.95, 0.95, 1},
   muted = {0.72, 0.72, 0.74, 1},
-  dim = {0.56, 0.56, 0.58, 1}
+  dim = {0.56, 0.56, 0.58, 1},
+  -- States: hints and warnings, success, destructive actions.
+  notice = {1, 0.82, 0.3, 1},
+  ok = {0.56, 0.89, 0.66, 1},
+  danger = {0.9, 0.38, 0.3, 1}
 }
 Widgets.colors = colors
 
@@ -426,15 +431,19 @@ end
 
 -- Button ----------------------------------------------------------------------
 
+-- Danger buttons (reset, delete) are red instead of the accent color.
+local DANGER = colors.danger
+
 local function SetButtonHovered(button, hovered)
-  button.Background:SetColorTexture(ACCENT[1], ACCENT[2], ACCENT[3], hovered and 0.4 or 0.22)
+  local color = button.danger and DANGER or ACCENT
+  button.Background:SetColorTexture(color[1], color[2], color[3], hovered and 0.4 or 0.22)
 end
 
 function Widgets.CreateButton(parent)
   local button = CreateFrame("Button", nil, parent)
   button:SetHeight(22)
   button.Background = Widgets.Fill(button, colors.control)
-  Widgets.Border(button, {ACCENT[1], ACCENT[2], ACCENT[3], 0.9})
+  button.Edges = Widgets.Border(button, {ACCENT[1], ACCENT[2], ACCENT[3], 0.9})
   button.Text = Widgets.Text(button, fonts.value, "CENTER")
   button.Text:SetPoint("LEFT", 10, 0)
   button.Text:SetPoint("RIGHT", -10, 0)
@@ -442,6 +451,12 @@ function Widgets.CreateButton(parent)
   button.SetLabel = function(self, text)
     self.Text:SetText(text)
     self:SetWidth(math.max(90, self.Text:GetUnboundedStringWidth() + 24))
+  end
+  button.SetDanger = function(self, danger)
+    self.danger = danger
+    local color = danger and DANGER or ACCENT
+    Widgets.SetBorderColor(self.Edges, {color[1], color[2], color[3], 0.9})
+    SetButtonHovered(self, false)
   end
   button:SetScript(
     "OnEnter",
@@ -626,7 +641,8 @@ local function CreateConfirm()
   Widgets.Fill(confirm, {0, 0, 0, 0.6})
 
   local box = CreateFrame("Frame", nil, confirm)
-  box:SetSize(360, 124)
+  box:SetWidth(360)
+  confirm.Box = box
   box:SetPoint("CENTER")
   Widgets.Fill(box, colors.card)
   Widgets.Border(box, colors.tooltipBorder)
@@ -636,7 +652,9 @@ local function CreateConfirm()
   confirm.Text:SetPoint("TOPRIGHT", -20, -24)
   confirm.Text:SetWordWrap(true)
 
+  -- Only destructive actions ask, so the accept button is always red.
   confirm.Accept = Widgets.CreateButton(box)
+  confirm.Accept:SetDanger(true)
   confirm.Accept:SetPoint("BOTTOMRIGHT", box, "BOTTOM", -6, 20)
   confirm.Accept:SetScript(
     "OnClick",
@@ -677,6 +695,8 @@ function Widgets.Confirm(window, text, acceptLabel, onAccept)
   confirm:SetAllPoints(window)
   confirm:SetFrameLevel(window:GetFrameLevel() + 100)
   confirm.Text:SetText(Markup(text))
+  -- Grows with the text: padding, text, gap, buttons, padding.
+  confirm.Box:SetHeight(24 + confirm.Text:GetStringHeight() + 22 + 22 + 20)
   confirm.Accept:SetLabel(acceptLabel)
   confirm.onAccept = onAccept
   confirm:Show()

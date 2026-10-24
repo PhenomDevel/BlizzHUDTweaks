@@ -7,6 +7,8 @@ local LibDeflate = LibStub("LibDeflate")
 local importString = ""
 local importProfileName = ""
 local exportString = ""
+-- Result of the last import attempt, shown below the import string.
+local importError
 
 -------------------------------------------------------------------------------
 -- Public API
@@ -29,25 +31,41 @@ local function serialize(t)
   return LibDeflate:EncodeForPrint(compressed)
 end
 
+-- Returns the profile table, or nil and the reason the string is not usable.
 local function deserialize(s)
-  if s and s ~= "" then
-    local decoded = LibDeflate:DecodeForPrint(s)
-    if decoded then
-      local decompressed = LibDeflate:DecompressDeflate(decoded)
+  s = s and strtrim(s) or ""
+  if s == "" then
+    return nil, "Paste an export string first."
+  end
+  local decoded = LibDeflate:DecodeForPrint(s)
+  if not decoded then
+    return nil, "This is not an export string of BlizzHUDTweaks."
+  end
+  local decompressed = LibDeflate:DecompressDeflate(decoded)
+  if not decompressed then
+    return nil, "The string is incomplete. Copy the whole export string again."
+  end
+  local worked, t = AceSerializer:Deserialize(decompressed)
+  if not worked or type(t) ~= "table" then
+    return nil, "The string could not be read. Copy the whole export string again."
+  end
+  return t
+end
 
-      if decompressed then
-        local worked, t = AceSerializer:Deserialize(decompressed)
-
-        return worked, t
-      else
-        addon:Print("String could not be decompressed. Aborting import.")
-      end
-    else
-      addon:Print("String could not be decoded. Aborting import.")
+-- Checks an import string without importing it. Returns the profile table
+-- and the number of frames with settings, or nil and the reason.
+function Profiles:CheckImportString(s)
+  local profileData, reason = deserialize(s)
+  if not profileData then
+    return nil, reason
+  end
+  local frames = 0
+  for _, value in pairs(profileData) do
+    if type(value) == "table" and value.displayName then
+      frames = frames + 1
     end
   end
-
-  return nil
+  return profileData, frames
 end
 
 function Profiles:ExportProfile()
@@ -55,15 +73,15 @@ function Profiles:ExportProfile()
   return serialize(profile)
 end
 
+-- Returns true and the profile name, or false and the reason.
 function Profiles:ImportProfile(s, profileName)
-  if not s or s == "" then
-    addon:Print("Import string is empty")
-    return false
+  local profileData, reason = deserialize(s)
+  if not profileData then
+    return false, reason
   end
 
-  local _, profileData = deserialize(s)
-
-  if not profileName or profileName == "" then
+  profileName = profileName and strtrim(profileName) or ""
+  if profileName == "" then
     profileName = "Imported - " .. date("%Y-%m-%d %H:%M:%S")
   end
 
@@ -74,12 +92,14 @@ function Profiles:ImportProfile(s, profileName)
 
   addon:Print("Successfully imported profile as '" .. profileName .. "'")
   addon:LoadProfile()
+  return true, profileName
 end
 
 function Profiles:ClearInputs()
   importString = ""
   exportString = ""
   importProfileName = ""
+  importError = nil
 end
 
 -------------------------------------------------------------------------------
@@ -121,9 +141,10 @@ end
 
 local function getProfileCard()
   local db = addon.db
+  local current = db:GetCurrentProfile()
   return {
     title = "Profiles",
-    note = "Active profile: |cffffffff" .. db:GetCurrentProfile() .. "|r",
+    note = "All settings in this window belong to the active profile.",
     tooltip = "Every profile has its own set of settings. Characters can share a profile or use their own.",
     rows = {
       {
@@ -156,12 +177,12 @@ local function getProfileCard()
           end
         end
       },
+      {type = "header", label = ('Overwrites "%s"'):format(current), danger = true},
       {
         type = "dropdown",
         label = "Copy From",
-        tooltip = "Copies the settings of another profile into the active profile.",
+        tooltip = "Copies the settings of another profile into the active profile. The current settings of the active profile are lost.",
         placeholder = "Select a profile",
-        layout = true,
         values = function()
           return getProfileEntries(false, false)
         end,
@@ -169,7 +190,31 @@ local function getProfileCard()
           return nil
         end,
         set = function(value)
-          db:CopyProfile(value)
+          Options:Confirm(
+            ('Copy all settings of "%s" into "%s"?\nThe current settings of "%s" are lost.'):format(value, current, current),
+            "Copy",
+            function()
+              db:CopyProfile(value)
+              Options:Refresh()
+            end
+          )
+        end
+      },
+      {
+        type = "button",
+        label = "Reset to defaults",
+        tooltip = "Resets the active profile to the default settings.",
+        buttonText = "Reset",
+        danger = true,
+        onClick = function()
+          Options:Confirm(
+            ('Reset "%s" to the default settings?\nCustom frames, links and all other settings of this profile are lost.'):format(current),
+            "Reset",
+            function()
+              db:ResetProfile()
+              Options:Refresh()
+            end
+          )
         end
       },
       {
@@ -193,96 +238,100 @@ local function getProfileCard()
             end
           )
         end
-      },
-      {
-        type = "button",
-        label = "Reset Profile",
-        tooltip = "Resets the active profile to the default settings.",
-        buttonText = "Reset",
-        layout = true,
-        onClick = function()
-          db:ResetProfile()
-        end
       }
     }
   }
 end
 
+-- What the pasted string contains, or why it can not be imported.
+local function getImportStatusRow()
+  if importError then
+    return {type = "notice", tone = "danger", label = importError}
+  end
+  if not importString or strtrim(importString) == "" then
+    return nil
+  end
+  local profileData, result = Profiles:CheckImportString(importString)
+  if not profileData then
+    return {type = "notice", tone = "danger", label = result}
+  end
+  return {type = "notice", tone = "ok", label = ("Valid export string with settings for %d frames."):format(result)}
+end
+
 local function getImportCard()
+  local rows = {
+    {
+      type = "textarea",
+      label = "Import String",
+      tooltip = "Paste an export string here. It is checked right away.",
+      placeholder = "Paste the export string here",
+      height = 90,
+      layout = true,
+      get = function()
+        return importString or ""
+      end,
+      set = function(value)
+        importString = value
+        importError = nil
+      end
+    }
+  }
+  rows[#rows + 1] = getImportStatusRow()
+  rows[#rows + 1] = {
+    type = "text",
+    label = "Profile Name",
+    note = "Optional. Leave empty for a name with the current date.",
+    tooltip = "Name for the imported profile. An existing profile with this name is overwritten.",
+    placeholder = "Imported - date",
+    get = function()
+      return importProfileName or ""
+    end,
+    set = function(value)
+      importProfileName = value
+    end
+  }
+  rows[#rows + 1] = {
+    type = "button",
+    label = "Import Profile",
+    tooltip = "Creates the profile from the string above and switches to it.",
+    buttonText = "Import",
+    layout = true,
+    onClick = function()
+      local success, result = Profiles:ImportProfile(importString, importProfileName)
+      if success then
+        importString, importProfileName, importError = "", "", nil
+        exportString = ""
+      else
+        importError = result
+      end
+    end
+  }
   return {
     title = "Import",
     note = "Adds a profile from an export string and switches to it.",
-    rows = {
-      {
-        type = "text",
-        label = "Profile Name (Optional)",
-        tooltip = "Name for the imported profile. Leave empty for auto-generated name.",
-        get = function()
-          return importProfileName or ""
-        end,
-        set = function(value)
-          importProfileName = value
-        end
-      },
-      {
-        type = "textarea",
-        label = "Import String",
-        tooltip = "Paste the export string here",
-        placeholder = "Paste the export string here",
-        height = 90,
-        get = function()
-          return importString or ""
-        end,
-        set = function(value)
-          importString = value
-        end
-      },
-      {
-        type = "button",
-        label = "Import Profile",
-        tooltip = "Click to import the profile from the string above",
-        buttonText = "Import",
-        layout = true,
-        onClick = function()
-          if importString and importString ~= "" then
-            local success = Profiles:ImportProfile(importString, importProfileName)
-            if success then
-              importString = ""
-              exportString = ""
-              importProfileName = ""
-            end
-          else
-            addon:Print("Please paste an import string first")
-          end
-        end
-      }
-    }
+    rows = rows
   }
 end
 
 local function getExportCard()
   return {
     title = "Export",
-    note = "Turns the active profile into a string you can share.",
+    note = "The active profile as a string you can share.",
     rows = {
-      {
-        type = "button",
-        label = "Generate Export String",
-        tooltip = "Click to generate an export string for your current profile",
-        buttonText = "Generate",
-        onClick = function()
-          exportString = Profiles:ExportProfile()
-        end
-      },
       {
         type = "textarea",
         label = "Export String",
-        tooltip = "Copy this string to share your profile",
-        placeholder = "Click 'Generate' above to create an export string",
+        note = "Click the text to select it, then press Ctrl+C to copy.",
+        tooltip = "Copy this string to share your profile. It always shows the current settings.",
         height = 90,
         readOnly = true,
         get = function()
-          return exportString or ""
+          -- Built on demand: the page clears it on every build, so it never
+          -- shows settings from before a change.
+          if exportString == "" then
+            exportString = Profiles:ExportProfile()
+          end
+          return exportString
         end,
         set = function()
         end
@@ -298,6 +347,7 @@ Options:RegisterPage(
     order = 50,
     searchable = true,
     build = function()
+      exportString = ""
       return "Profiles", "Manage, share and import settings", {getProfileCard(), getImportCard(), getExportCard()}
     end
   }

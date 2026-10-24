@@ -46,6 +46,9 @@ EventHandler.lua
 
 # Options window (widgets and window first, then the pages)
 Options/Widgets.lua
+Toast.lua
+WhatsNewNotes.lua
+WhatsNew.lua
 FramePicker.lua
 Options/Window.lua
 Options.lua
