@@ -447,10 +447,55 @@ local function getMouseoverCard(frameName, readOnly)
   }
 end
 
+-- Update interval presets; any other value shows as "Custom".
+local intervalPresets = {
+  {value = 0.1, label = "Responsive (0.1 s)"},
+  {value = 0.2, label = "Balanced (0.2 s)"},
+  {value = 0.5, label = "Light (0.5 s)"}
+}
+
 local function getPerformanceCard(frameName)
+  local function getInterval()
+    return MouseoverFrameFading:GetUpdateTickerValue(Info("UpdateInterval", frameName))
+  end
   return {
     title = "Performance",
     rows = {
+      {
+        type = "dropdown",
+        label = "Mouseover checks",
+        tooltip = "How often the addon checks whether the mouse is over a frame. Shorter intervals react faster and cost more CPU.",
+        values = function()
+          local values = {}
+          for _, preset in ipairs(intervalPresets) do
+            values[#values + 1] = preset
+          end
+          local current = getInterval()
+          local isPreset = false
+          for _, preset in ipairs(intervalPresets) do
+            if math.abs(preset.value - current) < 0.001 then
+              isPreset = true
+            end
+          end
+          if not isPreset then
+            values[#values + 1] = {value = current, label = ("Custom (%.2f s)"):format(current)}
+          end
+          return values
+        end,
+        layout = true,
+        get = function()
+          local current = getInterval()
+          for _, preset in ipairs(intervalPresets) do
+            if math.abs(preset.value - current) < 0.001 then
+              return preset.value
+            end
+          end
+          return current
+        end,
+        set = function(value)
+          MouseoverFrameFading:SetUpdateTickerValue(Info("UpdateInterval", frameName), value)
+        end
+      },
       {
         type = "slider",
         label = "Update Interval",
@@ -460,17 +505,14 @@ local function getPerformanceCard(frameName)
         max = 1,
         step = 0.01,
         format = secondsFormat(2),
-        get = function()
-          return MouseoverFrameFading:GetUpdateTickerValue(Info("UpdateInterval", frameName))
-        end,
+        get = getInterval,
         set = function(value)
           MouseoverFrameFading:SetUpdateTickerValue(Info("UpdateInterval", frameName), value)
         end
       },
       {
         type = "notice",
-        label = "Caution: If the value is decreased, the CPU load increases exponentially. Recommended value is 0.2. " ..
-          "If you decrease this value and experience any FPS drops, please consider increasing the value again."
+        label = "Values below 0.1 s raise the CPU load a lot. If you notice FPS drops, choose {Balanced} again."
       }
     }
   }
@@ -889,14 +931,29 @@ local function resetAllFrameLinks(profile, frameTable)
   end
 end
 
-local function getLinkCount(frameName)
-  local count = 0
-  for _, linked in pairs(addon:GetProfileDB()[frameName .. "LinkedFrames"] or {}) do
-    if linked then
-      count = count + 1
+-- "Action Bar 1, Action Bar 2 +3" for the links overview.
+local LINK_NAMES_SHOWN = 2
+
+local function getLinkSummary(frameName)
+  local names = {}
+  for linkedName, linked in pairs(addon:GetProfileDB()[frameName .. "LinkedFrames"] or {}) do
+    if linked and linkedName ~= frameName and type(addon:GetProfileDB()[linkedName]) == "table" then
+      names[#names + 1] = getDisplayName(linkedName)
     end
   end
-  return count
+  if #names == 0 then
+    return OFF_COLOR .. "None|r"
+  end
+  table.sort(names)
+  local shown = {}
+  for i = 1, math.min(LINK_NAMES_SHOWN, #names) do
+    shown[i] = names[i]
+  end
+  local text = table.concat(shown, ", ")
+  if #names > LINK_NAMES_SHOWN then
+    text = text .. "  +" .. (#names - LINK_NAMES_SHOWN)
+  end
+  return CUSTOM_COLOR .. text .. "|r"
 end
 
 local linksDescription =
@@ -929,12 +986,9 @@ local function getLinksOverview()
         label = getDisplayName(frameName),
         tooltip = getFrameDescription(frameName),
         value = function()
-          local count = getLinkCount(frameName)
-          if count == 0 then
-            return OFF_COLOR .. "None|r"
-          end
-          return CUSTOM_COLOR .. count .. (count == 1 and " link" or " links") .. "|r"
+          return getLinkSummary(frameName)
         end,
+        valueWidth = 190,
         onClick = function()
           Options:Navigate("fading-links", frameName)
         end

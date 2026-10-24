@@ -383,7 +383,7 @@ rowTypes.textarea = {
 }
 
 -- Link to another page or a detail view ({ onClick, value, toggle = { get, set },
--- pill, meter, dim }): label, optional status text, optional switch and a
+-- pill, meter, dim, valueWidth }): label, optional status text, optional switch and a
 -- chevron. The whole row is clickable; the switch keeps its own click.
 --   pill()  -> text, color      small tag, e.g. "Own" / "Global"
 --   meter() -> 0..1 or nil      alpha bar with percent, updated live
@@ -475,7 +475,10 @@ rowTypes.nav = {
     return row
   end,
   setup = function(row, spec)
-    local controlWidth = NAV_CHEVRON + 70
+    -- { valueWidth } for longer status texts (cut off with "...").
+    local valueWidth = spec.valueWidth or 70
+    local controlWidth = NAV_CHEVRON + valueWidth
+    row.Value:SetWidth(valueWidth - 8)
     row.Value:ClearAllPoints()
     row.Pill:ClearAllPoints()
     row.Meter:ClearAllPoints()
@@ -1175,6 +1178,9 @@ end
 
 local function SelectPage(page, detail)
   state.page, state.detail = page, detail
+  -- Opens there again next time, also after a reload.
+  local db = addon:GetGlobalProfileDB()
+  db.optionsPage, db.optionsDetail = page, detail
   if state.search ~= "" then
     state.search = ""
     searchBox:SetText("")
@@ -1616,6 +1622,10 @@ local function CreateWindow()
   tinsert(UISpecialFrames, frame:GetName())
 
   CreateHeader(frame)
+  local saved = addon:GetGlobalProfileDB()
+  if saved.optionsPage and pages[saved.optionsPage] then
+    state.page, state.detail = saved.optionsPage, saved.optionsDetail
+  end
   -- Never shorter than the sidebar's page list.
   local minHeight = math.max(MIN_HEIGHT, HEADER_HEIGHT + CreateSidebar(frame))
   local db = addon:GetGlobalProfileDB()
