@@ -574,7 +574,8 @@ local function getConditionsCard(frameName, readOnly, liveFrame)
     if isConditionAvailable(condition) then
       index = index + 1
       local key = condition.key
-      local expanded = not readOnly and expandedCondition[frameName] == key
+      local searching = Options:IsSearching()
+      local expanded = not readOnly and (searching or expandedCondition[frameName] == key)
       rows[#rows + 1] = {
         type = "condition",
         index = index,
@@ -610,6 +611,10 @@ local function getConditionsCard(frameName, readOnly, liveFrame)
       }
       if expanded and frameOptions[key] then
         for _, row in ipairs(getConditionValueRows(frameName, condition, readOnly)) do
+          -- Search results list the row alone, so it names its condition.
+          if searching then
+            row.note = condition.label
+          end
           rows[#rows + 1] = row
         end
       end

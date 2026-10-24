@@ -894,39 +894,82 @@ local function SortedPages()
   return list
 end
 
-local function Matches(card, query)
-  local function Has(text)
-    return type(text) == "string" and text:lower():find(query, 1, true)
-  end
-  if Has(card.title) or Has(card.note) or Has(card.tooltip) then
-    return true
-  end
-  for _, row in ipairs(card.rows or {}) do
-    if Has(row.label) or Has(row.tooltip) or Has(row.note) then
-      return true
-    end
-  end
-  return false
+local function Has(text, query)
+  return type(text) == "string" and text:lower():find(query, 1, true) ~= nil
 end
 
--- Cards of every searchable page that mention the query, tagged with the page.
+local function RowMatches(row, query)
+  return Has(row.label, query) or Has(row.tooltip, query) or Has(row.note, query)
+end
+
+-- Marks the query in a plain label; labels with color codes stay as they are.
+local MARK_COLOR = "|cffffd14d"
+
+local function MarkMatch(text, query)
+  if type(text) ~= "string" or text:find("|", 1, true) then
+    return text
+  end
+  local first, last = text:lower():find(query, 1, true)
+  if not first then
+    return text
+  end
+  return text:sub(1, first - 1) .. MARK_COLOR .. text:sub(first, last) .. "|r" .. text:sub(last + 1)
+end
+
+-- Matching settings of every searchable page. A card that matches in its
+-- rows shows only those rows (highlighted); a card that only matches in its
+-- title or description is shown whole. Each result links to its page.
 local function SearchPage()
   local query = state.search:lower()
-  local cards = {}
+  local cards, pageCount, settingCount = {}, 0, 0
   for _, page in ipairs(SortedPages()) do
     if page.searchable then
+      local found = false
       local _, _, pageCards = page.build()
       for _, card in ipairs(pageCards) do
-        if Matches(card, query) then
-          local label = page.section and (page.section .. " › " .. page.label) or page.label
-          card.note = card.note and card.note ~= "" and (label .. "  ·  " .. card.note) or label
+        local rows = {}
+        for _, row in ipairs(card.rows or {}) do
+          if row.label and RowMatches(row, query) then
+            row.highlight = true
+            row.indent = nil
+            row.label = MarkMatch(row.label, query)
+            rows[#rows + 1] = row
+          end
+        end
+        local headerMatch = Has(card.title, query) or Has(card.note, query) or Has(card.tooltip, query)
+        if #rows > 0 or headerMatch then
+          found = true
+          settingCount = settingCount + math.max(1, #rows)
+          if #rows > 0 then
+            card.rows = rows
+            card.hint = nil
+          end
           card.title = card.title or page.label
+          card.note = page.section and (page.section .. " › " .. page.label) or page.label
+          card.fullWidth = nil
+          card.rows = card.rows or {}
+          local pageId = page.id
+          card.rows[#card.rows + 1] = {
+            type = "nav",
+            label = "Open " .. page.label,
+            onClick = function()
+              Options:Navigate(pageId)
+            end
+          }
           cards[#cards + 1] = card
         end
       end
+      if found then
+        pageCount = pageCount + 1
+      end
     end
   end
-  local subtitle = #cards > 0 and ("%d found"):format(#cards) or ('Nothing matches "%s".'):format(state.search)
+  local subtitle
+  if #cards > 0 then
+    subtitle = ("%d %s on %d %s"):format(settingCount, settingCount == 1 and "match" or "matches", pageCount, pageCount == 1 and "page" or "pages")
+  else
+    subtitle = ('Nothing matches "%s".'):format(state.search)
+  end
   return "Search results", subtitle, cards
 end
 
@@ -1604,7 +1647,13 @@ end
 -- API
 --------------------------------------------------------------------------------
 
--- page = { id, label, order, section, searchable, build = function(detail) return title, subtitle, cards end }
+-- While searching, pages build every row (e.g. values that are folded away).
+function Options:IsSearching()
+  return state.search ~= ""
+end
+
+-- page = { id, label, order, section, searchable, status, badge,
+--          build = function(detail) return title, subtitle, cards end }
 function Options:RegisterPage(page)
   pages[page.id] = page
 end
