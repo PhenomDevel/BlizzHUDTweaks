@@ -168,7 +168,6 @@ local function OnLiveUpdate(row, elapsed)
   end
 end
 
-
 -- On/off switch.
 rowTypes.checkbox = {
   create = function(parent)
