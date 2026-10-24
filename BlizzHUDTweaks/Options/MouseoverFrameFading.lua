@@ -235,6 +235,8 @@ end
 -------------------------------------------------------------------------------
 -- Frame settings (one frame or the global settings)
 
+local targetTypes = {{value = "friendly", label = "Friendly"}, {value = "hostile", label = "Hostile"}, {value = "both", label = "Both"}}
+
 -- Fade conditions in the order they are checked.
 local conditions = {
   {
@@ -365,11 +367,26 @@ local function getFrameCard(frameName)
 
   if frameOptions.UseGlobalOptions then
     rows[#rows + 1] = {
+      type = "notice",
+      label = "This frame uses the global settings. The cards below show them read-only."
+    }
+    rows[#rows + 1] = {
       type = "nav",
       label = "Edit Global Settings",
-      tooltip = "The values below come from the global settings while {Use global options} is on.",
+      tooltip = "Changes there apply to every frame with {Use global options} turned on.",
       onClick = function()
         Options:Navigate("fading-global")
+      end
+    }
+    rows[#rows + 1] = {
+      type = "button",
+      label = "Use own settings",
+      tooltip = "Turns off {Use global options} and starts with a copy of the global values for this frame.",
+      buttonText = "Override",
+      layout = true,
+      onClick = function()
+        MouseoverFrameFading:CopyFrom(Info("CopyFrom", frameName), "Global")
+        addon:RefreshOptionTables()
       end
     }
   else
@@ -401,7 +418,8 @@ local function getFrameCard(frameName)
   return card
 end
 
-local function getMouseoverCard(frameName)
+-- readOnly: shown on a frame that uses the global settings.
+local function getMouseoverCard(frameName, readOnly)
   local rows = {
     valueRow("checkbox", frameName, "MouseOverFadeEnabled", "Fade on mouseover", "When activated you can mouseover action bars and frames to show the frame with full alpha."),
     valueRow(
@@ -415,8 +433,15 @@ local function getMouseoverCard(frameName)
   local duration = valueRow("slider", frameName, "FadeDuration", "Fade Duration", "The duration how long the fade should take (fade in and out).")
   duration.min, duration.max, duration.step, duration.format = 0.05, 2, 0.05, secondsFormat(2)
   rows[#rows + 1] = duration
+  for _, row in ipairs(rows) do
+    row.disabled = readOnly
+  end
 
-  return {title = "Mouseover", note = "Shows the frame at full alpha while the mouse is over it.", rows = rows}
+  return {
+    title = readOnly and "Mouseover  |cffa0a832· Global|r" or "Mouseover",
+    note = "Shows the frame at full alpha while the mouse is over it.",
+    rows = rows
+  }
 end
 
 local function getPerformanceCard(frameName)
@@ -448,52 +473,150 @@ local function getPerformanceCard(frameName)
   }
 end
 
-local function getConditionsCard(frameName)
-  local frameOptions = addon:GetProfileDB()[frameName]
+-- The condition whose values are shown, per frame (one at a time).
+local expandedCondition = {}
+
+local function isConditionAvailable(condition)
+  -- Housing conditions are skipped in WoW: Forever, which has no housing.
+  return not condition.retailOnly or addon:HasHousing()
+end
+
+local function getConditionLabel(key)
+  for _, condition in ipairs(conditions) do
+    if condition.key == key then
+      return condition.label
+    end
+  end
+end
+
+-- "Active now: Rested Area · 40%" for the frame (or the global settings).
+local function getLiveText(frameName, liveFrame)
+  if not Options:IsModuleOn("fading") then
+    return "|cff8f8f94Frame fading is turned off.|r"
+  end
+  local key, alpha = MouseoverFrameFading:GetActiveCondition(liveFrame or frameName)
+  local percent = ("%d%%"):format(math.floor((alpha or 1) * 100 + 0.5))
+  local text
+  if key then
+    text = ("Active now: |cff8fe3a8%s|r  ·  %s"):format(getConditionLabel(key), percent)
+  else
+    text = ("No condition applies  ·  %s"):format(percent)
+  end
+  if MouseoverFrameFading:GetValue(Info("MouseOverFadeEnabled", frameName)) then
+    text = text .. "     |cff8f8f94Mouseover: 100%|r"
+  end
+  return text
+end
+
+local function getConditionValueRows(frameName, condition, readOnly)
   local rows = {}
+  if condition.alphaKey then
+    rows[#rows + 1] = alphaRow(frameName, condition.alphaKey, condition.alphaDesc)
+  end
+  if condition.targetType then
+    local targetType =
+      valueRow("dropdown", frameName, "TreatTargetLikeInCombatTargetType", "Target type", "Choose the target type for which {Treat target as in combat} should be applied.")
+    targetType.values = targetTypes
+    rows[#rows + 1] = targetType
+  end
+  if condition.fadeDelay then
+    local delay =
+      valueRow(
+      "slider",
+      frameName,
+      "OutOfCombatFadeDelay",
+      "Fade Delay",
+      "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha. " ..
+        "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing` " ..
+          "action bars or frames when entering/leaving combat fast, e.g. while questing.\n\nNOTE: Mouseover a frame will interrupt the delay and use the normal alpha values instead."
+    )
+    delay.min, delay.max, delay.step, delay.format = 0, 60, 0.5, secondsFormat(1)
+    rows[#rows + 1] = delay
+  end
+  for _, row in ipairs(rows) do
+    row.indent = 26
+    row.disabled = readOnly
+  end
+  return rows
+end
+
+-- Short summary next to the name, e.g. "hostile" or "2.0 s delay".
+local function getConditionDetail(frameName, condition)
+  if condition.targetType then
+    local targetType = MouseoverFrameFading:GetValue(Info("TreatTargetLikeInCombatTargetType", frameName)) or "both"
+    return targetType .. " targets, uses In Combat"
+  end
+  if condition.fadeDelay then
+    local delay = MouseoverFrameFading:GetValue(Info("OutOfCombatFadeDelay", frameName)) or 0
+    if delay > 0 then
+      return ("%.1f s delay"):format(delay)
+    end
+  end
+end
+
+-- readOnly: the global settings shown on a frame that uses them; liveFrame is
+-- then the frame whose current state is shown.
+local function getConditionsCard(frameName, readOnly, liveFrame)
+  local frameOptions = addon:GetProfileDB()[frameName]
+  local rows = {
+    {
+      type = "live",
+      get = function()
+        return getLiveText(frameName, liveFrame)
+      end
+    }
+  }
   local index = 0
   for _, condition in ipairs(conditions) do
-    -- Housing conditions are skipped in WoW: Forever, which has no housing.
-    local available = not condition.retailOnly or addon:HasHousing()
-    if available then
+    if isConditionAvailable(condition) then
       index = index + 1
-      rows[#rows + 1] = {type = "header", label = index .. "  ·  " .. condition.label}
-      local toggle = valueRow("checkbox", frameName, condition.key, condition.toggleLabel or "Enabled", condition.desc)
-      toggle.layout = true
-      rows[#rows + 1] = toggle
-    end
-
-    -- Values of a condition only matter while it is on.
-    if available and frameOptions[condition.key] then
-      if condition.alphaKey then
-        rows[#rows + 1] = alphaRow(frameName, condition.alphaKey, condition.alphaDesc)
-      end
-      if condition.targetType then
-        local targetType =
-          valueRow("dropdown", frameName, "TreatTargetLikeInCombatTargetType", "Target type", "Choose the target type for which {Treat target as in combat} should be applied.")
-        targetType.values = {{value = "friendly", label = "Friendly"}, {value = "hostile", label = "Hostile"}, {value = "both", label = "Both"}}
-        rows[#rows + 1] = targetType
-      end
-      if condition.fadeDelay then
-        local delay =
-          valueRow(
-          "slider",
-          frameName,
-          "OutOfCombatFadeDelay",
-          "Fade Delay",
-          "Set a delay for how long the in combat alpha should be maintained before fading to the out of combat alpha. " ..
-            "The default is 0 and means that the alpha values will change immediately. Setting a higher value can help with reducing `flashing` " ..
-              "action bars or frames when entering/leaving combat fast, e.g. while questing.\n\nNOTE: Mouseover a frame will interrupt the delay and use the normal alpha values instead."
-        )
-        delay.min, delay.max, delay.step, delay.format = 0, 60, 0.5, secondsFormat(1)
-        rows[#rows + 1] = delay
+      local key = condition.key
+      local expanded = not readOnly and expandedCondition[frameName] == key
+      rows[#rows + 1] = {
+        type = "condition",
+        index = index,
+        label = condition.label,
+        tooltip = condition.desc .. (readOnly and "" or "\n\nClick the row to change its values."),
+        disabled = readOnly,
+        detail = function()
+          return getConditionDetail(frameName, condition)
+        end,
+        value = condition.alphaKey and function()
+            return ("%d%%"):format(MouseoverFrameFading:GetFadeSliderValue(Info(condition.alphaKey, frameName)))
+          end,
+        toggle = {
+          get = function()
+            return MouseoverFrameFading:GetValue(Info(key, frameName))
+          end,
+          set = function(value)
+            MouseoverFrameFading:SetValue(Info(key, frameName), value)
+            -- Turning a condition on shows its values right away.
+            expandedCondition[frameName] = value and key or nil
+          end
+        },
+        active = function()
+          if not Options:IsModuleOn("fading") then
+            return false
+          end
+          return (MouseoverFrameFading:GetActiveCondition(liveFrame or frameName)) == key
+        end,
+        onClick = function()
+          expandedCondition[frameName] = not expanded and key or nil
+          Options:Refresh()
+        end
+      }
+      if expanded and frameOptions[key] then
+        for _, row in ipairs(getConditionValueRows(frameName, condition, readOnly)) do
+          rows[#rows + 1] = row
+        end
       end
     end
   end
 
   return {
-    title = "Fade Conditions",
-    note = "Mouseover always comes first. Otherwise the first enabled condition that applies, from top to bottom, sets the alpha.",
+    title = readOnly and "Fade Conditions  |cffa0a832· Global|r" or "Fade Conditions",
+    note = "Mouseover always comes first. Otherwise the first enabled condition that applies, from top to bottom, sets the alpha." ..
+      (readOnly and "" or " Click a condition to change its values."),
     rows = rows
   }
 end
@@ -504,7 +627,13 @@ local function getFrameSettingsCards(frameName)
 
   if not isGlobal then
     cards[1] = getFrameCard(frameName)
-    if MouseoverFrameFading:GetDisabledFrameOptions(Info(nil, frameName)) then
+    local frameOptions = addon:GetProfileDB()[frameName]
+    if not frameOptions.Enabled then
+      return cards
+    end
+    if frameOptions.UseGlobalOptions then
+      cards[#cards + 1] = getMouseoverCard(GLOBAL, true)
+      cards[#cards + 1] = getConditionsCard(GLOBAL, true, frameName)
       return cards
     end
   end

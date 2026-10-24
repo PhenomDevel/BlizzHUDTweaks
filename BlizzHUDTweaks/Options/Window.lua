@@ -87,6 +87,12 @@ end
 
 local function CreateRowBase(parent)
   local row = CreateFrame("Button", nil, parent)
+  -- Search hit ({ highlight }).
+  row.Highlight = row:CreateTexture(nil, "BACKGROUND")
+  row.Highlight:SetPoint("TOPLEFT", -6, 0)
+  row.Highlight:SetPoint("BOTTOMRIGHT", 6, 0)
+  row.Highlight:SetColorTexture(colors.accent[1], colors.accent[2], colors.accent[3], 0.12)
+  row.Highlight:Hide()
   row.Label = Widgets.Text(row, fonts.body)
   row.Label:SetPoint("TOPLEFT", 0, -9)
   row.Note = Widgets.Text(row, fonts.small)
@@ -128,7 +134,9 @@ rowTypes.checkbox = {
     row:SetScript(
       "OnClick",
       function(self)
-        self.Control:Click()
+        if not self.spec.disabled then
+          self.Control:Click()
+        end
       end
     )
     row.Update = function(self)
@@ -481,6 +489,129 @@ rowTypes.hint = {
   end
 }
 
+-- Rows that show live state update themselves twice a second.
+local LIVE_INTERVAL = 0.5
+
+local function OnLiveUpdate(row, elapsed)
+  row.sinceUpdate = (row.sinceUpdate or 0) + elapsed
+  if row.sinceUpdate >= LIVE_INTERVAL then
+    row.sinceUpdate = 0
+    row:Update()
+  end
+end
+
+-- One fade condition in a single line ({ index, label, detail, value, toggle,
+-- active, expanded, onClick }): priority, name, gray detail, alpha, switch.
+-- `active()` marks the condition that applies right now; a click on the row
+-- shows or hides its values (rows below with { indent }).
+rowTypes.condition = {
+  create = function(parent)
+    local row = CreateRowBase(parent)
+    row.Active = row:CreateTexture(nil, "BACKGROUND")
+    row.Active:SetPoint("TOPLEFT", -6, 0)
+    row.Active:SetPoint("BOTTOMRIGHT", 6, 0)
+    row.Active:SetColorTexture(colors.ok[1], colors.ok[2], colors.ok[3], 0.08)
+    row.ActiveBar = row:CreateTexture(nil, "ARTWORK")
+    row.ActiveBar:SetPoint("TOPLEFT", -6, 0)
+    row.ActiveBar:SetPoint("BOTTOMLEFT", -6, 0)
+    row.ActiveBar:SetWidth(2)
+    row.ActiveBar:SetColorTexture(unpack(colors.ok))
+
+    row.Number = CreateFrame("Frame", nil, row)
+    row.Number:SetSize(18, 18)
+    row.Number:SetPoint("LEFT", row, "TOPLEFT", 0, -ROW_HEIGHT / 2)
+    Widgets.Border(row.Number)
+    row.Number.Text = Widgets.Text(row.Number, fonts.dim, "CENTER")
+    row.Number.Text:SetAllPoints()
+    row.Number.Text:SetJustifyV("MIDDLE")
+
+    row.Label:ClearAllPoints()
+    row.Label:SetPoint("LEFT", row.Number, "RIGHT", 8, 0)
+    row.Label:SetJustifyV("MIDDLE")
+
+    row.Toggle = Widgets.CreateToggle(row)
+    row.Toggle:SetPoint("RIGHT", row, "TOPRIGHT", 0, -ROW_HEIGHT / 2)
+    Widgets.ForwardHover(row.Toggle, row)
+    row.Value = Widgets.Text(row, fonts.value, "RIGHT")
+    row.Value:SetPoint("RIGHT", row.Toggle, "LEFT", -10, 0)
+    row.Value:SetJustifyV("MIDDLE")
+
+    row.Hover = row:CreateTexture(nil, "BACKGROUND")
+    row.Hover:SetPoint("TOPLEFT", -6, 0)
+    row.Hover:SetPoint("BOTTOMRIGHT", 6, 0)
+    row.Hover:SetColorTexture(unpack(colors.hover))
+    row.Hover:Hide()
+    row.OnHoverChanged = function(self, hovered)
+      self.Hover:SetShown(hovered and self.spec.onClick ~= nil and not self.spec.disabled)
+    end
+
+    row:SetScript(
+      "OnClick",
+      function(self)
+        if self.spec.onClick and not self.spec.disabled then
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+          self.spec.onClick()
+        end
+      end
+    )
+    row:SetScript("OnUpdate", OnLiveUpdate)
+    row.Update = function(self)
+      local spec = self.spec
+      local on = not not spec.toggle.get()
+      self.Toggle:SetChecked(on)
+      local label = spec.label
+      local detail = on and Resolve(spec.detail)
+      if detail and detail ~= "" then
+        label = ("%s  |cff8f8f94· %s|r"):format(label, detail)
+      end
+      self.Label:SetText(label)
+      self.Label:SetTextColor(unpack(on and colors.text or colors.dim))
+      self.Value:SetText(on and Resolve(spec.value) or "")
+      local active = spec.active and spec.active() or false
+      self.Active:SetShown(active)
+      self.ActiveBar:SetShown(active)
+    end
+    return row
+  end,
+  setup = function(row, spec)
+    row.Number.Text:SetText(spec.index)
+    row.Toggle.onToggle = function(value)
+      Widgets.SafeCall(spec.toggle.set, value)
+      Render()
+    end
+    local height = SetupRow(row, spec, 32 + 50, ROW_HEIGHT)
+    row.Label:SetWidth(rowWidth - 26 - 32 - 50 - 16)
+    return height
+  end
+}
+
+-- What applies right now ({ get = function() return text end }), in a green box.
+rowTypes.live = {
+  create = function(parent)
+    local row = CreateFrame("Frame", nil, parent)
+    Widgets.Fill(row, {colors.ok[1], colors.ok[2], colors.ok[3], 0.06})
+    Widgets.Border(row, {colors.ok[1], colors.ok[2], colors.ok[3], 0.3})
+    row.Dot = row:CreateTexture(nil, "ARTWORK")
+    row.Dot:SetSize(6, 6)
+    row.Dot:SetPoint("LEFT", 10, 0)
+    row.Dot:SetColorTexture(unpack(colors.ok))
+    row.Label = Widgets.Text(row, fonts.small)
+    row.Label:SetPoint("LEFT", row.Dot, "RIGHT", 8, 0)
+    row.Label:SetPoint("RIGHT", -10, 0)
+    row.Label:SetJustifyV("MIDDLE")
+    row:SetScript("OnUpdate", OnLiveUpdate)
+    row.Update = function(self)
+      self.Label:SetText(Markup(self.spec.get() or ""))
+    end
+    return row
+  end,
+  setup = function(row)
+    row:SetSize(rowWidth, 26)
+    -- Gap above and below inside the card.
+    return 34
+  end
+}
+
 for _, rowType in pairs(rowTypes) do
   rowType.pool = Widgets.NewPool(rowType.create)
 end
@@ -522,12 +653,27 @@ local cardPool =
 
 local activeRows, activeCards = {}, {}
 
+-- Rows can be indented ({ indent }, e.g. values below a condition) and
+-- shown read-only ({ disabled }: dimmed, controls ignore the mouse).
 local function AddRow(card, spec, y)
   local rowType = rowTypes[spec.type]
   local row = Widgets.Acquire(rowType.pool, card)
   row.spec = spec
+  local indent = spec.indent or 0
+  rowWidth = rowWidth - indent
   local height = rowType.setup(row, spec)
-  row:SetPoint("TOPLEFT", CARD_PADDING, -y)
+  rowWidth = rowWidth + indent
+  row:SetPoint("TOPLEFT", CARD_PADDING + indent, -y)
+  row:SetAlpha(spec.disabled and 0.45 or 1)
+  if row.Control then
+    row.Control:EnableMouse(not spec.disabled)
+  end
+  if row.Toggle then
+    row.Toggle:EnableMouse(not spec.disabled)
+  end
+  if row.Highlight then
+    row.Highlight:SetShown(spec.highlight and true or false)
+  end
   row:Update()
   activeRows[#activeRows + 1] = row
   return height
