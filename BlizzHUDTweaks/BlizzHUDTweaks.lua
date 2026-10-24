@@ -1,4 +1,4 @@
--- luacheck: read globals C_SwingTimer SwingTimerMainHandFrame SwingTimerOffHandFrame SwingTimerRangedFrame WorldFrame
+-- luacheck: read globals BlizzHUDTweaksDB C_SwingTimer SwingTimerMainHandFrame SwingTimerOffHandFrame SwingTimerRangedFrame WorldFrame
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
@@ -684,6 +684,7 @@ function addon:LoadProfileByName(name)
 end
 
 function addon:OnInitialize()
+  local isNewInstall = BlizzHUDTweaksDB == nil
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, "Default")
   updateFramesForLoadedAddons(self.db.profile)
   updateSwingTimerFrames(self.db.profile)
@@ -710,6 +711,7 @@ function addon:OnInitialize()
 
   addon:InitializeUpdateTicker()
   addon:InitializeOptions()
+  BlizzHUDTweaks.WhatsNew:Initialize(isNewInstall)
 
   --@debug@
   self.db.profile.debug = false
@@ -784,6 +786,8 @@ function addon:ExecuteChatCommand(input)
     Options:Toggle()
   elseif input == "minimap" then
     addon:ToggleMinimapIcon()
+  elseif input == "news" then
+    BlizzHUDTweaks.WhatsNew:Show()
   end
 end
 

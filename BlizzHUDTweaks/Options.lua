@@ -1,3 +1,4 @@
+local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local Options = addon:GetModule("Options")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
@@ -141,8 +142,28 @@ local function getAddonCard()
         end
       },
       {
+        type = "checkbox",
+        label = "What's new after updates",
+        tooltip = "After an update, shows a window with the most important changes once. Same switch as in that window.",
+        get = function()
+          return addon:GetGlobalProfileDB().whatsNew ~= false
+        end,
+        set = function(value)
+          addon:GetGlobalProfileDB().whatsNew = value
+        end
+      },
+      {
+        type = "button",
+        label = "What's new",
+        tooltip = "Shows the changes of the current version. Same as `/bht news`.",
+        buttonText = "Show",
+        onClick = function()
+          BlizzHUDTweaks.WhatsNew:Show()
+        end
+      },
+      {
         type = "description",
-        label = "`/bht` opens this window, `/bht minimap` shows or hides the minimap icon."
+        label = "`/bht` opens this window, `/bht minimap` shows or hides the minimap icon, `/bht news` shows what's new."
       }
     }
   }
