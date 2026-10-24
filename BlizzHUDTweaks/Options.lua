@@ -107,7 +107,7 @@ local function getAddonCard()
   return {
     title = "BlizzHUDTweaks",
     note = "Turns the whole addon and all of its modules on or off.",
-    tooltip = "Enables or disables the whole addon and all of it's sub modules.",
+    tooltip = "Enables or disables the whole addon and all of its sub modules.",
     toggle = {
       get = function()
         return Options:GetValue(Info("Enabled"))

@@ -241,8 +241,8 @@ local conditions = {
     label = "Vehicle",
     key = "FadeVehicle",
     alphaKey = "VehicleAlpha",
-    desc = "When active the fade value will be applied when you're in an vehicle.",
-    alphaDesc = "Set the alpha value of the frame when on an vehicle."
+    desc = "When active the fade value will be applied when you're in a vehicle.",
+    alphaDesc = "Set the alpha value of the frame when in a vehicle."
   },
   {
     label = "In Combat",
@@ -255,7 +255,7 @@ local conditions = {
     label = "Has Target",
     key = "TreatTargetLikeInCombat",
     toggleLabel = "Treat target as in combat",
-    desc = "When active the fade wll change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." ..
+    desc = "When active the fade will change to the in combat fade when you have a target of the corresponding target type (friendly, hostile, or both)." ..
       "\n\nUses the {In Combat} alpha and only works while {In Combat} is enabled.",
     targetType = true
   },
@@ -386,7 +386,15 @@ local function getFrameCard(frameName)
         return Options:GetValue(Info("CopyFrom", frameName))
       end,
       set = function(value)
-        MouseoverFrameFading:CopyFrom(Info("CopyFrom", frameName), value)
+        local source = value == "Global" and "Global Settings" or getDisplayName(value)
+        Options:Confirm(
+          ("Copy all fade settings of %s to %s?\nThe current settings of %s are lost."):format(source, getDisplayName(frameName), getDisplayName(frameName)),
+          "Copy",
+          function()
+            MouseoverFrameFading:CopyFrom(Info("CopyFrom", frameName), value)
+            Options:Refresh()
+          end
+        )
       end
     }
   end

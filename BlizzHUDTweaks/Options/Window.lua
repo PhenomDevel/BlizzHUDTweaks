@@ -265,6 +265,7 @@ rowTypes.button = {
   end,
   setup = function(row, spec)
     row.Control:SetLabel(spec.buttonText or spec.label)
+    row.Control:SetDanger(spec.danger)
     return SetupRow(row, spec, row.Control:GetWidth(), ROW_HEIGHT)
   end
 }
@@ -387,29 +388,29 @@ rowTypes.nav = {
   end
 }
 
--- Section title inside a card.
+-- Section title inside a card ({ danger } marks actions that overwrite settings).
 rowTypes.header = {
   create = function(parent)
     local row = CreateFrame("Frame", nil, parent)
-    local marker = row:CreateTexture(nil, "ARTWORK")
-    marker:SetColorTexture(unpack(colors.accent))
-    marker:SetSize(2, 12)
-    marker:SetPoint("BOTTOMLEFT", 0, 4)
+    row.Marker = row:CreateTexture(nil, "ARTWORK")
+    row.Marker:SetSize(2, 12)
+    row.Marker:SetPoint("BOTTOMLEFT", 0, 4)
     row.Label = Widgets.Text(row, fonts.section)
-    row.Label:SetPoint("BOTTOMLEFT", marker, "BOTTOMRIGHT", 6, 0)
+    row.Label:SetPoint("BOTTOMLEFT", row.Marker, "BOTTOMRIGHT", 6, 0)
     row.Update = function()
     end
     return row
   end,
   setup = function(row, spec)
     row:SetSize(rowWidth, 28)
+    row.Marker:SetColorTexture(unpack(spec.danger and colors.danger or colors.accent))
     row.Label:SetText(spec.label)
     return 28
   end
 }
 
--- Highlighted, wrapping hint (e.g. "needs a /reload", "module is off").
-local NOTICE_COLOR = {1, 0.82, 0.3, 1}
+-- Highlighted, wrapping hint (e.g. "needs a /reload", "module is off");
+-- { tone = "ok" | "danger" } for results like a checked import string.
 local NOTICE_BAR = 2
 local NOTICE_INDENT = NOTICE_BAR + 8
 
@@ -417,12 +418,10 @@ rowTypes.notice = {
   create = function(parent)
     local row = CreateFrame("Frame", nil, parent)
     row.Bar = row:CreateTexture(nil, "ARTWORK")
-    row.Bar:SetColorTexture(unpack(NOTICE_COLOR))
     row.Bar:SetWidth(NOTICE_BAR)
     row.Label = Widgets.Text(row, fonts.small)
     row.Label:SetPoint("TOPLEFT", NOTICE_INDENT, -8)
     row.Label:SetWordWrap(true)
-    row.Label:SetTextColor(unpack(NOTICE_COLOR))
     row.Bar:SetPoint("TOPLEFT", 0, -6)
     row.Bar:SetPoint("BOTTOMLEFT", 0, 4)
     row.Update = function()
@@ -430,6 +429,9 @@ rowTypes.notice = {
     return row
   end,
   setup = function(row, spec)
+    local color = colors[spec.tone or "notice"]
+    row.Bar:SetColorTexture(unpack(color))
+    row.Label:SetTextColor(unpack(color))
     row.Label:SetWidth(rowWidth - NOTICE_INDENT)
     row.Label:SetText(Markup(spec.label))
     local height = row.Label:GetStringHeight() + 14

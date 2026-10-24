@@ -326,7 +326,7 @@ Miscellaneous.options = {
         optionName = "MiscellaneousShowHideObjectiveTrackerUpdateFlash",
         displayName = "Objective Tracker Flash",
         frame = ObjectiveTrackerFrame,
-        description = "Shows the objective tracker in full alpha after an quest log update.",
+        description = "Shows the objective tracker in full alpha after a quest log update.",
         type = "toggle",
         setFn = doNothing
       },
