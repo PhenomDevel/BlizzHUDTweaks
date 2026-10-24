@@ -56,7 +56,7 @@ local TITLE = ("Blizz|cff%sHUD|rTweaks"):format(Widgets.BRAND_HEX)
 -- Derived from the window width by UpdateLayout() before every render.
 local columnCount, columnWidth, rowWidth
 
-local frame, scroll, content, sidebar, searchBox, backButton, pageTitle, pageSubtitle
+local frame, scroll, content, sidebar, searchBox, profileButton, backButton, pageTitle, pageSubtitle
 local pages = {}
 local state = {page = nil, detail = nil, search = ""}
 
@@ -761,16 +761,46 @@ end
 -- Sidebar
 --------------------------------------------------------------------------------
 -- One entry per page; a page's `section` puts it under a small gray label.
+-- `page.status()` (module on/off) adds a dot, on the section label for pages
+-- in a section; `page.badge()` adds a small count on the right.
 
 local SIDEBAR_BUTTON_HEIGHT = 28
-local sidebarButtons = {}
+local DOT_SIZE = 6
+local sidebarButtons, sidebarSections = {}, {}
+
+local function SetDot(dot, on)
+  dot:SetColorTexture(unpack(on and colors.ok or colors.control))
+end
 
 local function UpdateSidebar()
   for _, button in ipairs(sidebarButtons) do
+    local page = pages[button.page]
     local selected = state.search == "" and state.page == button.page
     button.Selected:SetShown(selected)
     button.Marker:SetShown(selected)
     button.Label:SetTextColor(unpack(selected and colors.text or colors.muted))
+
+    local status
+    if page.status and not page.section then
+      status = page.status()
+      button.Dot:Show()
+      SetDot(button.Dot, status)
+    else
+      button.Dot:Hide()
+    end
+    local badge = page.badge and page.badge()
+    if page.status and not page.section and not status then
+      badge = "Off"
+    end
+    button.Badge:SetText(badge or "")
+  end
+  for _, section in ipairs(sidebarSections) do
+    if section.page.status then
+      section.Dot:Show()
+      SetDot(section.Dot, section.page.status())
+    else
+      section.Dot:Hide()
+    end
   end
 end
 
@@ -801,9 +831,21 @@ local function AddSidebarButton(page, y)
   button.Marker:SetPoint("BOTTOMLEFT")
   button.Marker:SetWidth(2)
 
+  button.Dot = button:CreateTexture(nil, "ARTWORK")
+  button.Dot:SetSize(DOT_SIZE, DOT_SIZE)
+  button.Dot:SetPoint("LEFT", 12, 0)
+
+  button.Badge = Widgets.Text(button, fonts.dim, "RIGHT")
+  button.Badge:SetPoint("RIGHT", -8, 0)
+  button.Badge:SetJustifyV("MIDDLE")
+
   button.Label = Widgets.Text(button, fonts.body)
-  button.Label:SetPoint("LEFT", page.section and 20 or 12, 0)
-  button.Label:SetPoint("RIGHT", -8, 0)
+  local left = page.section and 20 or 12
+  if page.status and not page.section then
+    left = left + DOT_SIZE + 6
+  end
+  button.Label:SetPoint("LEFT", left, 0)
+  button.Label:SetPoint("RIGHT", button.Badge, "LEFT", -6, 0)
   button.Label:SetJustifyV("MIDDLE")
   button.Label:SetText(page.label)
 
@@ -829,10 +871,16 @@ local function AddSidebarButton(page, y)
   sidebarButtons[#sidebarButtons + 1] = button
 end
 
-local function AddSidebarSection(label, y)
+-- The section's first page decides its dot.
+local function AddSidebarSection(label, page, y)
+  local section = {page = page}
+  section.Dot = sidebar:CreateTexture(nil, "ARTWORK")
+  section.Dot:SetSize(DOT_SIZE, DOT_SIZE)
+  section.Dot:SetPoint("TOPLEFT", 20, -(y + 10))
   local text = Widgets.Text(sidebar, fonts.dim)
-  text:SetPoint("TOPLEFT", 20, -(y + 8))
+  text:SetPoint("TOPLEFT", page.status and 20 + DOT_SIZE + 6 or 20, -(y + 8))
   text:SetText(label:upper())
+  sidebarSections[#sidebarSections + 1] = section
 end
 
 -- Returns the height the sidebar needs.
@@ -857,7 +905,7 @@ local function CreateSidebar(parent)
         y = y + 8
       end
       if section then
-        AddSidebarSection(section, y)
+        AddSidebarSection(section, page, y)
         y = y + 24
       end
     end
@@ -873,7 +921,7 @@ end
 
 local function CreateSearchBox(parent)
   searchBox = CreateFrame("EditBox", nil, parent)
-  searchBox:SetSize(220, 26)
+  searchBox:SetSize(180, 26)
   searchBox:SetAutoFocus(false)
   searchBox:SetFontObject(fonts.body)
   searchBox:SetTextInsets(10, 10, 0, 0)
@@ -945,6 +993,43 @@ local function CreateIconButton(parent, lineSpecs, onClick)
   return button
 end
 
+-- Every setting belongs to the active profile, so it is always in view; a
+-- click opens the profile page.
+local function CreateProfileButton(parent)
+  profileButton = CreateFrame("Button", nil, parent)
+  profileButton:SetHeight(26)
+  profileButton.Background = Widgets.Fill(profileButton, colors.window)
+  Widgets.Border(profileButton)
+  profileButton.Text = Widgets.Text(profileButton, fonts.small)
+  profileButton.Text:SetPoint("LEFT", 10, 0)
+  profileButton.Text:SetJustifyV("MIDDLE")
+  profileButton.Update = function(self)
+    self.Text:SetText(("Profile: |cffffffff%s|r"):format(addon.db:GetCurrentProfile()))
+    self:SetWidth(math.min(160, self.Text:GetUnboundedStringWidth() + 20))
+    self.Text:SetWidth(self:GetWidth() - 20)
+  end
+  profileButton:SetScript(
+    "OnClick",
+    function()
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      SelectPage("profiles")
+    end
+  )
+  profileButton:SetScript(
+    "OnEnter",
+    function(self)
+      self.Background:SetColorTexture(unpack(colors.controlHover))
+    end
+  )
+  profileButton:SetScript(
+    "OnLeave",
+    function(self)
+      self.Background:SetColorTexture(unpack(colors.window))
+    end
+  )
+  return profileButton
+end
+
 local function CreateHeader(parent)
   local header = CreateFrame("Frame", nil, parent)
   header:SetPoint("TOPLEFT")
@@ -989,6 +1074,7 @@ local function CreateHeader(parent)
   )
   close:SetPoint("RIGHT", -PADDING + 4, 0)
   CreateSearchBox(header):SetPoint("RIGHT", close, "LEFT", -10, 0)
+  CreateProfileButton(header):SetPoint("RIGHT", searchBox, "LEFT", -10, 0)
 
   local edge = header:CreateTexture(nil, "BORDER")
   edge:SetColorTexture(unpack(colors.border))
@@ -1051,9 +1137,11 @@ Render = function()
   scroll:UpdateScrollChildRect()
   SetScroll(offset)
   UpdateSidebar()
+  profileButton:Update()
 end
 
 RefreshValues = function()
+  UpdateSidebar()
   for _, row in ipairs(activeRows) do
     row:Update()
   end

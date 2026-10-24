@@ -596,6 +596,24 @@ end
 -------------------------------------------------------------------------------
 -- Frame overview
 
+-- Listed frames: total, enabled, enabled with the global settings.
+local function countFrames()
+  local total, enabled, global = 0, 0, 0
+  for _, group in ipairs(getFrameGroups()) do
+    for _, frameName in ipairs(group.frames) do
+      local frameOptions = addon:GetProfileDB()[frameName]
+      total = total + 1
+      if frameOptions.Enabled then
+        enabled = enabled + 1
+        if frameOptions.UseGlobalOptions then
+          global = global + 1
+        end
+      end
+    end
+  end
+  return total, enabled, global
+end
+
 local function getFramesOverview()
   local cards = getModuleCards()
   local total, enabled, global = 0, 0, 0
@@ -769,6 +787,9 @@ Options:RegisterPage(
     label = "Global Settings",
     order = 20,
     searchable = true,
+    status = function()
+      return Options:IsModuleOn("fading")
+    end,
     build = function()
       local cards = getModuleCards()
       for _, card in ipairs(getFrameSettingsCards(GLOBAL)) do
@@ -786,6 +807,10 @@ Options:RegisterPage(
     label = "Frames",
     order = 21,
     searchable = true,
+    badge = function()
+      local total, enabled = countFrames()
+      return enabled .. "/" .. total
+    end,
     build = function(frameName)
       local profile = addon:GetProfileDB()
       if frameName and type(profile[frameName]) == "table" then

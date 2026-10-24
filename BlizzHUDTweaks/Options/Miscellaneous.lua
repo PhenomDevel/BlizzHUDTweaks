@@ -618,6 +618,9 @@ Options:RegisterPage(
     id = "miscellaneous",
     label = "Miscellaneous",
     order = 30,
+    status = function()
+      return Options:IsModuleOn("miscellaneous")
+    end,
     searchable = true,
     build = function()
       return "Miscellaneous", "Names, levels, font sizes and action bar padding", getCards()

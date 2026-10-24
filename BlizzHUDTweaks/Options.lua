@@ -95,6 +95,11 @@ function Options:GetModuleCard(id)
   }
 end
 
+-- Whether the module (and the addon) is on; shown as a dot in the sidebar.
+function Options:IsModuleOn(id)
+  return addon:IsEnabled() and Options:GetValue(Info(moduleCards[id].key)) and true or false
+end
+
 -- Notice for module pages while the module is turned off.
 function Options:GetModuleOffNotice(id)
   local spec = moduleCards[id]

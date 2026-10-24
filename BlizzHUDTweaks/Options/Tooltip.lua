@@ -67,6 +67,9 @@ Options:RegisterPage(
     id = "tooltip",
     label = "Tooltip",
     order = 40,
+    status = function()
+      return Options:IsModuleOn("tooltip")
+    end,
     searchable = true,
     build = function()
       return "Tooltip", "Tooltip position and extra information", getCards()
