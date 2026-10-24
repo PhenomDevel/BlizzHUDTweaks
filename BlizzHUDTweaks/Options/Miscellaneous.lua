@@ -473,6 +473,28 @@ local groupNotes = {
   ["ActionBarOptions"] = "Overwrites the space between the buttons, also below Blizzard's minimum of 2."
 }
 
+-- Short labels inside a card (the card already names the frame) and the
+-- section they are listed under: { section, label }.
+local rowLabels = {
+  ["MiscellaneousShowHidePlayerName"] = {"Hide", "Name"},
+  ["MiscellaneousShowHidePlayerLevel"] = {"Hide", "Level"},
+  ["MiscellaneousShowHidePlayerGroupIndicator"] = {"Hide", "Group indicator"},
+  ["MiscellaneousTextOverwritePlayerName"] = {"Text", "Name text"},
+  ["MiscellaneousFontSizeOverwritePlayerHealthBarFontSize"] = {"Font size", "Health"},
+  ["MiscellaneousFontSizeOverwritePlayerManaBarFontSize"] = {"Font size", "Mana"},
+  ["MiscellaneousShowHideTargetName"] = {"Hide", "Name"},
+  ["MiscellaneousShowHideTargetLevel"] = {"Hide", "Level"},
+  ["MiscellaneousFontSizeOverwriteTargetHealthBarFontSize"] = {"Font size", "Health"},
+  ["MiscellaneousFontSizeOverwriteTargetManaBarFontSize"] = {"Font size", "Mana"},
+  ["MiscellaneousShowHideFocusName"] = {"Hide", "Name"},
+  ["MiscellaneousShowHideFocusLevel"] = {"Hide", "Level"},
+  ["MiscellaneousShowHideTargetOfTargetName"] = {"Hide", "Name"},
+  ["MiscellaneousShowHidePetlevel"] = {"Hide", "Name"},
+  ["MiscellaneousShowHidePetStatusText"] = {"Hide", "Status texts"}
+}
+-- Sections in this order; options without one come first.
+local sectionOrder = {"Hide", "Text", "Font size"}
+
 local function isModuleEnabled()
   return addon:GetProfileDB()["GlobalOptionsMiscellaneousEnabled"]
 end
@@ -482,10 +504,55 @@ local function getValue(key)
 end
 
 -- Toggle, range and input options: save, then apply while the module is on.
+local function getRangeDefault(option)
+  local display = rangeDisplay[option.optionName] or (option.setFn == overwriteFontSize and {default = 10}) or {}
+  return display.default, display.unit
+end
+
+-- Whether the option differs from what Blizzard shows without it.
+local function isOptionChanged(option)
+  local value = getValue(option.optionName)
+  if option.type == "toggle" then
+    return value == true
+  elseif option.type == "input" then
+    return value ~= nil and value ~= ""
+  elseif option.type == "range" then
+    return value ~= nil and value ~= getRangeDefault(option)
+  elseif option.type == "actionbarpaddinggroup" then
+    return getValue(option.optionName .. "Enabled") == true
+  end
+  return false
+end
+
+local function resetOption(option)
+  local profile = addon:GetProfileDB()
+  profile[option.optionName] = nil
+  if option.type == "actionbarpaddinggroup" then
+    profile[option.optionName .. "Enabled"] = nil
+  end
+  if isModuleEnabled() and option.restoreOriginalValueFn then
+    option.restoreOriginalValueFn(option)
+  end
+end
+
+local function getResetSpec(option)
+  return {
+    changed = function()
+      return isOptionChanged(option)
+    end,
+    reset = function()
+      resetOption(option)
+    end
+  }
+end
+
+-- Toggle, range and input options: save, then apply while the module is on.
 local function getOptionRow(option)
+  local labels = rowLabels[option.optionName]
   local row = {
-    label = option.displayName or option.optionName,
+    label = labels and labels[2] or option.displayName or option.optionName,
     tooltip = option.description,
+    reset = getResetSpec(option),
     get = function()
       return getValue(option.optionName)
     end,
@@ -497,6 +564,10 @@ local function getOptionRow(option)
       end
     end
   }
+  if labels and (not row.tooltip or row.tooltip == "") then
+    -- The full name stays findable by search and in the tooltip.
+    row.tooltip = option.displayName
+  end
 
   if option.type == "toggle" then
     row.type = "checkbox"
@@ -504,11 +575,11 @@ local function getOptionRow(option)
     row.type = "text"
     row.placeholder = option.getOriginalValueFn and option.getOriginalValueFn() or nil
   elseif option.type == "range" then
-    local display = rangeDisplay[option.optionName] or (option.setFn == overwriteFontSize and {default = 10}) or {}
+    local default, unit = getRangeDefault(option)
     row.type = "slider"
-    row.min, row.max, row.step, row.default = option.min or 0, option.max or 100, option.step or 1, display.default
+    row.min, row.max, row.step, row.default = option.min or 0, option.max or 100, option.step or 1, default
     row.format = function(value)
-      return value .. (display.unit or "")
+      return value .. (unit or "")
     end
   end
   return row
@@ -521,6 +592,7 @@ local function getActionbarPaddingRows(option)
       type = "checkbox",
       label = option.displayName or option.optionName,
       tooltip = option.description,
+      reset = getResetSpec(option),
       layout = true,
       get = function()
         return getValue(enabledKey)
@@ -598,17 +670,54 @@ local function getCards()
 
   for _, groupName in ipairs(getSortedGroupNames()) do
     local groupOptions = Miscellaneous.options[groupName]
-    local rows = {}
+    -- Rows by section (see rowLabels), unsectioned ones first.
+    local bySection, changed = {[""] = {}}, 0
     for _, option in ipairs(groupOptions.options) do
+      local labels = rowLabels[option.optionName]
+      local section = labels and labels[1] or ""
+      bySection[section] = bySection[section] or {}
+      local sectionRows = bySection[section]
       if option.type == "actionbarpaddinggroup" then
         for _, row in ipairs(getActionbarPaddingRows(option)) do
-          rows[#rows + 1] = row
+          sectionRows[#sectionRows + 1] = row
         end
       elseif option.type == "toggle" or option.type == "range" or option.type == "input" then
-        rows[#rows + 1] = getOptionRow(option)
+        sectionRows[#sectionRows + 1] = getOptionRow(option)
+      end
+      if isOptionChanged(option) then
+        changed = changed + 1
       end
     end
-    cards[#cards + 1] = {title = groupOptions.name, note = groupNotes[groupName], rows = rows}
+
+    local rows = bySection[""]
+    for _, section in ipairs(sectionOrder) do
+      if bySection[section] then
+        rows[#rows + 1] = {type = "header", label = section}
+        for _, row in ipairs(bySection[section]) do
+          rows[#rows + 1] = row
+        end
+      end
+    end
+
+    local note = groupNotes[groupName]
+    if changed > 0 then
+      local options = groupOptions.options
+      local label = changed == 1 and "1 setting changed" or (changed .. " settings changed")
+      note = note and (note .. "\n" .. label) or label
+      rows[#rows + 1] = {
+        type = "button",
+        label = "Reset " .. groupOptions.name,
+        tooltip = "Sets every option of this card back to the default.",
+        buttonText = "Reset",
+        layout = true,
+        onClick = function()
+          for _, option in ipairs(options) do
+            resetOption(option)
+          end
+        end
+      }
+    end
+    cards[#cards + 1] = {title = groupOptions.name, note = note, rows = rows}
   end
   return cards
 end

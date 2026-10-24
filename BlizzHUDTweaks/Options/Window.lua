@@ -85,6 +85,8 @@ end
 -- A row = label (+ gray note) on the left, a control on the right. Each row
 -- type has its own pool and an Update() that reads the bound value.
 
+local RESET_ICON = "Interface\\Buttons\\UI-RefreshButton"
+
 local function CreateRowBase(parent)
   local row = CreateFrame("Button", nil, parent)
   -- Search hit ({ highlight }).
@@ -93,6 +95,37 @@ local function CreateRowBase(parent)
   row.Highlight:SetPoint("BOTTOMRIGHT", 6, 0)
   row.Highlight:SetColorTexture(colors.accent[1], colors.accent[2], colors.accent[3], 0.12)
   row.Highlight:Hide()
+
+  -- Back to the default ({ reset = { changed, reset } }), only while changed.
+  row.Reset = CreateFrame("Button", nil, row)
+  row.Reset:SetSize(16, 16)
+  row.Reset.Icon = row.Reset:CreateTexture(nil, "ARTWORK")
+  row.Reset.Icon:SetAllPoints()
+  row.Reset.Icon:SetTexture(RESET_ICON)
+  row.Reset.Icon:SetVertexColor(unpack(colors.muted))
+  row.Reset:SetScript(
+    "OnEnter",
+    function(self)
+      self.Icon:SetVertexColor(unpack(colors.text))
+      Widgets.ShowTooltipAt(self, "BOTTOM", "TOP", 0, 4, "Reset", "Back to the default value.")
+    end
+  )
+  row.Reset:SetScript(
+    "OnLeave",
+    function(self)
+      self.Icon:SetVertexColor(unpack(colors.muted))
+      Widgets.HideTooltip()
+    end
+  )
+  row.Reset:SetScript(
+    "OnClick",
+    function()
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)
+      Widgets.SafeCall(row.spec.reset.reset)
+      Render()
+    end
+  )
+  row.Reset:Hide()
   row.Label = Widgets.Text(row, fonts.body)
   row.Label:SetPoint("TOPLEFT", 0, -9)
   row.Note = Widgets.Text(row, fonts.small)
@@ -782,6 +815,18 @@ local cardPool =
 
 local activeRows, activeCards = {}, {}
 
+local function UpdateReset(row)
+  if not row.Reset then
+    return
+  end
+  local spec = row.spec
+  row.Reset:SetShown(spec.reset ~= nil and not spec.disabled and spec.reset.changed() and true or false)
+  if row.Value and spec.reset then
+    row.Reset:ClearAllPoints()
+    row.Reset:SetPoint("TOPRIGHT", row, "TOPRIGHT", -(row.Value:GetStringWidth() + 8), -7)
+  end
+end
+
 -- Rows can be indented ({ indent }, e.g. values below a condition) and
 -- shown read-only ({ disabled }: dimmed, controls ignore the mouse).
 local function AddRow(card, spec, y)
@@ -803,7 +848,13 @@ local function AddRow(card, spec, y)
   if row.Highlight then
     row.Highlight:SetShown(spec.highlight and true or false)
   end
+  -- Left of the control; sliders place it next to their value (UpdateReset).
+  if row.Reset and spec.reset and row.Control and not row.Value then
+    row.Reset:ClearAllPoints()
+    row.Reset:SetPoint("RIGHT", row.Control, "LEFT", -8, 0)
+  end
   row:Update()
+  UpdateReset(row)
   activeRows[#activeRows + 1] = row
   return height
 end
@@ -1476,6 +1527,7 @@ RefreshValues = function()
   UpdateSidebar()
   for _, row in ipairs(activeRows) do
     row:Update()
+    UpdateReset(row)
   end
   for _, card in ipairs(activeCards) do
     if card.spec.toggle then
