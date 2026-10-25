@@ -1176,14 +1176,6 @@ function MouseoverFrameFading:SetUpdateTickerValue(info, value)
   addon:RefreshUpdateTicker(interval)
 end
 
-function MouseoverFrameFading:GetDisabledFrameOptions(info)
-  if info then
-    if addon:GetProfileDB()[info.arg] then
-      return (addon:GetProfileDB()[info.arg]["UseGlobalOptions"] or not addon:GetProfileDB()[info.arg]["Enabled"]) or false
-    end
-  end
-end
-
 function MouseoverFrameFading:GetValue(info)
   return Options:GetValue(info)
 end

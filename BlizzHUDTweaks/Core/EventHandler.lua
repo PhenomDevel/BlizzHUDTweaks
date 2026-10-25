@@ -195,17 +195,6 @@ function EventHandler:RegisterEvents(forced)
   end
 end
 
-function EventHandler:UnregisterEvents(forced)
-  if addon:IsEnabled() or forced then
-    for _, event in ipairs(eventsToRegister) do
-      if registeredEvents[event] then
-        EventHandler:UnregisterEvent(event)
-        registeredEvents[event] = false
-      end
-    end
-  end
-end
-
 function EventHandler:PLAYER_REGEN_ENABLED()
   BlizzHUDTweaks.inCombat = false
 

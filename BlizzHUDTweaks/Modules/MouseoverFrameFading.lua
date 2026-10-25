@@ -540,16 +540,6 @@ local function shouldFade(frame, globalOptions, frameOptions)
   end
 end
 
-function MouseoverFrameFading:PauseAnimations()
-  local mapping = addon:GetFrameMapping()
-  for _, frameMappingOptions in pairs(mapping) do
-    local frame = frameMappingOptions.mainFrame
-    if frame and activeFades[frame] then
-      MouseoverFrameFading:ClearActiveFade(frame)
-    end
-  end
-end
-
 function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
   if addon:IsEnabled() and MouseoverFrameFading:IsEnabled() then
     local profile = addon:GetProfileDB()
