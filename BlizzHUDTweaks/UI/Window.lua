@@ -50,7 +50,7 @@ local INPUT_WIDTH = 170
 local TEXTAREA_HEIGHT = 64
 local SCROLL_STEP = 48
 
-local LOGO = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp"
+local LOGO = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Logo.blp"
 local TITLE = ("Blizz|cff%sHUD|rTweaks"):format(Widgets.BRAND_HEX)
 
 -- Derived from the window width by UpdateLayout() before every render.

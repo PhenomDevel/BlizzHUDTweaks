@@ -1,22 +1,19 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: "[BUG] "
+about: Something doesn't work as expected
 labels: bug
 assignees: PhenomDevel
-
 ---
 
-## Description
-> Please describe what the problem is as precise as possible
+**What happened / what did you expect?**
 
-## Reproduce
-> What steps are needed to reproduce it?
-1. Do this
-2. Do that
-3. Boom
+**Steps to reproduce**
+1.
 
-## Expected Behaviour
-> What did you expect what should have happend?
+**Lua error**
+If there is one, paste it here (enable with `/console scriptErrors 1` or use BugSack).
 
-## Optional Context (e.g. Screenshots)
+**Versions**
+- Addon version (shown in the AddOns list):
+- Game client and build (`/dump GetBuildInfo()`):
+- Game client language:

@@ -14,7 +14,7 @@ local colors, fonts = Widgets.colors, Widgets.fonts
 local Toast = {}
 BlizzHUDTweaks.Toast = Toast
 
-local LOGO = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp"
+local LOGO = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Logo.blp"
 local FADE_IN, HOLD, FADE_OUT = 0.15, 1.6, 0.4
 local PADDING = 10
 

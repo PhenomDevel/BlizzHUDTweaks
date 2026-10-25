@@ -2,7 +2,7 @@
 local _, BlizzHUDTweaks = ...
 
 --[[
-  Flat building blocks for the options window (Options/Window.lua): colors,
+  Flat building blocks for the options window (UI/Window.lua): colors,
   fonts, backgrounds, borders and the controls (toggle switch, slider,
   dropdown, button, text input, keybind). No Blizzard or AceGUI templates, so
   the look is fully ours.

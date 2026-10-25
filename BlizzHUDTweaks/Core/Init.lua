@@ -18,7 +18,7 @@ local function getBlizzHUDTweaksLibDbIconData(db)
       {
         type = "data source",
         text = "BlizzHUDTweaks",
-        icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp",
+        icon = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Logo.blp",
         OnClick = function(_, button)
           if button == "LeftButton" then
             Options:Toggle()
@@ -727,7 +727,7 @@ function addon:InitializeOptions()
 end
 
 -- The options window builds its pages from the profile on every render, so
--- refreshing means re-rendering the visible page (Options/Window.lua).
+-- refreshing means re-rendering the visible page (UI/Window.lua).
 function addon:RefreshOptionTables()
   Options:Refresh()
 end

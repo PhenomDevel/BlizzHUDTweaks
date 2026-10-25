@@ -20,9 +20,9 @@
 ## Category-ruRU: Интерфейс пользователя
 ## Category-zhCN: 用户界面
 ## Category-zhTW: 使用者介面
-## IconTexture: Interface/Addons/BlizzHUDTweaks/Media/Icons/BlizzHUDTweaks.blp
+## IconTexture: Interface/Addons/BlizzHUDTweaks/Media/Logo.blp
 
-
+# Libraries (.pkgmeta externals, LibDeflate committed)
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
 Libs\AceAddon-3.0\AceAddon-3.0.xml
@@ -34,25 +34,25 @@ Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\lib.xml
 Libs\LibDeflate\LibDeflate.lua
 
-BlizzHUDTweaks.lua
+# Core (Init.lua creates the addon and its modules)
+Core\Init.lua
+Core\Utils.lua
+Core\EventHandler.lua
 
 # Modules
-MouseoverFrameFading.lua
-Miscellaneous.lua
-Tooltip.lua
+Modules\MouseoverFrameFading.lua
+Modules\Miscellaneous.lua
+Modules\Tooltip.lua
 
-Util.lua
-EventHandler.lua
-
-# Options window (widgets and window first, then the pages)
-Options/Widgets.lua
-Toast.lua
-WhatsNewNotes.lua
-WhatsNew.lua
-FramePicker.lua
-Options/Window.lua
-Options.lua
-Options/MouseoverFrameFading.lua
-Options/Miscellaneous.lua
-Options/Tooltip.lua
-Options/Profiles.lua
+# UI (widgets and window first, then the pages)
+UI\Widgets.lua
+UI\Toast.lua
+UI\WhatsNewNotes.lua
+UI\WhatsNew.lua
+UI\FramePicker.lua
+UI\Window.lua
+UI\Options.lua
+UI\Pages\MouseoverFrameFading.lua
+UI\Pages\Miscellaneous.lua
+UI\Pages\Tooltip.lua
+UI\Pages\Profiles.lua
