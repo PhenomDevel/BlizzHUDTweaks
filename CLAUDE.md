@@ -56,7 +56,8 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
 ## Conventions
 - Lua 5.1, 2 spaces indentation, English code comments and docs.
 - In-game strings are English only.
-- Commit messages: `[feature] …`, `[fix] …`, `[chore] …`.
+- Commit messages and PR titles: Conventional Commits (`feat: …`, `fix: …`,
+  `docs: …`, `chore: …`, see the general rules).
 - `.luacheckrc` holds the common WoW globals; declare others per file with
   `-- luacheck: read globals …`.
 
