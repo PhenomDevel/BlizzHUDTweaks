@@ -84,8 +84,10 @@ four (one PR per repository).
   (written for players). A release PR renames it to `## vX.Y.Z (YYYY-MM-DD)`
   and adds the "What's new" entry where the addon has one.
 - READMEs are for players only, outline in this order:
-  1. `# Name`, logo (`<img … width="96" align="right">`), badges: Version,
-     CurseForge, License (same set in all four)
+  1. `# Name`, logo (`<img … width="96" align="right">` with an absolute
+     `https://raw.githubusercontent.com/…` URL, so it also renders on
+     CurseForge/Wago), badges: Version, CurseForge, License (same set in all
+     four)
   2. summary: bold one-line tagline and a short abstract
   3. `## Supported versions`: table `Client | Interface`, matching the `.toc`
   4. `## Installation`: CurseForge/Wago app or GitHub releases, manual
