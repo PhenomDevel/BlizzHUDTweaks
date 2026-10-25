@@ -1,9 +1,5 @@
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 
-function addon:IsTable(x)
-  return type(x) == "table"
-end
-
 --credit https://www.mmo-champion.com/threads/2414999-How-do-I-disable-the-GCD-flash-on-my-bars
 function addon:HideGCDFlash()
   -- Optimized: Only check specific actionbar frames instead of iterating all globals
@@ -52,18 +48,6 @@ function addon:tClone(orig, copies)
     copy = orig
   end
   return copy
-end
-
-function addon:tKeys(t)
-  local keyset = {}
-  local n = 0
-
-  for k, _ in pairs(t) do
-    n = n + 1
-    keyset[n] = k
-  end
-
-  return keyset
 end
 
 function addon:IsMounted()

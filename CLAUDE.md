@@ -16,7 +16,6 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
 - `Core/Init.lua`: AceAddon setup, profile defaults, `frameMapping`
   (profile key → frame), custom frames and the public addon API; creates all
   AceAddon modules. `Core/EventHandler.lua`: events, `Core/Utils.lua`: helpers.
-  `Core/API.lua` and `Core/Debug.lua` are not in the `.toc` (not loaded).
 - Modules: `Modules/MouseoverFrameFading.lua`, `Modules/Miscellaneous.lua`,
   `Modules/Tooltip.lua`.
 - Options: own window, no AceConfig. `UI/Widgets.lua` (controls),

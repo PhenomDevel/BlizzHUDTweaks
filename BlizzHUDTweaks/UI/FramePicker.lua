@@ -278,7 +278,3 @@ function FramePicker:Start(validate, onPick, onCancel)
   overlay:Show()
   return true
 end
-
-function FramePicker:IsPicking()
-  return overlay ~= nil and overlay:IsShown()
-end
