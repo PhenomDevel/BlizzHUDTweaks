@@ -18,112 +18,60 @@ local function getButtonSizeForActionbar(actionbar)
   end
 end
 
+-- Length of `count` buttons in a line, including the padding between them.
+local function lineLength(actionbar, count, padding)
+  local buttonScale = actionbar.settingMap[3].displayValue / 100
+  return (count * getButtonSizeForActionbar(actionbar) + (count - 1) * padding) * buttonScale
+end
+
 local function setActionbarWidth(actionbar, padding)
   if actionbar.settingMap and isActionbarInitialized(actionbar) then
     padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
-    local buttonSize = getButtonSizeForActionbar(actionbar)
-    local buttonScale = (actionbar.settingMap[3].displayValue / 100)
-    local newWidth
-
-    if actionbar.isHorizontal then
-      local numberOfButtonsPerRow
-
-      if actionbar.numRows == 1 then
-        numberOfButtonsPerRow = actionbar.numButtonsShowable
-      else
-        numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
-      end
-
-      newWidth = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
-    else
-      local numberOfButtonsPerRow
-
-      if actionbar.numRows == 1 then
-        numberOfButtonsPerRow = 1
-      else
-        numberOfButtonsPerRow = actionbar.numRows
-      end
-
-      newWidth = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
-    end
-
-    actionbar:SetWidth(newWidth)
+    local buttonsPerLine = actionbar.isHorizontal and actionbar.numButtonsShowable / actionbar.numRows or actionbar.numRows
+    actionbar:SetWidth(lineLength(actionbar, buttonsPerLine, padding))
   end
 end
 
+-- Single-row bars keep their height.
 local function setActionbarHeight(actionbar, padding)
-  if actionbar.settingMap and isActionbarInitialized(actionbar) then
+  if actionbar.settingMap and isActionbarInitialized(actionbar) and actionbar.numRows ~= 1 then
     padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
-    local buttonSize = getButtonSizeForActionbar(actionbar)
-    local buttonScale = (actionbar.settingMap[3].displayValue / 100)
-    local newHeight
+    local buttonsPerLine = actionbar.isHorizontal and actionbar.numRows or actionbar.numButtonsShowable / actionbar.numRows
+    actionbar:SetHeight(lineLength(actionbar, buttonsPerLine, padding))
+  end
+end
 
-    if actionbar.isHorizontal then
-      local numberOfButtonsPerRow
+-- Re-anchors the buttons of a bar with `padding` between them. Horizontal
+-- bars grow right and up from the bottom-left button, vertical bars grow down
+-- and right from the top-left button.
+local function restoreActionbarButtons(options, actionbar, padding)
+  if not isActionbarInitialized(actionbar) then
+    return
+  end
 
-      if actionbar.numRows == 1 then
-        return
+  local horizontal = actionbar.isHorizontal
+  local point = horizontal and "BOTTOMLEFT" or "TOPLEFT"
+  local numCols = actionbar.numButtonsShowable / actionbar.numRows
+
+  local veryFirstButton = _G[options.actionButtonName .. 1]
+  veryFirstButton:SetParent(actionbar)
+  veryFirstButton:SetPoint(point, actionbar, point, 0, 0)
+
+  for i = 2, actionbar.numButtonsShowable, 1 do
+    local currentButton = _G[options.actionButtonName .. i]
+    if math.fmod(i - 1, numCols) == 0 then
+      local firstButtonPreviousRow = _G[options.actionButtonName .. (i - numCols)]
+      if horizontal then
+        currentButton:SetPoint(point, firstButtonPreviousRow, "TOPLEFT", 0, padding)
       else
-        numberOfButtonsPerRow = actionbar.numRows
+        currentButton:SetPoint(point, firstButtonPreviousRow, "TOPRIGHT", padding, 0)
       end
-
-      newHeight = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
     else
-      local numberOfButtonsPerRow
-
-      if actionbar.numRows == 1 then
-        return
-      else
-        numberOfButtonsPerRow = actionbar.numButtonsShowable / actionbar.numRows
-      end
-
-      newHeight = ((numberOfButtonsPerRow * buttonSize) + ((numberOfButtonsPerRow - 1) * padding)) * buttonScale
-    end
-
-    actionbar:SetHeight(newHeight)
-  end
-end
-
-local function restoreActionbarButtonHorizontal(options, actionbar, padding)
-  if isActionbarInitialized(actionbar) then
-    local numCols = actionbar.numButtonsShowable / actionbar.numRows
-
-    local veryFirstButton = _G[options.actionButtonName .. 1]
-    veryFirstButton:SetParent(actionbar)
-    veryFirstButton:SetPoint("BOTTOMLEFT", actionbar, "BOTTOMLEFT", 0, -0)
-
-    for i = 2, actionbar.numButtonsShowable, 1 do
-      local firstOfRow = math.fmod(i - 1, numCols) == 0
-      local currentButton = _G[options.actionButtonName .. i]
       local previousButton = _G[options.actionButtonName .. i - 1]
-      if firstOfRow then
-        local firstButtonPreviousRow = _G[options.actionButtonName .. (i - numCols)]
-        currentButton:SetPoint("BOTTOMLEFT", firstButtonPreviousRow, "TOPLEFT", 0, padding)
+      if horizontal then
+        currentButton:SetPoint(point, previousButton, "BOTTOMRIGHT", padding, 0)
       else
-        currentButton:SetPoint("BOTTOMLEFT", previousButton, "BOTTOMRIGHT", padding, 0)
-      end
-    end
-  end
-end
-
-local function restoreActionbarButtonVertical(options, actionbar, padding)
-  if isActionbarInitialized(actionbar) then
-    local numCols = actionbar.numButtonsShowable / actionbar.numRows
-
-    local veryFirstButton = _G[options.actionButtonName .. 1]
-    veryFirstButton:SetParent(actionbar)
-    veryFirstButton:SetPoint("TOPLEFT", actionbar, "TOPLEFT", 0, -0)
-
-    for i = 2, actionbar.numButtonsShowable, 1 do
-      local firstOfRow = math.fmod(i - 1, numCols) == 0
-      local currentButton = _G[options.actionButtonName .. i]
-      local previousButton = _G[options.actionButtonName .. i - 1]
-
-      if firstOfRow then
-        local firstButtonPreviousRow = _G[options.actionButtonName .. (i - numCols)]
-        currentButton:SetPoint("TOPLEFT", firstButtonPreviousRow, "TOPRIGHT", padding, 0)
-      else
-        currentButton:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -padding)
+        currentButton:SetPoint(point, previousButton, "BOTTOMLEFT", 0, -padding)
       end
     end
   end
@@ -174,11 +122,7 @@ function Miscellaneous:RestoreActionbarPadding(profile, options, padding, forced
   if isActionbarInitialized(actionbar) then
     if actionbar and (enabled or forced) and not InCombatLockdown() then
       padding = padding or actionbar.buttonPadding or actionbar.minButtonPadding or 0
-      if actionbar.isHorizontal then
-        restoreActionbarButtonHorizontal(options, actionbar, padding)
-      else
-        restoreActionbarButtonVertical(options, actionbar, padding)
-      end
+      restoreActionbarButtons(options, actionbar, padding)
     end
   end
 end
