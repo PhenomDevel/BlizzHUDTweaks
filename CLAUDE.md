@@ -8,6 +8,8 @@ calls). Do not assume the old Classic Era API. Features that only exist in one
 client (e.g. the Forever swing timer) must be hidden or skipped in the other.
 
 ## Layout
+- Dev setup and checks: `docs/DEVELOPMENT.md`. Release and shared
+  conventions: see *Shared with the other PhenomDevel addons* below.
 - `BlizzHUDTweaks/` is the addon folder that gets installed; everything else
   stays in the repo only (see `.pkgmeta`).
 - Load order is defined in `BlizzHUDTweaks.toc`.
@@ -23,11 +25,6 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
 - `WhatsNew.lua` / `WhatsNewNotes.lua`: "What's new" window after updates.
   Add an entry to `WhatsNewNotes.lua` (newest first) for every release users
   should hear about; `version` is the release version without the `v`.
-
-## Release
-- Same process in all PhenomDevel addons: `docs/RELEASE.md`. Tags are
-  `vX.Y.Z`; every user-facing change adds a line under `## Unreleased` in
-  `CHANGELOG.md`.
 
 ## Fading frames
 - A built-in frame needs a profile default (`displayName`) and an entry in
@@ -64,8 +61,39 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
   `-- luacheck: read globals …`.
 
 ## Checks
-- `luacheck BlizzHUDTweaks` must pass before committing
+- `luacheck .` must pass before committing
   (install with `apt-get install lua5.1 luarocks && luarocks install luacheck`).
 - There are no automated tests: Kevin verifies every change in-game. Do not
   add a mocked WoW API to the repo. In the PR description, list what he should
   check in-game.
+
+## Shared with the other PhenomDevel addons
+PhenomRaidTools, BlizzHUDTweaks, Quality-of-Life-Forever and
+Guild-Finder-Forever follow the same conventions below; this section is
+identical in their `CLAUDE.md`. A change to a shared file or rule goes to all
+four (one PR per repository).
+
+- Release process: `docs/RELEASE.md`. `.github/workflows/release.yml`,
+  `.github/workflows/ci.yml` and `docs/RELEASE.md` are identical in all four,
+  except the `env` block of `release.yml` and the "This repository" section
+  of `RELEASE.md`.
+- Tags: `vX.Y.Z`, test releases `vX.Y.Z-alphaN` / `-betaN`. Releases are
+  started by Kevin (*Actions → Release → Run workflow*); never push tags or
+  start the release workflow without being asked.
+- Every user-facing PR adds a line under `## Unreleased` in `CHANGELOG.md`
+  (written for players). A release PR renames it to `## vX.Y.Z (YYYY-MM-DD)`
+  and adds the "What's new" entry where the addon has one.
+- README outline, in this order:
+  1. `# Name`, logo (`<img … width="96" align="right">`), badges: CI,
+     Release, Version, CurseForge, License (+ Discord where the addon has one)
+  2. bold one-line tagline, short intro for players
+  3. `## Installation`: CurseForge/Wago app or GitHub releases, manual
+     install folder, first command; then a link to `CHANGELOG.md`
+  4. `## Supported clients`: table `Client | Interface`, matching the `.toc`
+  5. `## Usage` with `### Commands` (table)
+  6. `## Features`; optional `## FAQ`, `## Known limitations`
+  7. `## Feedback & support`, `## Development` (links to
+     `docs/DEVELOPMENT.md` and `docs/RELEASE.md`), `## License`
+  8. footer "Developed with the help of AI …"
+- Developer details (libraries, local setup, checks, release) belong in
+  `docs/`, not in the README.
