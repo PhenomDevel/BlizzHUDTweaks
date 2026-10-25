@@ -1,9 +1,32 @@
-[![CI](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/ci.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/ci.yml) [![Release](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/release.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/release.yml) [![Discord General](https://img.shields.io/discord/596662921753526275?label=discord)](https://discord.gg/4fSVKCVJWy)
-
 # BlizzHUDTweaks
-Fade the Blizzard default frames by situation (combat, mouseover, target, rested area and more) and tweak the default HUD, without replacing it.
 
-## Supported versions
+<img src="media-src/logo-512.png" alt="BlizzHUDTweaks logo" width="96" align="right">
+
+[![CI](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/ci.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/ci.yml)
+[![Release](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/release.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/release.yml)
+[![Version](https://img.shields.io/github/v/release/PhenomDevel/BlizzHUDTweaks?label=version)](https://github.com/PhenomDevel/BlizzHUDTweaks/releases/latest)
+[![CurseForge](https://img.shields.io/curseforge/dt/698104?label=CurseForge)](https://www.curseforge.com/projects/698104)
+[![License](https://img.shields.io/github/license/PhenomDevel/BlizzHUDTweaks)](LICENSE)
+[![Discord](https://img.shields.io/discord/596662921753526275?label=discord)](https://discord.gg/4fSVKCVJWy)
+
+**Fade and tweak the default Blizzard HUD, without replacing it.**
+
+Fade the Blizzard default frames by situation (combat, mouseover, target,
+rested area and more), fade frames of other addons, and tweak small parts of
+the default HUD.
+
+## Installation
+
+1. Install it with the CurseForge or Wago app, or download the zip from
+   [GitHub releases](https://github.com/PhenomDevel/BlizzHUDTweaks/releases).
+2. For a manual install, extract `BlizzHUDTweaks` into the game client's
+   `Interface/AddOns/` folder (`_retail_` or your WoW: Forever installation).
+3. Log in and type `/bht`.
+
+Changes per version: [CHANGELOG.md](CHANGELOG.md).
+
+## Supported clients
+
 | Client | Interface |
 | --- | --- |
 | WoW: Forever | 16001 |
@@ -11,7 +34,22 @@ Fade the Blizzard default frames by situation (combat, mouseover, target, rested
 
 Classic Era, Cataclysm/Mists Classic and other clients are not supported.
 
+## Usage
+
+Open the options with `/bht` (or `/blizzhudtweaks`), the minimap icon or
+`Options > AddOns > BlizzHUDTweaks`. The search box finds options on every
+page.
+
+### Commands
+
+| Command | |
+| --- | --- |
+| `/bht` | Open/close the options (also `/blizzhudtweaks`) |
+| `/bht minimap` | Show/hide the minimap icon |
+| `/bht news` | Show what's new |
+
 ## Features
+
 ### Frame fading
 Set an alpha value per situation for action bars, unit frames, auras, status bars, the minimap, the objective tracker, the cooldown manager and more:
 
@@ -45,21 +83,26 @@ Custom frames have the same options as built-in ones, can be renamed and are sav
 ### Profiles
 Create, copy, reset and delete profiles, and share them via import/export strings (custom frames included).
 
-## Usage
-Open the options with `/bht` (or `/blizzhudtweaks`), the minimap icon or `Options > AddOns > BlizzHUDTweaks`. The search box finds options on every page. `/bht minimap` toggles the minimap icon.
-
 ## FAQ
+
 - **A frame does not fade**: check that fading is `Enabled` for that frame.
 - **A frame does not show**: set `Bar Visible` in Blizzard's Edit Mode to `Always visible`, otherwise the Edit Mode setting wins.
 - **Fade delay is ignored**: mouseover cancels the delay once you leave the frame.
 - **Padding changes in combat**: they are applied after combat (protected functions).
 
-Questions: [Discord](https://discord.gg/4fSVKCVJWy). If you like the addon, leave a star on GitHub :)
+## Feedback & support
 
-## Release
-Add a `## vX.Y.Z (YYYY-MM-DD)` section to `CHANGELOG.md`, merge it, then run *Actions → Release → Run workflow* on `main` with the version (`v3.4.0`, or `v3.4.0-beta1` / `-alpha1` for test releases). The workflow tags the commit and uploads to CurseForge, Wago and GitHub. Details: [docs/RELEASE.md](docs/RELEASE.md) (same process in all PhenomDevel addons).
+- Questions: [Discord](https://discord.gg/4fSVKCVJWy).
+- Bugs and ideas: [GitHub issues](https://github.com/PhenomDevel/BlizzHUDTweaks/issues).
+- If you like the addon, star it on GitHub :)
+
+## Development
+
+- Libraries, local setup and checks: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
+- Release (same process in all PhenomDevel addons): [`docs/RELEASE.md`](docs/RELEASE.md)
 
 ## License
+
 [MIT](LICENSE)
 
 ---
