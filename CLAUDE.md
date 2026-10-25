@@ -118,3 +118,7 @@ four (one PR per repository).
   7. footer "Developed with the help of AI …"
 - No developer, API, release or guide content in the README; that belongs in
   `docs/` (e.g. `docs/DEVELOPMENT.md`, `docs/RELEASE.md`).
+- Every link and image in the README is absolute
+  (`https://github.com/PhenomDevel/<repo>/blob/<branch>/…`, images via
+  `https://raw.githubusercontent.com/…`), so it also works where the README
+  is shown outside GitHub (CurseForge, Wago).

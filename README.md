@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/github/v/release/PhenomDevel/BlizzHUDTweaks?label=version)](https://github.com/PhenomDevel/BlizzHUDTweaks/releases/latest)
 [![CurseForge](https://img.shields.io/curseforge/dt/698104?label=CurseForge)](https://www.curseforge.com/projects/698104)
-[![License](https://img.shields.io/github/license/PhenomDevel/BlizzHUDTweaks)](LICENSE)
+[![License](https://img.shields.io/github/license/PhenomDevel/BlizzHUDTweaks)](https://github.com/PhenomDevel/BlizzHUDTweaks/blob/main/LICENSE)
 
 **Fade and tweak the default Blizzard HUD, without replacing it.**
 
@@ -30,7 +30,7 @@ Classic Era, Cataclysm/Mists Classic and other clients are not supported.
    `World of Warcraft/<client>/Interface/AddOns/`.
 3. Log in and type `/bht`.
 
-What changed: [CHANGELOG.md](CHANGELOG.md)
+What changed: [CHANGELOG.md](https://github.com/PhenomDevel/BlizzHUDTweaks/blob/main/CHANGELOG.md)
 
 ## Features
 
