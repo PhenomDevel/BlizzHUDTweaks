@@ -83,17 +83,16 @@ four (one PR per repository).
 - Every user-facing PR adds a line under `## Unreleased` in `CHANGELOG.md`
   (written for players). A release PR renames it to `## vX.Y.Z (YYYY-MM-DD)`
   and adds the "What's new" entry where the addon has one.
-- README outline, in this order:
-  1. `# Name`, logo (`<img … width="96" align="right">`), badges: CI,
-     Release, Version, CurseForge, License (+ Discord where the addon has one)
-  2. bold one-line tagline, short intro for players
-  3. `## Installation`: CurseForge/Wago app or GitHub releases, manual
+- READMEs are for players only, outline in this order:
+  1. `# Name`, logo (`<img … width="96" align="right">`), badges: Version,
+     CurseForge, License (same set in all four)
+  2. summary: bold one-line tagline and a short abstract
+  3. `## Supported versions`: table `Client | Interface`, matching the `.toc`
+  4. `## Installation`: CurseForge/Wago app or GitHub releases, manual
      install folder, first command; then a link to `CHANGELOG.md`
-  4. `## Supported clients`: table `Client | Interface`, matching the `.toc`
-  5. `## Usage` with `### Commands` (table)
-  6. `## Features`; optional `## FAQ`, `## Known limitations`
-  7. `## Feedback & support`, `## Development` (links to
-     `docs/DEVELOPMENT.md` and `docs/RELEASE.md`), `## License`
-  8. footer "Developed with the help of AI …"
-- Developer details (libraries, local setup, checks, release) belong in
-  `docs/`, not in the README.
+  5. `## Features`, ending with `### Commands` (table)
+  6. `## Support`: common issues, GitHub issues, Discord where the addon has
+     one, tip link `https://streamlabs.com/phenombutbetter/tip`
+  7. footer "Developed with the help of AI …"
+- No developer, API, release or guide content in the README; that belongs in
+  `docs/` (e.g. `docs/DEVELOPMENT.md`, `docs/RELEASE.md`).
