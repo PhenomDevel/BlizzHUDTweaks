@@ -1,4 +1,9 @@
 std = "luajit"
+exclude_files = {
+  ".release/",
+  -- Third-party libraries (.pkgmeta externals).
+  "BlizzHUDTweaks/Libs/",
+}
 globals = {
   -- World of Warcraft related
   "UIParent",

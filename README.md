@@ -1,4 +1,4 @@
-[![Build](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/build.yml) [![Discord General](https://img.shields.io/discord/596662921753526275?label=discord)](https://discord.gg/4fSVKCVJWy)
+[![CI](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/ci.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/ci.yml) [![Release](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/release.yml/badge.svg)](https://github.com/PhenomDevel/BlizzHUDTweaks/actions/workflows/release.yml) [![Discord General](https://img.shields.io/discord/596662921753526275?label=discord)](https://discord.gg/4fSVKCVJWy)
 
 # BlizzHUDTweaks
 Fade the Blizzard default frames by situation (combat, mouseover, target, rested area and more) and tweak the default HUD, without replacing it.
@@ -55,6 +55,9 @@ Open the options with `/bht` (or `/blizzhudtweaks`), the minimap icon or `Option
 - **Padding changes in combat**: they are applied after combat (protected functions).
 
 Questions: [Discord](https://discord.gg/4fSVKCVJWy). If you like the addon, leave a star on GitHub :)
+
+## Release
+Add a `## vX.Y.Z (YYYY-MM-DD)` section to `CHANGELOG.md`, merge it, then run *Actions → Release → Run workflow* on `main` with the version (`v3.4.0`, or `v3.4.0-beta1` / `-alpha1` for test releases). The workflow tags the commit and uploads to CurseForge, Wago and GitHub. Details: [docs/RELEASE.md](docs/RELEASE.md) (same process in all PhenomDevel addons).
 
 ## License
 [MIT](LICENSE)
