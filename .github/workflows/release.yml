@@ -1,0 +1,106 @@
+name: Release
+
+# Packages the addon and uploads it to CurseForge, Wago and GitHub releases.
+# Start it from Actions → Release → Run workflow with a version (v1.2.0, or
+# v1.2.0-beta1 / -alpha1 for test releases); it tags the branch it runs on.
+# Pushing a v* tag manually works as well. Process: docs/RELEASE.md.
+#
+# Same file in all PhenomDevel addon repositories; only `env` differs.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag, e.g. v1.2.0 or v1.2.0-beta1"
+        required: true
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency: release
+
+env:
+  # Branches besides the default branch that may ship alpha/beta releases
+  # (space-separated).
+  PRERELEASE_BRANCHES: ""
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version || github.ref_name }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The packager needs the tag history for the version.
+          fetch-depth: 0
+
+      - name: Check version
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta)[0-9]+)?$ ]]; then
+            echo "::error::Invalid version '$VERSION'"; exit 1
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            branch="${GITHUB_REF#refs/heads/}"
+            if [[ "$branch" != "$DEFAULT_BRANCH" ]]; then
+              if [[ " $PRERELEASE_BRANCHES " != *" $branch "* ]]; then
+                echo "::error::Releases are only created from $DEFAULT_BRANCH${PRERELEASE_BRANCHES:+ (alpha/beta also from $PRERELEASE_BRANCHES)}"; exit 1
+              fi
+              if [[ "$VERSION" != *-* ]]; then
+                echo "::error::Only alpha/beta releases are created from $branch"; exit 1
+              fi
+            fi
+            if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+              echo "::error::Tag $VERSION already exists"; exit 1
+            fi
+          fi
+
+      # The packager uploads CHANGELOG.md (.pkgmeta manual-changelog) as the
+      # release notes; cut it down to this version's section.
+      - name: Release notes
+        run: |
+          notes="$RUNNER_TEMP/notes.md"
+          awk -v v="$VERSION" '/^## / { if (found) exit; found = ($2 == v) } found' CHANGELOG.md > "$notes"
+          if [[ ! -s "$notes" ]]; then
+            echo "::error::CHANGELOG.md has no section '## $VERSION'"; exit 1
+          fi
+          mv "$notes" CHANGELOG.md
+          cat CHANGELOG.md
+
+      # luacheck for the lint step, subversion for CurseForge externals.
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 luarocks subversion
+          sudo luarocks install luacheck
+
+      - name: Lint
+        run: luacheck .
+
+      # Tags pushed with GITHUB_TOKEN don't trigger workflows, so this doesn't
+      # start a second run via the tag trigger.
+      - name: Create tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git tag "$VERSION"
+          git push origin "refs/tags/$VERSION"
+
+      # Uploads are skipped for a site without project ID in the .toc
+      # (X-Curse-Project-ID, X-Wago-ID) or without its secret.
+      - name: Package and release
+        uses: BigWigsMods/packager@v2
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report failure to Discord
+        if: failure() && env.DISCORD_WEBHOOK_URL != ''
+        uses: nebularg/actions-discord-webhook@v1
+        with:
+          webhook_url: ${{ env.DISCORD_WEBHOOK_URL }}
+          status: ${{ job.status }}

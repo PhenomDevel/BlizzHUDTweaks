@@ -22,7 +22,12 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
 - `Toast.lua`: short on-screen message (e.g. after the fading toggle keybind).
 - `WhatsNew.lua` / `WhatsNewNotes.lua`: "What's new" window after updates.
   Add an entry to `WhatsNewNotes.lua` (newest first) for every release users
-  should hear about; the version must match the release tag.
+  should hear about; `version` is the release version without the `v`.
+
+## Release
+- Same process in all PhenomDevel addons: `docs/RELEASE.md`. Tags are
+  `vX.Y.Z`; every user-facing change adds a line under `## Unreleased` in
+  `CHANGELOG.md`.
 
 ## Fading frames
 - A built-in frame needs a profile default (`displayName`) and an entry in
