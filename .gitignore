@@ -1,12 +1,18 @@
-./ldoc
-/.html
-BlizzHUDTweaks/Libs/Ace*
-BlizzHUDTweaks/Libs/LibStub
-BlizzHUDTweaks/Libs/LibShared*
-BlizzHUDTweaks/Libs/LibDBIcon*
-BlizzHUDTweaks/Libs/LibData*
-BlizzHUDTweaks/Libs/Callback*
-*.html
+# Packager output
+.release/
+*.zip
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+
+# Libraries come from .pkgmeta externals; LibDeflate is committed.
+BlizzHUDTweaks/Libs/*
+!BlizzHUDTweaks/Libs/LibDeflate/
+
+# Local scratch files and Markdown previews
 SCRATCH.lua
 /Assets
-.vscode/settings.json
+/*.html

@@ -13,23 +13,25 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
 - `BlizzHUDTweaks/` is the addon folder that gets installed; everything else
   stays in the repo only (see `.pkgmeta`).
 - Load order is defined in `BlizzHUDTweaks.toc`.
-- `BlizzHUDTweaks.lua`: AceAddon setup, profile defaults, `frameMapping`
-  (profile key → frame), custom frames and the public addon API.
-- Modules: `MouseoverFrameFading.lua`, `Miscellaneous.lua`, `Tooltip.lua`;
-  events in `EventHandler.lua`.
-- Options: own window, no AceConfig. `Options/Widgets.lua` (controls),
-  `Options/Window.lua` (window, pages, row types), one file per page in
-  `Options/`. Pages are rebuilt from the profile on every render.
-- `FramePicker.lua`: overlay for picking custom frames.
-- `Toast.lua`: short on-screen message (e.g. after the fading toggle keybind).
-- `WhatsNew.lua` / `WhatsNewNotes.lua`: "What's new" window after updates.
-  Add an entry to `WhatsNewNotes.lua` (newest first) for every release users
+- `Core/Init.lua`: AceAddon setup, profile defaults, `frameMapping`
+  (profile key → frame), custom frames and the public addon API; creates all
+  AceAddon modules. `Core/EventHandler.lua`: events, `Core/Utils.lua`: helpers.
+  `Core/API.lua` and `Core/Debug.lua` are not in the `.toc` (not loaded).
+- Modules: `Modules/MouseoverFrameFading.lua`, `Modules/Miscellaneous.lua`,
+  `Modules/Tooltip.lua`.
+- Options: own window, no AceConfig. `UI/Widgets.lua` (controls),
+  `UI/Window.lua` (window, pages, row types), `UI/Options.lua`, one file per
+  page in `UI/Pages/`. Pages are rebuilt from the profile on every render.
+- `UI/FramePicker.lua`: overlay for picking custom frames.
+- `UI/Toast.lua`: short on-screen message (e.g. after the fading toggle keybind).
+- `UI/WhatsNew.lua` / `UI/WhatsNewNotes.lua`: "What's new" window after updates.
+  Add an entry to `UI/WhatsNewNotes.lua` (newest first) for every release users
   should hear about; `version` is the release version without the `v`.
 
 ## Fading frames
 - A built-in frame needs a profile default (`displayName`) and an entry in
-  `frameMapping` in `BlizzHUDTweaks.lua`, plus a group in
-  `Options/MouseoverFrameFading.lua` (otherwise it ends up in "Other").
+  `frameMapping` in `Core/Init.lua`, plus a group in
+  `UI/Pages/MouseoverFrameFading.lua` (otherwise it ends up in "Other").
 - Frames that may not exist when the addon loads get `lookup = "GlobalName"`
   in `frameMapping`; they are resolved later.
 - Profile keys are SavedVariables – never rename a released key without a
@@ -83,6 +85,24 @@ four (one PR per repository).
 - Every user-facing PR adds a line under `## Unreleased` in `CHANGELOG.md`
   (written for players). A release PR renames it to `## vX.Y.Z (YYYY-MM-DD)`
   and adds the "What's new" entry where the addon has one.
+- Repository layout, the same in all four (only the folders an addon needs):
+  - `<Addon>/<Addon>.toc` lists everything (libraries too, no `embeds.xml`),
+    paths with backslashes, sections `Libs`, `Locales`, `Core`, `UI`,
+    `Modules`.
+  - `<Addon>/Libs/`, `Locales/` (enUS first), `Media/` (addon icon
+    `Logo.tga`/`Logo.blp`, other assets in subfolders), `Core/` (setup in
+    `Core/Init.lua`, logic, data, events), `UI/` (windows, widgets, option
+    pages, minimap button, toasts, What's new), `Modules/` (self-contained
+    features).
+  - `docs/` (`DEVELOPMENT.md` with the layout tree, `RELEASE.md`,
+    `logo/logo.svg` + `logo/logo.png`), `tools/` (dev scripts),
+    `.github/workflows/` (`ci.yml`, `release.yml`) and
+    `.github/ISSUE_TEMPLATE/` (`bug-report.md`, `feature-request.md`,
+    identical in all four).
+  - Root: `.editorconfig`, `.gitignore` (same base, repo-specific part
+    below it), `.luacheckrc`, `.pkgmeta` (ignore `README.md`, `CLAUDE.md`,
+    `docs`, `tools`), `CHANGELOG.md`, `CLAUDE.md`, `LICENSE` (MIT),
+    `README.md`.
 - READMEs are for players only, outline in this order:
   1. `# Name`, logo (`<img … width="96" align="right">` with an absolute
      `https://raw.githubusercontent.com/…` URL, so it also renders on

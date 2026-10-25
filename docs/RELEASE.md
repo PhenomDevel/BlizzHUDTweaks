@@ -64,6 +64,6 @@ curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh
 - Default branch: `main`. No prerelease branches.
 - [CurseForge](https://www.curseforge.com/projects/698104) 698104,
   [Wago](https://addons.wago.io/addons/rkGrWlNy) `rkGrWlNy`.
-- What's new: `BlizzHUDTweaks/WhatsNewNotes.lua`, newest first,
+- What's new: `BlizzHUDTweaks/UI/WhatsNewNotes.lua`, newest first,
   `version = "X.Y.Z"`, English only. The window shows every entry newer than
   the last version the player saw; test releases show nothing.

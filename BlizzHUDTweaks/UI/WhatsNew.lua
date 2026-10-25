@@ -19,7 +19,7 @@ local Markup = Widgets.Markup
 local WhatsNew = {}
 BlizzHUDTweaks.WhatsNew = WhatsNew
 
-local LOGO = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Icons\\BlizzHUDTweaks.blp"
+local LOGO = "Interface\\AddOns\\BlizzHUDTweaks\\Media\\Logo.blp"
 local WIDTH, MAX_HEIGHT = 500, 480
 local PADDING = 16
 local HEADER_HEIGHT = 48

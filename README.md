@@ -1,6 +1,6 @@
 # BlizzHUDTweaks
 
-<img src="https://raw.githubusercontent.com/PhenomDevel/BlizzHUDTweaks/main/media-src/logo-512.png" alt="BlizzHUDTweaks logo" width="96" align="right">
+<img src="https://raw.githubusercontent.com/PhenomDevel/BlizzHUDTweaks/main/docs/logo/logo.png" alt="BlizzHUDTweaks logo" width="96" align="right">
 
 [![Version](https://img.shields.io/github/v/release/PhenomDevel/BlizzHUDTweaks?label=version)](https://github.com/PhenomDevel/BlizzHUDTweaks/releases/latest)
 [![CurseForge](https://img.shields.io/curseforge/dt/698104?label=CurseForge)](https://www.curseforge.com/projects/698104)
