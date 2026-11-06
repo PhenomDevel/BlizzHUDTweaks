@@ -21,6 +21,23 @@ local function getToggleRow(key, label, desc, apply)
   }
 end
 
+-- Only matters while the tooltip follows the mouse, so it sits below that
+-- switch and is read-only while the switch is off.
+local function getAnchorInCombatRow()
+  local row = getToggleRow(
+    "TooltipAnchorInCombat",
+    "Also in Combat and Instances",
+    "By default the tooltip goes back to its normal position in combat and in instances, " ..
+      "because moving it there can cause errors with Blizzard's tooltips. " ..
+      "If enabled, it follows the mouse there too, using a lighter method that does not touch the tooltip's content.",
+    function()
+    end
+  )
+  row.indent = 26
+  row.disabled = not Options:GetValue(Info("TooltipAnchorToMouse"))
+  return row
+end
+
 local function getCards()
   local moduleCard = Options:GetModuleCard("tooltip")
   local notice = Options:GetModuleOffNotice("tooltip")
@@ -43,8 +60,11 @@ local function getCards()
             else
               Tooltip:AnchorTooltipToMouse()
             end
+            -- the combat row below is read-only while this is off
+            Options:Refresh()
           end
         ),
+        getAnchorInCombatRow(),
         getToggleRow(
           "TooltipShowSpellID",
           "Show Spell ID in Tooltip",

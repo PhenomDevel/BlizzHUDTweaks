@@ -4,16 +4,34 @@ local Tooltip = addon:GetModule("Tooltip")
 -- using a secure hook instead of replacing the global function prevents
 -- Blizzard taint errors.  The hook is registered only once and checks the
 -- profile option each time it runs.
+--
+-- Out of combat the tooltip gets a new owner with the cursor anchor. SetOwner
+-- clears the tooltip and runs its OnHide/OnTooltipCleared scripts, so calling
+-- it from addon code taints the fields those scripts write; in combat and in
+-- instances Blizzard's tooltip code works with secret values, and that taint
+-- turns into errors. There the tooltip stays at Blizzard's default position,
+-- unless "TooltipAnchorInCombat" is on: then only the anchor type is changed
+-- (SetAnchorType is a plain widget call that runs no scripts and keeps the
+-- owner and the content).
 local anchorHooked
+
+local function isRestricted()
+    return InCombatLockdown() or IsInInstance()
+end
 
 local function ensureTooltipAnchorHook()
     if not anchorHooked then
         hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-            if not InCombatLockdown() and not IsInInstance() then
-                local profile = addon:GetProfileDB()
-                if profile["TooltipAnchorToMouse"] then
-                    tooltip:SetOwner(parent, "ANCHOR_CURSOR")
-                end
+            local profile = addon:GetProfileDB()
+            if not Tooltip:IsEnabled() or not profile["TooltipAnchorToMouse"] then
+                return
+            end
+
+            if not isRestricted() then
+                tooltip:SetOwner(parent, "ANCHOR_CURSOR")
+            elseif profile["TooltipAnchorInCombat"] and tooltip.SetAnchorType then
+                tooltip:ClearAllPoints()
+                tooltip:SetAnchorType("ANCHOR_CURSOR")
             end
         end)
         anchorHooked = true
