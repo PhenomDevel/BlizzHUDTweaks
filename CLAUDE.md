@@ -22,6 +22,8 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
   `UI/Window.lua` (window, pages, row types), `UI/Options.lua`, one file per
   page in `UI/Pages/`. Pages are rebuilt from the profile on every render.
 - `UI/FramePicker.lua`: overlay for picking custom frames.
+- `UI/EditModePanel.lua`: quick fade settings below Blizzard's Edit Mode
+  dialog for the selected frame (own frame, only anchored to the dialog).
 - `UI/Toast.lua`: short on-screen message (e.g. after the fading toggle keybind).
 - `UI/WhatsNew.lua` / `UI/WhatsNewNotes.lua`: "What's new" window after updates.
   Add an entry to `UI/WhatsNewNotes.lua` (newest first) for every release users

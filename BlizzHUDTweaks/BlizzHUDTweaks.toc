@@ -52,6 +52,7 @@ UI\WhatsNew.lua
 UI\FramePicker.lua
 UI\Window.lua
 UI\Options.lua
+UI\EditModePanel.lua
 UI\Pages\MouseoverFrameFading.lua
 UI\Pages\Miscellaneous.lua
 UI\Pages\Tooltip.lua

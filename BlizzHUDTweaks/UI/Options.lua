@@ -55,6 +55,20 @@ local moduleCards = {
         set = function(value)
           Options:SetValue(Info("GlobalOptionsMouseoverFrameFadingToggleKeybind"), value)
         end
+      },
+      {
+        type = "checkbox",
+        label = "Settings in Edit Mode",
+        tooltip = "Shows the most important fade settings of the selected frame in Blizzard's Edit Mode, below its settings dialog. Applies to all characters.",
+        get = function()
+          return BlizzHUDTweaks.EditModePanel:IsEnabled()
+        end,
+        set = function(value)
+          addon:GetGlobalProfileDB().editModePanel = value
+          if not value then
+            BlizzHUDTweaks.EditModePanel:Hide()
+          end
+        end
       }
     }
   },

@@ -41,6 +41,8 @@ What changed: [CHANGELOG.md](https://github.com/PhenomDevel/BlizzHUDTweaks/blob/
   that applies wins.
 - **Mouseover** shows a faded frame at full alpha, optionally also in combat.
   Fade duration and out-of-combat delay are adjustable.
+- **Edit Mode:** select a frame in Blizzard's Edit Mode to change its most
+  important fade settings right there.
 - **Global or per-frame settings**, and **frame links**: hovering one frame
   also shows its linked frames (e.g. all action bars at once).
 - **Custom frames:** fade any named frame, also of other addons. Pick it with
