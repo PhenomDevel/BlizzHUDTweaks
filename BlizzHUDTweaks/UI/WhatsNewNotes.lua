@@ -6,6 +6,16 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.4.0",
+    notes = {
+      "# Edit Mode",
+      "The most important fade settings of the selected frame are shown below Blizzard's Edit Mode settings",
+      "{All settings} opens that frame in the options window; turn it off with {Settings in Edit Mode} under Frame Fading",
+      "# Options window",
+      "Frame names and the alpha percent in the frame lists are no longer cut off"
+    }
+  },
+  {
     version = "3.3.0",
     notes = {
       "# Options window",
