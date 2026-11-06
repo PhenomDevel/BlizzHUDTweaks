@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.5.0 (2026-11-06)
+
+- Tooltip: new option "Also in Combat and Instances" (below "Anchor Tooltip to Mouse", off by default). When on, the tooltip stays at the mouse cursor in combat and in instances too. It only changes the anchor type there, so the tooltip keeps its owner and content.
+- Tooltip: turning the Tooltip module off now really stops the tooltip from following the mouse.
+
 ## v3.4.0 (2026-11-06)
 
 - Frame Fading: the most important fade settings of a frame (on/off, global or own settings, out of combat and in combat alpha, mouseover) are now also shown in Blizzard's Edit Mode, below the settings of the selected frame. "All settings" opens that frame in the options window. Can be turned off with "Settings in Edit Mode" in the Frame Fading settings.
