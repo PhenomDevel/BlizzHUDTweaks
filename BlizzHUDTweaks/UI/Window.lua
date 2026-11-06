@@ -388,8 +388,11 @@ rowTypes.textarea = {
 --   meter() -> 0..1 or nil      alpha bar with percent, updated live
 --   dim()   -> true             gray label, e.g. for a disabled frame
 local NAV_CHEVRON = 12
-local PILL_WIDTH = 50
-local METER_WIDTH = 74
+local NAV_TOGGLE = 32
+local PILL_WIDTH = 44
+local METER_TRACK = 32
+local METER_TEXT = 34
+local METER_WIDTH = METER_TRACK + 6 + METER_TEXT
 
 rowTypes.nav = {
   create = function(parent)
@@ -422,14 +425,13 @@ rowTypes.nav = {
     row.Meter = CreateFrame("Frame", nil, row)
     row.Meter:SetSize(METER_WIDTH, 16)
     row.Meter.Text = Widgets.Text(row.Meter, fonts.small, "RIGHT")
+    -- No fixed width: the percent is short and must never be cut off.
     row.Meter.Text:SetPoint("RIGHT")
-    row.Meter.Text:SetWidth(32)
     row.Meter.Text:SetJustifyV("MIDDLE")
     row.Meter.Track = row.Meter:CreateTexture(nil, "ARTWORK")
     row.Meter.Track:SetColorTexture(unpack(colors.control))
     row.Meter.Track:SetPoint("LEFT")
-    row.Meter.Track:SetPoint("RIGHT", row.Meter.Text, "LEFT", -6, 0)
-    row.Meter.Track:SetHeight(5)
+    row.Meter.Track:SetSize(METER_TRACK, 5)
     row.Meter.Fill = row.Meter:CreateTexture(nil, "OVERLAY")
     row.Meter.Fill:SetColorTexture(Widgets.brand[1], Widgets.brand[2], Widgets.brand[3], 0.85)
     row.Meter.Fill:SetPoint("LEFT", row.Meter.Track)
@@ -466,17 +468,17 @@ rowTypes.nav = {
       local meter = spec.meter and spec.meter()
       self.Meter:SetShown(meter ~= nil)
       if meter then
-        local trackWidth = METER_WIDTH - 32 - 6
-        self.Meter.Fill:SetWidth(math.max(1, trackWidth * meter))
+        self.Meter.Fill:SetWidth(math.max(1, METER_TRACK * meter))
         self.Meter.Text:SetText(("%d%%"):format(math.floor(meter * 100 + 0.5)))
       end
     end
     return row
   end,
   setup = function(row, spec)
-    -- { valueWidth } for longer status texts (cut off with "...").
+    -- { valueWidth } for longer status texts (cut off with "..."). Only the
+    -- parts the row actually shows take width from the label.
     local valueWidth = spec.valueWidth or 70
-    local controlWidth = NAV_CHEVRON + valueWidth
+    local controlWidth = NAV_CHEVRON + 4
     row.Value:SetWidth(valueWidth - 8)
     row.Value:ClearAllPoints()
     row.Pill:ClearAllPoints()
@@ -490,7 +492,7 @@ rowTypes.nav = {
         Render()
       end
       anchor, anchorPoint, offset = row.Toggle, "LEFT", -8
-      controlWidth = controlWidth + 40
+      controlWidth = controlWidth + NAV_TOGGLE + 8
     else
       row.Toggle:Hide()
     end
@@ -502,6 +504,8 @@ rowTypes.nav = {
     if spec.meter then
       row.Meter:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
       controlWidth = controlWidth + METER_WIDTH + 10
+    elseif spec.value then
+      controlWidth = controlWidth + valueWidth
     end
     row.Value:SetPoint("RIGHT", anchor, anchorPoint, offset, anchor == row and -ROW_HEIGHT / 2 or 0)
     row:SetScript("OnUpdate", spec.meter and OnLiveUpdate or nil)
