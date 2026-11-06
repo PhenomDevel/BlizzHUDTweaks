@@ -6,6 +6,13 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.5.0",
+    notes = {
+      "# Tooltip",
+      "New option {Also in Combat and Instances}: the tooltip stays at the mouse cursor in combat and in instances too (off by default, below {Anchor Tooltip to Mouse})"
+    }
+  },
+  {
     version = "3.4.0",
     notes = {
       "# Edit Mode",
