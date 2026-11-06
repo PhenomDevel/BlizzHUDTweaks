@@ -9,7 +9,7 @@ BlizzHUDTweaks/              addon folder (the only thing that gets installed)
   Media/                     Logo.blp (addon icon)
   Core/                      addon setup (Init.lua: profile defaults, frame mapping), events, utils
   Modules/                   frame fading, miscellaneous, tooltip
-  UI/                        options window, widgets, pages, frame picker, toast, What's new
+  UI/                        options window, widgets, pages, frame picker, Edit Mode panel, toast, What's new
 docs/                        developer docs, release process, logo/ (logo.svg, README logo)
 .pkgmeta                     packaging config (BigWigs packager)
 ```
