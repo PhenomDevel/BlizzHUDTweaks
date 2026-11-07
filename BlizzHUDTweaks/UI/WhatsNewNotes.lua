@@ -6,6 +6,14 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.6.0",
+    notes = {
+      "# Frame Fading",
+      "New frame {Chat Frame}: fades all chat windows, the docked tabs and the chat buttons together; hovering the chat or typing shows it",
+      "New frame {Gamepad Action Bars} (WoW: Forever): fades the gamepad HUD with its four action bars"
+    }
+  },
+  {
     version = "3.5.0",
     notes = {
       "# Tooltip",
