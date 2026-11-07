@@ -1,4 +1,5 @@
 -- luacheck: read globals BlizzHUDTweaksDB C_SwingTimer SwingTimerMainHandFrame SwingTimerOffHandFrame SwingTimerRangedFrame WorldFrame
+-- luacheck: read globals GeneralDockManager ChatFrame1 CHAT_FRAMES GamepadMainActionBarFrame
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
@@ -224,6 +225,12 @@ local defaultConfig = {
     },
     ["SwingTimerRangedFrame"] = {
       displayName = "Swing Timer Ranged"
+    },
+    ["ChatFrame"] = {
+      displayName = "Chat Frame"
+    },
+    ["GamepadMainActionBarFrame"] = {
+      displayName = "Gamepad Action Bars"
     }
   }
 }
@@ -277,10 +284,139 @@ local frameMapping = {
   -- yet when this file loads (see resolvePendingFrames).
   ["SwingTimerMainHandFrame"] = {mainFrame = SwingTimerMainHandFrame, lookup = "SwingTimerMainHandFrame"},
   ["SwingTimerOffHandFrame"] = {mainFrame = SwingTimerOffHandFrame, lookup = "SwingTimerOffHandFrame"},
-  ["SwingTimerRangedFrame"] = {mainFrame = SwingTimerRangedFrame, lookup = "SwingTimerRangedFrame"}
+  ["SwingTimerRangedFrame"] = {mainFrame = SwingTimerRangedFrame, lookup = "SwingTimerRangedFrame"},
+  -- WoW: Forever only: the gamepad HUD (four action bars), shown in gamepad mode.
+  ["GamepadMainActionBarFrame"] = {mainFrame = GamepadMainActionBarFrame, lookup = "GamepadMainActionBarFrame"}
 }
 
 local swingTimerFrames = {"SwingTimerMainHandFrame", "SwingTimerOffHandFrame", "SwingTimerRangedFrame"}
+local gamepadFrames = {"GamepadMainActionBarFrame"}
+
+-------------------------------------------------------------------------------
+-- Chat frame
+--
+-- The chat is not one frame: every chat window (ChatFrame1, 2, ... and the
+-- temporary whisper windows) is shown and hidden when the tab changes. So the
+-- dock (GeneralDockManager, always shown, holds the docked tabs) is the main
+-- frame and the chat windows plus the buttons around them are sub frames.
+-- Blizzard fades the tabs and the chat background itself (UIFrameFade); those
+-- are never touched here, only the alpha of their parents, so both fades
+-- simply multiply.
+
+-- Buttons next to the chat that are not children of a chat window (each one
+-- is skipped if it is, so it is not faded twice).
+local chatExtraFrameNames = {
+  "ChatFrameMenuButton",
+  "ChatFrameChannelButton",
+  "ChatFrameToggleVoiceDeafenButton",
+  "ChatFrameToggleVoiceMuteButton",
+  "QuickJoinToastButton"
+}
+
+local chatMapping
+
+local function isChatFadingActive()
+  local profile = addon.db and addon.db.profile
+  local chatOptions = profile and profile["ChatFrame"]
+  return chatOptions and chatOptions.Enabled and addon:IsEnabled() and MouseoverFrameFading:IsEnabled()
+end
+
+-- A chat window that is shown (e.g. after switching tabs) takes the current
+-- alpha of the dock, otherwise it would stay at full alpha until the next fade.
+local function syncChatSubFrameAlpha(frame)
+  local dock = chatMapping.mainFrame
+  if dock and isChatFadingActive() then
+    local alpha = dock:GetAlpha()
+    if not (issecretvalue and issecretvalue(alpha)) then
+      frame:SetAlpha(alpha)
+    end
+  end
+end
+
+local function isChatSubFrameCandidate(frame, known)
+  if not frame or (frame.IsForbidden and frame:IsForbidden()) then
+    return false
+  end
+  local parent = frame:GetParent()
+  while parent do
+    if known[parent] then
+      return false
+    end
+    parent = parent:GetParent()
+  end
+  return true
+end
+
+local function addChatSubFrame(frame)
+  if not chatMapping.knownSubFrames[frame] then
+    chatMapping.knownSubFrames[frame] = true
+    tinsert(chatMapping.subFrames, frame)
+    frame:HookScript("OnShow", syncChatSubFrameAlpha)
+    if frame:IsShown() then
+      syncChatSubFrameAlpha(frame)
+    end
+  end
+end
+
+-- New chat windows can show up at any time (whispers in their own window),
+-- so this runs with the regular frame lookup (at most once per second).
+local function refreshChatFrames()
+  if not CHAT_FRAMES then
+    return
+  end
+  local known = chatMapping.knownSubFrames
+  if chatMapping.mainFrame then
+    known[chatMapping.mainFrame] = true
+  end
+
+  for _, frameName in ipairs(CHAT_FRAMES) do
+    local frame = _G[frameName]
+    if frame and not known[frame] and isChatSubFrameCandidate(frame, known) then
+      addChatSubFrame(frame)
+    end
+  end
+
+  for _, frameName in ipairs(chatExtraFrameNames) do
+    local frame = _G[frameName]
+    if frame and not known[frame] and isChatSubFrameCandidate(frame, known) then
+      addChatSubFrame(frame)
+    end
+  end
+end
+
+-- Mouseover over any shown chat window (incl. its button bar and scroll bar)
+-- or a focused chat edit box counts as mouseover of the chat.
+local function isChatMouseover(mapping)
+  for _, frame in ipairs(mapping.subFrames) do
+    if frame:IsVisible() then
+      if frame:IsMouseOver() then
+        return true
+      end
+      if frame.buttonFrame and frame.buttonFrame:IsVisible() and frame.buttonFrame:IsMouseOver() then
+        return true
+      end
+      if frame.ScrollBar and frame.ScrollBar:IsVisible() and frame.ScrollBar:IsMouseOver() then
+        return true
+      end
+      if frame.editBox and frame.editBox:HasFocus() then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+chatMapping = {
+  mainFrame = GeneralDockManager,
+  lookup = "GeneralDockManager",
+  -- Edit Mode selects ChatFrame1, not the dock (see UI/EditModePanel.lua).
+  editModeFrame = ChatFrame1,
+  subFrames = {},
+  knownSubFrames = {},
+  refresh = refreshChatFrames,
+  isMouseover = isChatMouseover
+}
+frameMapping["ChatFrame"] = chatMapping
 
 local function setFrameDefaultOptions(frameOptions)
   frameOptions["Enabled"] = true
@@ -414,14 +550,19 @@ local function updateFramesForLoadedAddons(profile)
   end
 end
 
--- The swing timer only exists in WoW: Forever, hide its frames elsewhere.
-local function updateSwingTimerFrames(profile)
-  local available = C_SwingTimer ~= nil or SwingTimerMainHandFrame ~= nil
-  for _, frameName in ipairs(swingTimerFrames) do
+local function setFramesHidden(profile, frameNames, hidden)
+  for _, frameName in ipairs(frameNames) do
     if profile[frameName] then
-      profile[frameName]["Hidden"] = not available
+      profile[frameName]["Hidden"] = hidden
     end
   end
+end
+
+-- The swing timer and the gamepad HUD only exist in WoW: Forever, hide their
+-- frames elsewhere.
+local function updateForeverOnlyFrames(profile)
+  setFramesHidden(profile, swingTimerFrames, not (C_SwingTimer ~= nil or SwingTimerMainHandFrame ~= nil))
+  setFramesHidden(profile, gamepadFrames, addon:HasHousing())
 end
 
 -------------------------------------------------------------------------------
@@ -455,6 +596,9 @@ local function resolvePendingFrames()
   for _, frameMappingOptions in pairs(frameMapping) do
     if not frameMappingOptions.mainFrame and frameMappingOptions.lookup then
       frameMappingOptions.mainFrame = resolveFramePath(frameMappingOptions.lookup)
+    end
+    if frameMappingOptions.refresh then
+      frameMappingOptions.refresh(frameMappingOptions)
     end
   end
 end
@@ -626,7 +770,7 @@ end
 function addon:LoadProfile()
   frameTable = nil
   updateFramesForLoadedAddons(self.db.profile)
-  updateSwingTimerFrames(self.db.profile)
+  updateForeverOnlyFrames(self.db.profile)
   loadCustomFrames(self.db.profile)
 
   if addon:IsEnabled() then
@@ -687,7 +831,7 @@ function addon:OnInitialize()
   local isNewInstall = BlizzHUDTweaksDB == nil
   self.db = LibStub("AceDB-3.0"):New("BlizzHUDTweaksDB", defaultConfig, "Default")
   updateFramesForLoadedAddons(self.db.profile)
-  updateSwingTimerFrames(self.db.profile)
+  updateForeverOnlyFrames(self.db.profile)
   loadCustomFrames(self.db.profile)
 
   -- Remove in the future

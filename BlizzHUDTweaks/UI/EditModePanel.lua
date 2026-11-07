@@ -46,7 +46,7 @@ local function findFrameName(systemFrame)
   end
   local profile = addon:GetProfileDB()
   for frameName, mappingOptions in pairs(addon:GetFrameMapping()) do
-    if mappingOptions.mainFrame == systemFrame and type(profile[frameName]) == "table" and not profile[frameName].Hidden then
+    if (mappingOptions.mainFrame == systemFrame or mappingOptions.editModeFrame == systemFrame) and type(profile[frameName]) == "table" and not profile[frameName].Hidden then
       return frameName
     end
   end
