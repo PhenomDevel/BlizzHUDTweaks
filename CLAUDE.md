@@ -35,6 +35,13 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
   `UI/Pages/MouseoverFrameFading.lua` (otherwise it ends up in "Other").
 - Frames that may not exist when the addon loads get `lookup = "GlobalName"`
   in `frameMapping`; they are resolved later.
+- Optional `frameMapping` fields for frames that are more than one frame
+  (see the chat frame in `Core/Init.lua`): `subFrames` (faded with the main
+  frame), `refresh(mapping)` (runs with the frame lookup, at most once per
+  second), `isMouseover(mapping)` (extra mouseover check) and
+  `editModeFrame` (the frame Edit Mode selects, if it is not `mainFrame`).
+- Never `SetAlpha` frames that Blizzard fades itself with `UIFrameFade`
+  (e.g. chat tabs, chat background textures); fade their parent instead.
 - Profile keys are SavedVariables – never rename a released key without a
   migration.
 

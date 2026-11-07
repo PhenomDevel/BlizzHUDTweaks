@@ -261,6 +261,7 @@ local function determineMouseOver(profile, frameName, frameOptions)
   local linkedFrames = profile[linkedFramesKeys[frameName]]
   local mainFrame = frameOptions.mainFrame
   local fallback = mainFrame.__BlizzHUDTweaksForceMouseover or mainFrame:IsMouseOver()
+    or (frameOptions.isMouseover and frameOptions.isMouseover(frameOptions))
 
   if fallback then
     return setMouseoverCache(frameName, true, now)

@@ -52,9 +52,14 @@ local frameGroups = {
     frames = {"SwingTimerMainHandFrame", "SwingTimerOffHandFrame", "SwingTimerRangedFrame"}
   },
   {
+    name = "Gamepad",
+    frames = {"GamepadMainActionBarFrame"}
+  },
+  {
     name = "Interface",
     frames = {
       "MinimapCluster",
+      "ChatFrame",
       "ObjectiveTrackerFrame",
       "MicroMenu",
       "BagsBar",

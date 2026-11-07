@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: new frame "Chat Frame" (in "Interface"). It fades all chat windows, the docked chat tabs and the chat buttons together. Hovering any chat window or typing in the chat shows it at full alpha.
+- Frame Fading: new frame "Gamepad Action Bars" (WoW: Forever only, group "Gamepad") for the gamepad HUD with its four action bars.
+
 ## v3.5.0 (2026-11-06)
 
 - Tooltip: new option "Also in Combat and Instances" (below "Anchor Tooltip to Mouse", off by default). When on, the tooltip stays at the mouse cursor in combat and in instances too. It only changes the anchor type there, so the tooltip keeps its owner and content.
