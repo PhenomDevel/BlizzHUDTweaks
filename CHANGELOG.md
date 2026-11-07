@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v3.6.0 (2026-11-07)
 
 - Frame Fading: new frame "Chat Frame" (in "Interface"). It fades all chat windows, the docked chat tabs and the chat buttons together. Hovering any chat window or typing in the chat shows it at full alpha.
 - Frame Fading: new frame "Gamepad Action Bars" (WoW: Forever only, group "Gamepad") for the gamepad HUD with its four action bars.
