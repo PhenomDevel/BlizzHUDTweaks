@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: new option "Disable fading when HP not at max" for unit frames (Player, Pet, Target, Target of Target, Focus, Focus Target), in the Edit Mode settings of the selected frame. While the unit is below max health the frame stays visible, so you can see that you need to heal. Once it is back at full health it fades out as usual.
+
 ## v3.6.0 (2026-11-07)
 
 - Frame Fading: new frame "Chat Frame" (in "Interface"). It fades all chat windows, the docked chat tabs and the chat buttons together. Hovering any chat window or typing in the chat shows it at full alpha.

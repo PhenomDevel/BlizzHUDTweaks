@@ -439,6 +439,7 @@ local function setFrameDefaultOptions(frameOptions)
   frameOptions["TreatTargetLikeInCombat"] = false
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
   frameOptions["MouseOverFadeEnabled"] = true
+  frameOptions["DisableFadeWhenNotFullHP"] = false
 end
 
 do
@@ -795,6 +796,7 @@ function addon:StartUpdateTicker(interval)
     math.min(interval, 1),
     function()
       MouseoverFrameFading:RefreshMouseoverFrameAlphas()
+      MouseoverFrameFading:RefreshHealthFrames()
     end
   )
 end

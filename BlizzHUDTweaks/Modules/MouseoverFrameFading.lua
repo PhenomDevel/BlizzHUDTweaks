@@ -1,3 +1,4 @@
+-- luacheck: read globals C_CurveUtil Enum UnitHealthPercent
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
@@ -143,6 +144,115 @@ local function neighborhoodFadeActive(globalOptions, frameOptions)
   else
     return frameOptions.FadeInNeighborhood
   end
+end
+
+-- Unit frames that the "Disable fading when HP not at max" option applies to.
+local unitByFrame = {
+  PlayerFrame = "player",
+  PetFrame = "pet",
+  TargetFrame = "target",
+  TargetFrameToT = "targettarget",
+  FocusFrame = "focus",
+  FocusFrameToT = "focustarget"
+}
+
+-- Health is secret in this client, so addon code can neither read nor compare it.
+-- The game evaluates a curve on the health percent and sets the alpha natively: 1
+-- below full health, and the alpha at full health. The alpha at full health is
+-- driven by addon code. It jumps to 1 whenever the unit's health changes, and fades
+-- to the normal alpha once the health has been unchanged for HEALTH_HOLD seconds.
+-- So a heal to full fades out like any other fade.
+-- ponytail: HEALTH_HOLD assumes regeneration ticks come more often than this.
+-- ponytail: a 1e-6 gap below full health; pools above ~1M HP blend near full health.
+local HEALTH_HURT_GAP = 1e-6
+local HEALTH_HOLD = 2
+local nativeFrames = {} -- frame -> true while the game owns its alpha
+local healthStates = {} -- frameName -> { frame, unit, alpha, target, duration, changed, hovered, curve, curveAlpha }
+local frameByUnit = {}
+for frameName, unit in pairs(unitByFrame) do
+  frameByUnit[unit] = frameName
+end
+
+local function wantsHealthAlpha(frameName, frameOptions)
+  return unitByFrame[frameName] ~= nil and frameOptions.Enabled and frameOptions.DisableFadeWhenNotFullHP
+end
+
+local function healthAlphaCurve(state)
+  if state.curveAlpha ~= state.alpha then
+    local curve = C_CurveUtil.CreateCurve()
+    curve:SetType(Enum.LuaCurveType.Linear)
+    curve:AddPoint(0, 1)
+    curve:AddPoint(1 - HEALTH_HURT_GAP, 1)
+    curve:AddPoint(1, state.alpha)
+    state.curve, state.curveAlpha = curve, state.alpha
+  end
+  return state.curve
+end
+
+-- Gives the alpha back to the addon as a plain value, which fades can work with again.
+local function releaseHealthAlpha(frame, alpha)
+  if nativeFrames[frame] then
+    nativeFrames[frame] = nil
+    frame:SetAlpha(alpha)
+  end
+end
+
+local function setHealthAlpha(state)
+  MouseoverFrameFading:ClearActiveFade(state.frame)
+  state.frame:SetAlpha(UnitHealthPercent(state.unit, true, healthAlphaCurve(state)))
+  nativeFrames[state.frame] = true
+end
+
+local function stepHealthState(state, elapsed, now)
+  if now - state.changed < HEALTH_HOLD then
+    return
+  end
+  local diff = state.target - state.alpha
+  local step = state.duration > 0 and elapsed / state.duration or 1
+  if math.abs(diff) <= step then
+    state.alpha = state.target
+  else
+    state.alpha = state.alpha + (diff > 0 and step or -step)
+  end
+end
+
+local healthDriver = CreateFrame("Frame")
+healthDriver:Hide()
+healthDriver:SetScript(
+  "OnUpdate",
+  function(_, elapsed)
+    local now = GetTime()
+    for _, state in pairs(healthStates) do
+      stepHealthState(state, elapsed, now)
+      if not state.hovered then
+        setHealthAlpha(state)
+      end
+    end
+  end
+)
+
+local healthEvents = CreateFrame("Frame")
+healthEvents:RegisterEvent("UNIT_HEALTH")
+healthEvents:SetScript(
+  "OnEvent",
+  function(_, _, unit)
+    local state = healthStates[frameByUnit[unit]]
+    if state then
+      state.alpha, state.changed = 1, GetTime()
+    end
+  end
+)
+
+local function clearHealthStates()
+  for frameName, state in pairs(healthStates) do
+    releaseHealthAlpha(state.frame, state.target)
+    healthStates[frameName] = nil
+  end
+  healthDriver:Hide()
+end
+
+function MouseoverFrameFading:HasFullHealthOption(frameName)
+  return unitByFrame[frameName] ~= nil
 end
 
 -- Returns the alpha and the key of the condition that set it (nil when no
@@ -549,6 +659,9 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
     local mapping = addon:GetFrameMapping()
     for frameName, frameMappingOptions in pairs(mapping) do
       local frameOptions = profile[frameName]
+      if frameOptions and nativeFrames[frameMappingOptions.mainFrame] and not wantsHealthAlpha(frameName, frameOptions) then
+        releaseHealthAlpha(frameMappingOptions.mainFrame, determineTargetAlpha(globalOptions, frameOptions))
+      end
       -- Disabled frames are skipped before their target alpha is computed.
       if frameOptions and frameOptions.Enabled and shouldFade(frameMappingOptions.mainFrame, globalOptions, frameOptions) then
         local isMouseover = determineMouseOver(profile, frameName, frameMappingOptions)
@@ -576,6 +689,41 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
   end
 end
 
+-- Runs on the update ticker. Keeps the set of frames in health mode current and
+-- records their target alpha, fade duration and hover state for the driver.
+function MouseoverFrameFading:RefreshHealthFrames()
+  if not (addon:IsEnabled() and MouseoverFrameFading:IsEnabled()) then
+    clearHealthStates()
+    return
+  end
+  local profile = addon:GetProfileDB()
+  local globalOptions = profile["*Global*"]
+  local mapping = addon:GetFrameMapping()
+  for frameName, unit in pairs(unitByFrame) do
+    local frameOptions = profile[frameName]
+    local frameMappingOptions = mapping[frameName]
+    local frame = frameMappingOptions and frameMappingOptions.mainFrame
+    local state = healthStates[frameName]
+    if frame and frameOptions and wantsHealthAlpha(frameName, frameOptions) and frame:IsShown() then
+      local target = determineTargetAlpha(globalOptions, frameOptions)
+      if not state then
+        state = {frame = frame, unit = unit, alpha = target, changed = 0}
+        healthStates[frameName] = state
+      end
+      state.target = target
+      state.duration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
+      state.hovered = determineMouseOver(profile, frameName, frameMappingOptions) and true or false
+      if state.hovered then
+        releaseHealthAlpha(frame, 1)
+      end
+    elseif state then
+      releaseHealthAlpha(state.frame, state.target)
+      healthStates[frameName] = nil
+    end
+  end
+  healthDriver:SetShown(next(healthStates) ~= nil)
+end
+
 function MouseoverFrameFading:InstallHooks()
   SpellFlyout:HookScript("OnShow", SpellFlyoutOnShow)
 end
@@ -584,6 +732,7 @@ function MouseoverFrameFading:Disable()
   for _, frameMappingOptions in pairs(addon:GetFrameMapping()) do
     addon:ResetFrameByMappingOptions(frameMappingOptions)
   end
+  clearHealthStates()
   --@debug@
   addon:Print("Disabled Module", addon:ColoredString("MouseoverFrameFading", "fcba03"))
   --@end-debug@
