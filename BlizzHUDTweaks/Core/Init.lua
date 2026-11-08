@@ -444,9 +444,9 @@ local function setFrameDefaultOptions(frameOptions)
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
   frameOptions["MouseOverFadeEnabled"] = true
   frameOptions["DisableFadeWhenNotFullHP"] = false
-  frameOptions["NotFullHPAlpha"] = 1
+  frameOptions["NotFullHPAlpha"] = 0.9
   frameOptions["DisableFadeWhenNotFullPower"] = false
-  frameOptions["NotFullPowerAlpha"] = 1
+  frameOptions["NotFullPowerAlpha"] = 0.3
 end
 
 do

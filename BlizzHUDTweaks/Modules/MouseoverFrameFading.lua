@@ -235,7 +235,9 @@ end
 
 local function setHealthAlpha(state)
   MouseoverFrameFading:ClearActiveFade(state.frame)
-  state.frame:SetAlpha(readValue(state, healthAlphaCurve(state)))
+  -- A dead unit is classed as full: its health reads 1 of max, which the curve would take as hurt.
+  local alpha = state.dead and state.alpha or readValue(state, healthAlphaCurve(state))
+  state.frame:SetAlpha(alpha)
   nativeFrames[state.frame] = true
 end
 
@@ -739,13 +741,14 @@ function MouseoverFrameFading:RefreshHealthFrames()
     local frame = frameMappingOptions and frameMappingOptions.mainFrame
     local state = healthStates[frameName]
     local dead = UnitIsDeadOrGhost(frameInfo.unit)
-    if frame and frameOptions and not dead and wantsHealthAlpha(frameName, frameOptions) and frame:IsShown() then
+    if frame and frameOptions and wantsHealthAlpha(frameName, frameOptions) and frame:IsShown() then
       local keys = MouseoverFrameFading:GetValueOption(frameName)
       local target = determineTargetAlpha(globalOptions, frameOptions)
       if not state then
         state = {frame = frame, unit = frameInfo.unit, kind = frameInfo.kind, alpha = target, changed = 0}
         healthStates[frameName] = state
       end
+      state.dead = dead
       state.hurtAlpha = frameOptions[keys.alpha] or 1
       state.duration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
       local inCombatHover = not BlizzHUDTweaks.inCombat or (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat)
