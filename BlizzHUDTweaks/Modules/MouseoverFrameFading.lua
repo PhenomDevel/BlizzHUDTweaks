@@ -204,10 +204,11 @@ local function setHealthAlpha(state)
 end
 
 local function stepHealthState(state, elapsed, now)
-  if now - state.changed < HEALTH_HOLD then
+  -- Fading down waits until the health has settled; fading up (hover, full health) is immediate.
+  local diff = state.target - state.alpha
+  if diff < 0 and now - state.changed < HEALTH_HOLD then
     return
   end
-  local diff = state.target - state.alpha
   local step = state.duration > 0 and elapsed / state.duration or 1
   if math.abs(diff) <= step then
     state.alpha = state.target
@@ -224,9 +225,7 @@ healthDriver:SetScript(
     local now = GetTime()
     for _, state in pairs(healthStates) do
       stepHealthState(state, elapsed, now)
-      if not state.hovered then
-        setHealthAlpha(state)
-      end
+      setHealthAlpha(state)
     end
   end
 )
@@ -712,10 +711,9 @@ function MouseoverFrameFading:RefreshHealthFrames()
       end
       state.target = target
       state.duration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
-      state.hovered = determineMouseOver(profile, frameName, frameMappingOptions) and true or false
-      if state.hovered then
-        releaseHealthAlpha(frame, 1)
-      end
+      local inCombatHover = not BlizzHUDTweaks.inCombat or (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat)
+      state.hovered = MouseoverFrameFading:MouseoverFadingEnabled(frameOptions) and inCombatHover and determineMouseOver(profile, frameName, frameMappingOptions) and true or false
+      state.target = state.hovered and 1 or target
     elseif state then
       releaseHealthAlpha(state.frame, state.target)
       healthStates[frameName] = nil
