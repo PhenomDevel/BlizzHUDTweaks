@@ -1,4 +1,4 @@
--- luacheck: read globals C_CurveUtil Enum UnitHealthPercent
+-- luacheck: read globals C_CurveUtil Enum UnitHealthPercent UnitPowerPercent
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
@@ -146,45 +146,74 @@ local function neighborhoodFadeActive(globalOptions, frameOptions)
   end
 end
 
--- Unit frames that the "Disable fading when HP not at max" option applies to.
-local unitByFrame = {
-  PlayerFrame = "player",
-  PetFrame = "pet",
-  TargetFrame = "target",
-  TargetFrameToT = "targettarget",
-  FocusFrame = "focus",
-  FocusFrameToT = "focustarget"
+-- Frames whose alpha follows a unit's health or power (frameName -> unit and kind).
+-- The power bar is the player's mana, energy, rage, ... bar.
+local valueFrames = {
+  PlayerFrame = {unit = "player", kind = "health"},
+  PetFrame = {unit = "pet", kind = "health"},
+  TargetFrame = {unit = "target", kind = "health"},
+  TargetFrameToT = {unit = "targettarget", kind = "health"},
+  FocusFrame = {unit = "focus", kind = "health"},
+  FocusFrameToT = {unit = "focustarget", kind = "health"},
+  PlayerPowerBar = {unit = "player", kind = "power"}
 }
 
--- Health is secret in this client, so addon code can neither read nor compare it.
--- The game evaluates a curve on the health percent and sets the alpha natively: 1
--- below full health, and the alpha at full health. The alpha at full health is
--- driven by addon code. It jumps to 1 whenever the unit's health changes, and fades
--- to the normal alpha once the health has been unchanged for HEALTH_HOLD seconds.
--- So a heal to full fades out like any other fade.
+-- Profile keys and texts of the "not full" option per kind.
+local valueOptions = {
+  health = {
+    title = "Not at full health",
+    toggle = "DisableFadeWhenNotFullHP",
+    alpha = "NotFullHPAlpha",
+    label = "Disable fading when HP not at max",
+    desc = "While the unit is below max health the frame is shown at the alpha below instead of fading.",
+    alphaDesc = "Alpha of the frame while the unit is below max health."
+  },
+  power = {
+    title = "Not at full power",
+    toggle = "DisableFadeWhenNotFullPower",
+    alpha = "NotFullPowerAlpha",
+    label = "Disable fading when power not at max",
+    desc = "While the bar is below max power the frame is shown at the alpha below instead of fading.",
+    alphaDesc = "Alpha of the frame while the bar is below max power."
+  }
+}
+
+-- Option texts and profile keys for a frame, nil if the frame has no such option.
+function MouseoverFrameFading:GetValueOption(frameName)
+  local frame = valueFrames[frameName]
+  return frame and valueOptions[frame.kind]
+end
+
+-- Health and power are secret in this client, so addon code can neither read nor compare
+-- them. The game evaluates a curve on the percent and sets the alpha natively: the "not full"
+-- alpha below full, and the alpha of the frame at full. The alpha at full is driven by addon
+-- code: it jumps to 1 whenever the value changes, and fades to the normal alpha once the value
+-- has been unchanged for HEALTH_HOLD seconds. Fading up (hover, full value) is immediate.
 -- ponytail: HEALTH_HOLD assumes regeneration ticks come more often than this.
--- ponytail: a 1e-6 gap below full health; pools above ~1M HP blend near full health.
+-- ponytail: a 1e-6 gap below full; pools above ~1M blend near full.
 local HEALTH_HURT_GAP = 1e-6
 local HEALTH_HOLD = 2
 local nativeFrames = {} -- frame -> true while the game owns its alpha
-local healthStates = {} -- frameName -> { frame, unit, alpha, target, duration, changed, hovered, curve, curveAlpha }
-local frameByUnit = {}
-for frameName, unit in pairs(unitByFrame) do
-  frameByUnit[unit] = frameName
+local healthStates = {} -- frameName -> { frame, unit, kind, alpha, target, hurtAlpha, duration, changed, hovered, curve, curveAlpha, curveHurt }
+local frameByUnit = {health = {}, power = {}}
+for frameName, frameInfo in pairs(valueFrames) do
+  frameByUnit[frameInfo.kind][frameInfo.unit] = frameName
 end
 
 local function wantsHealthAlpha(frameName, frameOptions)
-  return unitByFrame[frameName] ~= nil and frameOptions.Enabled and frameOptions.DisableFadeWhenNotFullHP
+  local options = MouseoverFrameFading:GetValueOption(frameName)
+  return options ~= nil and frameOptions.Enabled and frameOptions[options.toggle] and true or false
 end
 
 local function healthAlphaCurve(state)
-  if state.curveAlpha ~= state.alpha then
+  local hurt = state.hovered and 1 or state.hurtAlpha
+  if state.curveAlpha ~= state.alpha or state.curveHurt ~= hurt then
     local curve = C_CurveUtil.CreateCurve()
     curve:SetType(Enum.LuaCurveType.Linear)
-    curve:AddPoint(0, 1)
-    curve:AddPoint(1 - HEALTH_HURT_GAP, 1)
+    curve:AddPoint(0, hurt)
+    curve:AddPoint(1 - HEALTH_HURT_GAP, hurt)
     curve:AddPoint(1, state.alpha)
-    state.curve, state.curveAlpha = curve, state.alpha
+    state.curve, state.curveAlpha, state.curveHurt = curve, state.alpha, hurt
   end
   return state.curve
 end
@@ -197,14 +226,21 @@ local function releaseHealthAlpha(frame, alpha)
   end
 end
 
+local function readValue(state, curve)
+  if state.kind == "power" then
+    return UnitPowerPercent(state.unit, nil, false, curve)
+  end
+  return UnitHealthPercent(state.unit, true, curve)
+end
+
 local function setHealthAlpha(state)
   MouseoverFrameFading:ClearActiveFade(state.frame)
-  state.frame:SetAlpha(UnitHealthPercent(state.unit, true, healthAlphaCurve(state)))
+  state.frame:SetAlpha(readValue(state, healthAlphaCurve(state)))
   nativeFrames[state.frame] = true
 end
 
 local function stepHealthState(state, elapsed, now)
-  -- Fading down waits until the health has settled; fading up (hover, full health) is immediate.
+  -- Fading down waits until the value has settled; fading up (hover, full value) is immediate.
   local diff = state.target - state.alpha
   if diff < 0 and now - state.changed < HEALTH_HOLD then
     return
@@ -232,10 +268,13 @@ healthDriver:SetScript(
 
 local healthEvents = CreateFrame("Frame")
 healthEvents:RegisterEvent("UNIT_HEALTH")
+healthEvents:RegisterEvent("UNIT_POWER_UPDATE")
+healthEvents:RegisterEvent("UNIT_MAXPOWER")
 healthEvents:SetScript(
   "OnEvent",
-  function(_, _, unit)
-    local state = healthStates[frameByUnit[unit]]
+  function(_, event, unit)
+    local kind = event == "UNIT_HEALTH" and "health" or "power"
+    local state = healthStates[frameByUnit[kind][unit]]
     if state then
       state.alpha, state.changed = 1, GetTime()
     end
@@ -248,10 +287,6 @@ local function clearHealthStates()
     healthStates[frameName] = nil
   end
   healthDriver:Hide()
-end
-
-function MouseoverFrameFading:HasFullHealthOption(frameName)
-  return unitByFrame[frameName] ~= nil
 end
 
 -- Returns the alpha and the key of the condition that set it (nil when no
@@ -688,8 +723,8 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
   end
 end
 
--- Runs on the update ticker. Keeps the set of frames in health mode current and
--- records their target alpha, fade duration and hover state for the driver.
+-- Runs on the update ticker. Keeps the set of frames in health or power mode current and
+-- records their target alpha, "not full" alpha, fade duration and hover state for the driver.
 function MouseoverFrameFading:RefreshHealthFrames()
   if not (addon:IsEnabled() and MouseoverFrameFading:IsEnabled()) then
     clearHealthStates()
@@ -698,18 +733,19 @@ function MouseoverFrameFading:RefreshHealthFrames()
   local profile = addon:GetProfileDB()
   local globalOptions = profile["*Global*"]
   local mapping = addon:GetFrameMapping()
-  for frameName, unit in pairs(unitByFrame) do
+  for frameName, frameInfo in pairs(valueFrames) do
     local frameOptions = profile[frameName]
     local frameMappingOptions = mapping[frameName]
     local frame = frameMappingOptions and frameMappingOptions.mainFrame
     local state = healthStates[frameName]
     if frame and frameOptions and wantsHealthAlpha(frameName, frameOptions) and frame:IsShown() then
+      local keys = MouseoverFrameFading:GetValueOption(frameName)
       local target = determineTargetAlpha(globalOptions, frameOptions)
       if not state then
-        state = {frame = frame, unit = unit, alpha = target, changed = 0}
+        state = {frame = frame, unit = frameInfo.unit, kind = frameInfo.kind, alpha = target, changed = 0}
         healthStates[frameName] = state
       end
-      state.target = target
+      state.hurtAlpha = frameOptions[keys.alpha] or 1
       state.duration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
       local inCombatHover = not BlizzHUDTweaks.inCombat or (frameOptions.UseGlobalOptions and globalOptions.MouseOverInCombat) or (not frameOptions.UseGlobalOptions and frameOptions.MouseOverInCombat)
       state.hovered = MouseoverFrameFading:MouseoverFadingEnabled(frameOptions) and inCombatHover and determineMouseOver(profile, frameName, frameMappingOptions) and true or false

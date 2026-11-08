@@ -15,7 +15,7 @@ local SECTION = "Frame Fading"
 local frameGroups = {
   {
     name = "Unit Frames",
-    frames = {"PlayerFrame", "PetFrame", "TargetFrame", "TargetFrameToT", "FocusFrame", "FocusFrameToT", "PartyFrame", "CompactRaidFrameContainer"}
+    frames = {"PlayerFrame", "PlayerPowerBar", "PetFrame", "TargetFrame", "TargetFrameToT", "FocusFrame", "FocusFrameToT", "PartyFrame", "CompactRaidFrameContainer"}
   },
   {
     name = "Action Bars",
@@ -676,6 +676,18 @@ local function getConditionsCard(frameName, readOnly, liveFrame)
   }
 end
 
+-- Alpha while the unit's health or power is below max, for frames that have the option.
+local function getValueCard(frameName)
+  local option = MouseoverFrameFading:GetValueOption(frameName)
+  local rows = {
+    valueRow("checkbox", frameName, option.toggle, option.label, option.desc),
+    alphaRow(frameName, option.alpha, option.alphaDesc)
+  }
+  rows[2].indent = 26
+  rows[2].disabled = not MouseoverFrameFading:GetValue(Info(option.toggle, frameName))
+  return {title = option.title, rows = rows}
+end
+
 local function getFrameSettingsCards(frameName)
   local cards = {}
   local isGlobal = frameName == GLOBAL
@@ -685,6 +697,9 @@ local function getFrameSettingsCards(frameName)
     local frameOptions = addon:GetProfileDB()[frameName]
     if not frameOptions.Enabled then
       return cards
+    end
+    if MouseoverFrameFading:GetValueOption(frameName) then
+      cards[#cards + 1] = getValueCard(frameName)
     end
     if frameOptions.UseGlobalOptions then
       cards[#cards + 1] = getMouseoverCard(GLOBAL, true)

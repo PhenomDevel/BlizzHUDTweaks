@@ -181,7 +181,7 @@ local function createPanel()
   rows = {
     enabled = createToggleRow(panel),
     useGlobal = createToggleRow(panel),
-    hpFade = createToggleRow(panel),
+    hpFade = createConditionRow(panel),
     outOfCombat = createConditionRow(panel),
     inCombat = createConditionRow(panel),
     mouseover = createToggleRow(panel)
@@ -275,18 +275,9 @@ function EditModePanel:Render()
       end
     )
     elements[#elements + 1] = rows.useGlobal
-    if MouseoverFrameFading:HasFullHealthOption(frameName) then
-      bindToggle(
-        rows.hpFade,
-        "Disable fading when HP not at max",
-        "While the unit is below its maximum health the frame stays at full alpha. Works with or without {Use global options}.",
-        function()
-          return frameOptions.DisableFadeWhenNotFullHP
-        end,
-        function(value)
-          setValue(frameName, "DisableFadeWhenNotFullHP", value)
-        end
-      )
+    local option = MouseoverFrameFading:GetValueOption(frameName)
+    if option then
+      bindCondition(rows.hpFade, frameName, option.label, option.desc, option.toggle, option.alpha)
       elements[#elements + 1] = rows.hpFade
     end
 

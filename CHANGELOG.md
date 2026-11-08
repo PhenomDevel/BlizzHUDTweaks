@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Frame Fading: new option "Disable fading when HP not at max" for unit frames (Player, Pet, Target, Target of Target, Focus, Focus Target), in the Edit Mode settings of the selected frame. While the unit is below max health the frame stays visible, so you can see that you need to heal. Once it is back at full health it fades out as usual.
+- Frame Fading: the alpha shown while "Disable fading when HP not at max" applies is now a slider from 0% to 100% (default 100%), in the Edit Mode settings and the options window.
+- Frame Fading: new frame "Player Power Bar" (off by default) with the option "Disable fading when power not at max", so the mana, energy or rage bar stays visible while it is below max. Its alpha is set with a slider from 0% to 100%.
 
 ## v3.6.0 (2026-11-07)
 

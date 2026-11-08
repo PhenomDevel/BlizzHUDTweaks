@@ -87,6 +87,9 @@ local defaultConfig = {
     ["PlayerFrame"] = {
       displayName = "Player Frame"
     },
+    ["PlayerPowerBar"] = {
+      displayName = "Player Power Bar"
+    },
     ["TargetFrame"] = {
       displayName = "Target Frame"
     },
@@ -260,6 +263,7 @@ local frameMapping = {
   ["PlayerCastingBarFrame"] = {mainFrame = PlayerCastingBarFrame},
   ["ExtraActionButtonFrame"] = {mainFrame = ExtraAbilityContainer},
   ["PetFrame"] = {mainFrame = PetFrame},
+  ["PlayerPowerBar"] = {mainFrame = PlayerFrame.PlayerFrameContent.PlayerFrameContentMain.ManaBarArea},
   ["QueueStatusButton"] = {mainFrame = QueueStatusButton},
   ["DurabilityFrame"] = {mainFrame = DurabilityFrame},
   ["VehicleSeatIndicator"] = {mainFrame = VehicleSeatIndicator},
@@ -440,6 +444,9 @@ local function setFrameDefaultOptions(frameOptions)
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
   frameOptions["MouseOverFadeEnabled"] = true
   frameOptions["DisableFadeWhenNotFullHP"] = false
+  frameOptions["NotFullHPAlpha"] = 1
+  frameOptions["DisableFadeWhenNotFullPower"] = false
+  frameOptions["NotFullPowerAlpha"] = 1
 end
 
 do
@@ -462,6 +469,7 @@ do
     end
   end
 end
+defaultConfig.profile["PlayerPowerBar"]["Enabled"] = false
 
 local function ensureFrameOptions(profile, addonName, frames)
   for _, frameOptions in ipairs(frames) do
