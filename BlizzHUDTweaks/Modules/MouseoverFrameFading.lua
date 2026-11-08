@@ -164,7 +164,7 @@ local valueOptions = {
     title = "Not at full health",
     toggle = "DisableFadeWhenNotFullHP",
     alpha = "NotFullHPAlpha",
-    label = "Disable fading when HP not at max",
+    label = "Disable fading when HP below",
     desc = "While the unit is below max health the frame is shown at the alpha below instead of fading.",
     alphaDesc = "Alpha of the frame while the unit is below max health."
   },
@@ -172,7 +172,7 @@ local valueOptions = {
     title = "Not at full power",
     toggle = "DisableFadeWhenNotFullPower",
     alpha = "NotFullPowerAlpha",
-    label = "Disable fading when power not at max",
+    label = "Disable fading when power below",
     desc = "While the bar is below max power the frame is shown at the alpha below instead of fading.",
     alphaDesc = "Alpha of the frame while the bar is below max power."
   }
