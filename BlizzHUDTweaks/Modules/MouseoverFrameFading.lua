@@ -1,4 +1,4 @@
--- luacheck: read globals C_CurveUtil Enum UnitHealthPercent UnitPowerPercent
+-- luacheck: read globals C_CurveUtil Enum UnitHealthPercent UnitPowerPercent UnitIsDeadOrGhost
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):GetAddon("BlizzHUDTweaks")
 local MouseoverFrameFading = addon:GetModule("MouseoverFrameFading")
@@ -738,7 +738,8 @@ function MouseoverFrameFading:RefreshHealthFrames()
     local frameMappingOptions = mapping[frameName]
     local frame = frameMappingOptions and frameMappingOptions.mainFrame
     local state = healthStates[frameName]
-    if frame and frameOptions and wantsHealthAlpha(frameName, frameOptions) and frame:IsShown() then
+    local dead = UnitIsDeadOrGhost(frameInfo.unit)
+    if frame and frameOptions and not dead and wantsHealthAlpha(frameName, frameOptions) and frame:IsShown() then
       local keys = MouseoverFrameFading:GetValueOption(frameName)
       local target = determineTargetAlpha(globalOptions, frameOptions)
       if not state then
