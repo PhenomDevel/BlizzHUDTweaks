@@ -462,6 +462,37 @@ local function getMouseoverCard(frameName, readOnly)
   }
 end
 
+-- Chat Frame only: show the chat for a while on new messages. Uses the
+-- frame's own values, also when it uses the global settings.
+local function getChatMessageCard(frameName)
+  local enabled = MouseoverFrameFading:GetValue(Info("ShowOnChatMessage", frameName))
+  local toggle = valueRow("checkbox", frameName, "ShowOnChatMessage", "Show on new messages", "Shows the chat at full alpha for a while when a message arrives in one of the channels below.")
+  toggle.set = function(value)
+    MouseoverFrameFading:SetValue(Info("ShowOnChatMessage", frameName), value)
+    Options:Refresh()
+  end
+  local duration =
+    valueRow("slider", frameName, "ShowOnChatMessageDuration", "Show for", "How long the chat stays visible after the last new message. Every new message starts the time again.")
+  duration.min, duration.max, duration.step, duration.format = 1, 60, 1, secondsFormat(0)
+  local rows = {
+    toggle,
+    duration,
+    valueRow("checkbox", frameName, "ShowOnWhisper", "Whispers", "Whispers and Battle.net whispers."),
+    valueRow("checkbox", frameName, "ShowOnParty", "Party and instance", "Party and instance group chat."),
+    valueRow("checkbox", frameName, "ShowOnRaid", "Raid", "Raid chat and raid warnings."),
+    valueRow("checkbox", frameName, "ShowOnGuild", "Guild", "Guild and officer chat.")
+  }
+  for i = 2, #rows do
+    rows[i].disabled = not enabled
+    rows[i].indent = 26
+  end
+  return {
+    title = "New messages",
+    note = "Messages you write yourself also show the chat: in instances the sender can't be read.",
+    rows = rows
+  }
+end
+
 -- Update interval presets; any other value shows as "Custom".
 local intervalPresets = {
   {value = 0.1, label = "Responsive (0.1 s)"},
@@ -542,11 +573,15 @@ local function isConditionAvailable(condition)
 end
 
 local function getConditionLabel(key)
+  if key == "ShowOnChatMessage" then
+    return "New chat message"
+  end
   for _, condition in ipairs(conditions) do
     if condition.key == key then
       return condition.label
     end
   end
+  return key
 end
 
 -- "Active now: Rested Area · 40%" for the frame (or the global settings).
@@ -695,6 +730,9 @@ local function getFrameSettingsCards(frameName)
     local frameOptions = addon:GetProfileDB()[frameName]
     if not frameOptions.Enabled then
       return cards
+    end
+    if frameName == "ChatFrame" then
+      cards[#cards + 1] = getChatMessageCard(frameName)
     end
     if frameOptions.UseGlobalOptions then
       cards[#cards + 1] = getMouseoverCard(GLOBAL, true)
