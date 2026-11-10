@@ -359,6 +359,59 @@ Miscellaneous.options = {
       }
     }
   },
+  ["ChatOptions"] = {
+    name = "Chat",
+    options = {
+      {
+        optionName = "MiscellaneousShowHideChatFlash",
+        displayName = "Chat Flash",
+        description = "Shows the chat in full alpha when a new message arrives in one of the channels below. Messages you write yourself flash it too.\n\nNeeds frame fading for the Chat Frame.",
+        type = "toggle",
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousShowHideChatFlashDuration",
+        displayName = "Flash Duration",
+        description = "How long the chat stays visible after the last new message. Every new message starts the time again.",
+        type = "range",
+        min = 1,
+        max = 60,
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousChatFlashWhisper",
+        displayName = "Whispers",
+        description = "Whispers and Battle.net whispers.",
+        type = "toggle",
+        default = true,
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousChatFlashParty",
+        displayName = "Party and instance",
+        description = "Party and instance group chat.",
+        type = "toggle",
+        default = true,
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousChatFlashRaid",
+        displayName = "Raid",
+        description = "Raid chat and raid warnings.",
+        type = "toggle",
+        default = true,
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousChatFlashGuild",
+        displayName = "Guild",
+        description = "Guild and officer chat.",
+        type = "toggle",
+        default = true,
+        setFn = doNothing
+      }
+    }
+  },
   ["ActionBarOptions"] = {
     name = "Action Bars",
     options = {
@@ -460,13 +513,15 @@ local groupOrder = {
   "PetFrameOptions",
   "ObjectiveTrackerOptions",
   "ExperienceBarOptions",
+  "ChatOptions",
   "ActionBarOptions"
 }
 
 -- Display only: unit and the value shown while a range was never set.
 local rangeDisplay = {
   ["MiscellaneousShowHideObjectiveTrackerUpdateFlashDuration"] = {default = 5, unit = " s"},
-  ["MiscellaneousShowHideExperienceBarUpdateFlashDuration"] = {default = 5, unit = " s"}
+  ["MiscellaneousShowHideExperienceBarUpdateFlashDuration"] = {default = 5, unit = " s"},
+  ["MiscellaneousShowHideChatFlashDuration"] = {default = 10, unit = " s"}
 }
 
 local groupNotes = {
@@ -490,10 +545,14 @@ local rowLabels = {
   ["MiscellaneousShowHideFocusLevel"] = {"Hide", "Level"},
   ["MiscellaneousShowHideTargetOfTargetName"] = {"Hide", "Name"},
   ["MiscellaneousShowHidePetlevel"] = {"Hide", "Name"},
-  ["MiscellaneousShowHidePetStatusText"] = {"Hide", "Status texts"}
+  ["MiscellaneousShowHidePetStatusText"] = {"Hide", "Status texts"},
+  ["MiscellaneousChatFlashWhisper"] = {"Channels", "Whispers"},
+  ["MiscellaneousChatFlashParty"] = {"Channels", "Party and instance"},
+  ["MiscellaneousChatFlashRaid"] = {"Channels", "Raid"},
+  ["MiscellaneousChatFlashGuild"] = {"Channels", "Guild"}
 }
 -- Sections in this order; options without one come first.
-local sectionOrder = {"Hide", "Text", "Font size"}
+local sectionOrder = {"Hide", "Text", "Font size", "Channels"}
 
 local function isModuleEnabled()
   return addon:GetProfileDB()["GlobalOptionsMiscellaneousEnabled"]
@@ -513,7 +572,8 @@ end
 local function isOptionChanged(option)
   local value = getValue(option.optionName)
   if option.type == "toggle" then
-    return value == true
+    -- option.default: toggles that are on by default (profile default true).
+    return (value == true) ~= (option.default == true)
   elseif option.type == "input" then
     return value ~= nil and value ~= ""
   elseif option.type == "range" then
@@ -732,7 +792,7 @@ Options:RegisterPage(
     end,
     searchable = true,
     build = function()
-      return "Miscellaneous", "Names, levels, font sizes and action bar padding", getCards()
+      return "Miscellaneous", "Names, levels, font sizes, flashes and action bar padding", getCards()
     end
   }
 )

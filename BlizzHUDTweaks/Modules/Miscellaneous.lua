@@ -155,25 +155,57 @@ end
 -- Shows a faded frame at full alpha for a while. Each flash restarts the
 -- timer; only the latest one fades the frame back, so quick updates (quest
 -- progress, XP from a pull) don't cut a running flash short.
+-- Frames made of more than one frame (e.g. the chat) flash their sub frames
+-- with the main frame.
 local flashGeneration = {}
 
-local function flashFrame(profile, frameName, enabledKey, durationKey)
-  if profile[enabledKey] and profile[frameName].Enabled then
+local function forEachFlashFrame(mapping, fn)
+  fn(mapping.mainFrame)
+  if mapping.subFrames then
+    for _, frame in ipairs(mapping.subFrames) do
+      fn(frame)
+    end
+  end
+end
+
+-- The flash starts at the current alpha, so a half visible frame doesn't
+-- drop to 0 first. Secret alphas start at 0.
+local function getFlashStartAlpha(frame)
+  local alpha = frame:GetAlpha()
+  if issecretvalue and issecretvalue(alpha) then
+    return 0
+  end
+  return alpha
+end
+
+local function flashFrame(profile, frameName, enabledKey, durationKey, defaultDuration)
+  local mapping = addon:GetFrameMapping()[frameName]
+  if profile[enabledKey] and profile[frameName].Enabled and mapping and mapping.mainFrame then
     local globalOptions = profile["*Global*"]
     local frameOptions = profile[frameName]
     local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
-    local frame = addon:GetFrameMapping()[frameName].mainFrame
+    local startAlpha = getFlashStartAlpha(mapping.mainFrame)
 
-    MouseoverFrameFading:Fade(frame, 0, 1, fadeDuration, 0, 0)
-    frame.__BlizzHUDTweaksForceFaded = true
+    forEachFlashFrame(
+      mapping,
+      function(frame)
+        MouseoverFrameFading:Fade(frame, startAlpha, 1, fadeDuration, 0, 0)
+        frame.__BlizzHUDTweaksForceFaded = true
+      end
+    )
 
     local generation = (flashGeneration[frameName] or 0) + 1
     flashGeneration[frameName] = generation
     C_Timer.After(
-      profile[durationKey] or 5,
+      profile[durationKey] or defaultDuration or 5,
       function()
         if flashGeneration[frameName] == generation then
-          frame.__BlizzHUDTweaksForceFaded = false
+          forEachFlashFrame(
+            mapping,
+            function(frame)
+              frame.__BlizzHUDTweaksForceFaded = false
+            end
+          )
           MouseoverFrameFading:RefreshFrameAlphas()
         end
       end
@@ -186,6 +218,41 @@ function Miscellaneous:FlashObjectiveTracker(profile)
     flashFrame(profile, "ObjectiveTrackerFrame", "MiscellaneousShowHideObjectiveTrackerUpdateFlash", "MiscellaneousShowHideObjectiveTrackerUpdateFlashDuration")
   end
 end
+
+-- Chat flash: profile key of the channel toggle -> chat events. Chat events
+-- are secret during the chat messaging lockdown (text, sender and GUID can't
+-- be read then), so only the event itself is used: own messages flash too.
+local chatFlashEvents = {
+  MiscellaneousChatFlashWhisper = {"CHAT_MSG_WHISPER", "CHAT_MSG_BN_WHISPER"},
+  MiscellaneousChatFlashParty = {"CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "CHAT_MSG_INSTANCE_CHAT", "CHAT_MSG_INSTANCE_CHAT_LEADER"},
+  MiscellaneousChatFlashRaid = {"CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_RAID_WARNING"},
+  MiscellaneousChatFlashGuild = {"CHAT_MSG_GUILD", "CHAT_MSG_OFFICER"}
+}
+local chatFlashChannel = {}
+for channelKey, events in pairs(chatFlashEvents) do
+  for _, event in ipairs(events) do
+    chatFlashChannel[event] = channelKey
+  end
+end
+
+function Miscellaneous:FlashChat(profile, event)
+  if Miscellaneous:IsEnabled() and profile[chatFlashChannel[event]] then
+    flashFrame(profile, "ChatFrame", "MiscellaneousShowHideChatFlash", "MiscellaneousShowHideChatFlashDuration", 10)
+  end
+end
+
+local chatFlashEventFrame = CreateFrame("Frame")
+for event in pairs(chatFlashChannel) do
+  chatFlashEventFrame:RegisterEvent(event)
+end
+chatFlashEventFrame:SetScript(
+  "OnEvent",
+  function(_, event)
+    if addon.db and addon:IsEnabled() then
+      Miscellaneous:FlashChat(addon:GetProfileDB(), event)
+    end
+  end
+)
 
 function Miscellaneous:FlashExperienceBar(profile)
   if MainStatusTrackingBarContainer:IsShown() then
