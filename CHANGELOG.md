@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: new option "Delay after mouseover" (in "Mouseover", global and per frame). The frame stays at full alpha for the set time after the mouse has left it before it fades back. Default 0 s, as before.
+
 ## v3.6.0 (2026-11-07)
 
 - Frame Fading: new frame "Chat Frame" (in "Interface"). It fades all chat windows, the docked chat tabs and the chat buttons together. Hovering any chat window or typing in the chat shows it at full alpha.
