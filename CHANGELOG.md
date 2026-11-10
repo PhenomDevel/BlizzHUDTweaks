@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Frame Fading: new option "Delay after mouseover" (in "Mouseover", global and per frame). The frame stays at full alpha for the set time after the mouse has left it before it fades back. Default 0 s, as before.
+- Frame Fading: the Chat Frame can now show itself for a while when a new message arrives ("New messages" on the Chat Frame page, off by default). Choose the channels (whispers, party and instance, raid, guild) and how long the chat stays visible.
 - Frame Fading: new condition "Recovering" (off by default). While your health or power (mana, energy, rage, ...) is not full, e.g. after combat or fall damage, frames use its alpha instead of fading out. Set it to 100% to keep your bars visible until you are back at full.
 
 ## v3.6.0 (2026-11-07)

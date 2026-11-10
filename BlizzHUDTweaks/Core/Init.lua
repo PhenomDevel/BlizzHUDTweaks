@@ -227,7 +227,13 @@ local defaultConfig = {
       displayName = "Swing Timer Ranged"
     },
     ["ChatFrame"] = {
-      displayName = "Chat Frame"
+      displayName = "Chat Frame",
+      ShowOnChatMessage = false,
+      ShowOnChatMessageDuration = 10,
+      ShowOnWhisper = true,
+      ShowOnParty = true,
+      ShowOnRaid = true,
+      ShowOnGuild = true
     },
     ["GamepadMainActionBarFrame"] = {
       displayName = "Gamepad Action Bars"

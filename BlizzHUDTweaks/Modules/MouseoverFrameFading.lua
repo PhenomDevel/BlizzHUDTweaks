@@ -205,6 +205,66 @@ local function neighborhoodFadeActive(globalOptions, frameOptions)
   end
 end
 
+-------------------------------------------------------------------------------
+-- Chat Frame: show it for a while on new messages
+--
+-- Chat events are secret during the chat messaging lockdown (text, sender and
+-- GUID can't be read then), so only the event itself is used: own messages
+-- show the chat too.
+
+-- Profile key of the toggle (on the "ChatFrame" options) -> chat events.
+local chatMessageEvents = {
+  ShowOnWhisper = {"CHAT_MSG_WHISPER", "CHAT_MSG_BN_WHISPER"},
+  ShowOnParty = {"CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "CHAT_MSG_INSTANCE_CHAT", "CHAT_MSG_INSTANCE_CHAT_LEADER"},
+  ShowOnRaid = {"CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_RAID_WARNING"},
+  ShowOnGuild = {"CHAT_MSG_GUILD", "CHAT_MSG_OFFICER"}
+}
+local chatEventToggle = {}
+for toggle, events in pairs(chatMessageEvents) do
+  for _, event in ipairs(events) do
+    chatEventToggle[event] = toggle
+  end
+end
+
+local chatShowUntil = 0
+local chatRefreshTimer
+
+local function chatMessageShowActive(frameOptions)
+  return frameOptions.ShowOnChatMessage and GetTime() < chatShowUntil
+end
+
+local chatEvents = CreateFrame("Frame")
+for event in pairs(chatEventToggle) do
+  chatEvents:RegisterEvent(event)
+end
+chatEvents:SetScript(
+  "OnEvent",
+  function(_, event)
+    if not (addon.db and addon:IsEnabled() and MouseoverFrameFading:IsEnabled()) then
+      return
+    end
+    local chatOptions = addon:GetProfileDB()["ChatFrame"]
+    if not (chatOptions and chatOptions.Enabled and chatOptions.ShowOnChatMessage and chatOptions[chatEventToggle[event]]) then
+      return
+    end
+    local duration = chatOptions.ShowOnChatMessageDuration or 10
+    chatShowUntil = GetTime() + duration
+    MouseoverFrameFading:RefreshFrameAlphas()
+    -- Fade back once the time is up (a new message restarts the timer).
+    if chatRefreshTimer then
+      chatRefreshTimer:Cancel()
+    end
+    chatRefreshTimer =
+      C_Timer.NewTimer(
+      duration + 0.05,
+      function()
+        chatRefreshTimer = nil
+        MouseoverFrameFading:RefreshFrameAlphas()
+      end
+    )
+  end
+)
+
 -- Returns the alpha and the key of the condition that set it (nil when no
 -- condition applies and the frame is shown at full alpha).
 local function determineTargetAlpha(globalOptions, frameOptions)
@@ -216,7 +276,9 @@ local function determineTargetAlpha(globalOptions, frameOptions)
 
   local alpha, condition
 
-  if hasBonusActionBar and vehicleFadeActive(globalOptions, frameOptions) then
+  if chatMessageShowActive(frameOptions) then
+    alpha, condition = 1, "ShowOnChatMessage"
+  elseif hasBonusActionBar and vehicleFadeActive(globalOptions, frameOptions) then
     alpha, condition = vehicleAlphaValue(globalOptions, frameOptions), "FadeVehicle"
   elseif inCombat and inCombatFadeActive(globalOptions, frameOptions) then
     alpha, condition = inCombatAlphaValue(globalOptions, frameOptions), "FadeInCombat"
