@@ -270,6 +270,14 @@ local conditions = {
     targetType = true
   },
   {
+    label = "Recovering",
+    key = "FadeWhileRecovering",
+    alphaKey = "RecoveringAlpha",
+    desc = "When active this fade will be applied while your health or power (mana, energy, rage, ...) is not full, e.g. after combat or after fall damage." ..
+      "\n\nThe frame keeps this alpha until your health and power have not changed for about 3 seconds.",
+    alphaDesc = "Set the alpha value of the frame while your health or power is not full."
+  },
+  {
     label = "Neighborhood",
     key = "FadeInNeighborhood",
     alphaKey = "NeighborhoodAlpha",
