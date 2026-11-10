@@ -57,3 +57,4 @@ UI\Pages\MouseoverFrameFading.lua
 UI\Pages\Miscellaneous.lua
 UI\Pages\Tooltip.lua
 UI\Pages\Profiles.lua
+UI\Pages\About.lua

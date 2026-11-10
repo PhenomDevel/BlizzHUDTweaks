@@ -322,12 +322,12 @@ rowTypes.button = {
   end
 }
 
--- Single-line text ({ placeholder, maxLetters }).
+-- Single-line text ({ placeholder, maxLetters, readOnly, width }). Read-only
+-- fields select their text on click, e.g. a link to copy.
 rowTypes.text = {
   create = function(parent)
     local row = CreateRowBase(parent)
     row.Control = Widgets.CreateInput(row, false)
-    row.Control:SetWidth(INPUT_WIDTH)
     row.Control:SetPoint("RIGHT", row, "TOPRIGHT", 0, -ROW_HEIGHT / 2)
     Widgets.ForwardHover(row.Control.EditBox, row)
     row.Update = function(self)
@@ -342,9 +342,12 @@ rowTypes.text = {
         Commit(spec, value)
       end,
       spec.placeholder,
-      spec.maxLetters
+      spec.maxLetters,
+      spec.readOnly
     )
-    return SetupRow(row, spec, INPUT_WIDTH, ROW_HEIGHT)
+    local width = spec.width or INPUT_WIDTH
+    row.Control:SetWidth(width)
+    return SetupRow(row, spec, width, ROW_HEIGHT)
   end
 }
 

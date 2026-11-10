@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- New "About" page in the options: who made the addon (Phenom), version, and links to Discord, CurseForge, Wago, GitHub and bug reports, ready to copy.
+
 ## v3.7.0 (2026-11-10)
 
 - Miscellaneous: the settings are now split into pages in the sidebar, like categories: "Unit Frames", "Chat", "Interface" and "Action Bars".
