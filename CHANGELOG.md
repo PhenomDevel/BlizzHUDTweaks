@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: the Chat Frame can now show itself for a while when a new message arrives ("New messages" on the Chat Frame page, off by default). Choose the channels (whispers, party and instance, raid, guild) and how long the chat stays visible.
+
 ## v3.6.0 (2026-11-07)
 
 - Frame Fading: new frame "Chat Frame" (in "Interface"). It fades all chat windows, the docked chat tabs and the chat buttons together. Hovering any chat window or typing in the chat shows it at full alpha.
