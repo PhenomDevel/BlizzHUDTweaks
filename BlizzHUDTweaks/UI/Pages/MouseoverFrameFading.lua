@@ -441,6 +441,16 @@ local function getMouseoverCard(frameName, readOnly)
   local duration = valueRow("slider", frameName, "FadeDuration", "Fade Duration", "The duration how long the fade should take (fade in and out).")
   duration.min, duration.max, duration.step, duration.format = 0.05, 2, 0.05, secondsFormat(2)
   rows[#rows + 1] = duration
+  local delay =
+    valueRow(
+    "slider",
+    frameName,
+    "MouseOverFadeDelay",
+    "Delay after mouseover",
+    "How long the frame stays at full alpha after the mouse has left it, before it fades back. The default is 0 and fades right away."
+  )
+  delay.min, delay.max, delay.step, delay.format = 0, 10, 0.5, secondsFormat(1)
+  rows[#rows + 1] = delay
   for _, row in ipairs(rows) do
     row.disabled = readOnly
   end
