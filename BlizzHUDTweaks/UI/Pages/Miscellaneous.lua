@@ -360,7 +360,7 @@ Miscellaneous.options = {
     }
   },
   ["ChatOptions"] = {
-    name = "Chat",
+    name = "Chat Flash",
     options = {
       {
         optionName = "MiscellaneousShowHideChatFlash",
@@ -408,6 +408,14 @@ Miscellaneous.options = {
         description = "Guild and officer chat.",
         type = "toggle",
         default = true,
+        setFn = doNothing
+      },
+      {
+        optionName = "MiscellaneousChatFlashChannels",
+        displayName = "General channels",
+        description = "Numbered channels such as /1 General, /2 Trade and LocalDefense, and channels you joined yourself." ..
+          "\n\nOff by default: busy channels like Trade keep the chat visible most of the time.",
+        type = "toggle",
         setFn = doNothing
       }
     }
@@ -504,17 +512,34 @@ Miscellaneous.options = {
 
 local Info = Options.Info
 
--- Card order on the page; groups missing here follow alphabetically.
-local groupOrder = {
-  "PlayerFrameOptions",
-  "TargetFrameOptions",
-  "FocusTargetOptions",
-  "TargetOfTargetOptions",
-  "PetFrameOptions",
-  "ObjectiveTrackerOptions",
-  "ExperienceBarOptions",
-  "ChatOptions",
-  "ActionBarOptions"
+-- The Miscellaneous section in the sidebar: one page per topic (like the
+-- categories of Quality of Life Forever), each with the cards of its groups.
+local SECTION = "Miscellaneous"
+local miscPages = {
+  {
+    id = "miscellaneous",
+    label = "Unit Frames",
+    subtitle = "Names, levels and font sizes of the unit frames",
+    groups = {"PlayerFrameOptions", "TargetFrameOptions", "FocusTargetOptions", "TargetOfTargetOptions", "PetFrameOptions"}
+  },
+  {
+    id = "misc-chat",
+    label = "Chat",
+    subtitle = "Shows the faded chat on new messages",
+    groups = {"ChatOptions"}
+  },
+  {
+    id = "misc-interface",
+    label = "Interface",
+    subtitle = "Shows faded frames for a while after an update",
+    groups = {"ObjectiveTrackerOptions", "ExperienceBarOptions"}
+  },
+  {
+    id = "misc-actionbars",
+    label = "Action Bars",
+    subtitle = "Space between the action buttons",
+    groups = {"ActionBarOptions"}
+  }
 }
 
 -- Display only: unit and the value shown while a range was never set.
@@ -549,7 +574,8 @@ local rowLabels = {
   ["MiscellaneousChatFlashWhisper"] = {"Channels", "Whispers"},
   ["MiscellaneousChatFlashParty"] = {"Channels", "Party and instance"},
   ["MiscellaneousChatFlashRaid"] = {"Channels", "Raid"},
-  ["MiscellaneousChatFlashGuild"] = {"Channels", "Guild"}
+  ["MiscellaneousChatFlashGuild"] = {"Channels", "Guild"},
+  ["MiscellaneousChatFlashChannels"] = {"Channels", "General channels (/1, /2, ...)"}
 }
 -- Sections in this order; options without one come first.
 local sectionOrder = {"Hide", "Text", "Font size", "Channels"}
@@ -699,36 +725,17 @@ local function getActionbarPaddingRows(option)
   return rows
 end
 
-local function getSortedGroupNames()
-  local names, listed = {}, {}
-  for _, name in ipairs(groupOrder) do
-    if Miscellaneous.options[name] then
-      names[#names + 1] = name
-      listed[name] = true
-    end
-  end
-  local others = {}
-  for name in pairs(Miscellaneous.options) do
-    if not listed[name] then
-      others[#others + 1] = name
-    end
-  end
-  table.sort(others)
-  for _, name in ipairs(others) do
-    names[#names + 1] = name
-  end
-  return names
-end
-
-local function getCards()
-  local moduleCard = Options:GetModuleCard("miscellaneous")
+local function getCards(groupNames)
+  local cards = {}
+  -- While the module is off, every page starts with its switch.
   local notice = Options:GetModuleOffNotice("miscellaneous")
   if notice then
+    local moduleCard = Options:GetModuleCard("miscellaneous")
     moduleCard.rows = {notice}
+    cards[1] = moduleCard
   end
-  local cards = {moduleCard}
 
-  for _, groupName in ipairs(getSortedGroupNames()) do
+  for _, groupName in ipairs(groupNames) do
     local groupOptions = Miscellaneous.options[groupName]
     -- Rows by section (see rowLabels), unsectioned ones first.
     local bySection, changed = {[""] = {}}, 0
@@ -782,20 +789,24 @@ local function getCards()
   return cards
 end
 
-Options:RegisterPage(
-  {
-    id = "miscellaneous",
-    label = "Miscellaneous",
-    order = 30,
-    status = function()
-      return Options:IsModuleOn("miscellaneous")
-    end,
-    searchable = true,
-    build = function()
-      return "Miscellaneous", "Names, levels, font sizes, flashes and action bar padding", getCards()
-    end
-  }
-)
+for index, miscPage in ipairs(miscPages) do
+  Options:RegisterPage(
+    {
+      id = miscPage.id,
+      section = SECTION,
+      label = miscPage.label,
+      order = 30 + index - 1,
+      -- Only the first page: its status is the dot of the section.
+      status = index == 1 and function()
+          return Options:IsModuleOn("miscellaneous")
+        end or nil,
+      searchable = true,
+      build = function()
+        return miscPage.label, miscPage.subtitle, getCards(miscPage.groups)
+      end
+    }
+  )
+end
 
 -------------------------------------------------------------------------------
 -- Public API

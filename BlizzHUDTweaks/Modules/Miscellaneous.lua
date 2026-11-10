@@ -226,7 +226,9 @@ local chatFlashEvents = {
   MiscellaneousChatFlashWhisper = {"CHAT_MSG_WHISPER", "CHAT_MSG_BN_WHISPER"},
   MiscellaneousChatFlashParty = {"CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "CHAT_MSG_INSTANCE_CHAT", "CHAT_MSG_INSTANCE_CHAT_LEADER"},
   MiscellaneousChatFlashRaid = {"CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER", "CHAT_MSG_RAID_WARNING"},
-  MiscellaneousChatFlashGuild = {"CHAT_MSG_GUILD", "CHAT_MSG_OFFICER"}
+  MiscellaneousChatFlashGuild = {"CHAT_MSG_GUILD", "CHAT_MSG_OFFICER"},
+  -- Numbered channels: /1 General, /2 Trade, LocalDefense, joined channels.
+  MiscellaneousChatFlashChannels = {"CHAT_MSG_CHANNEL"}
 }
 local chatFlashChannel = {}
 for channelKey, events in pairs(chatFlashEvents) do
