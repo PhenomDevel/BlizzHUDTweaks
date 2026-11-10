@@ -6,6 +6,13 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.8.0",
+    notes = {
+      "# Options",
+      "New {About} page: who made the addon, version, and links to Discord, CurseForge, Wago and GitHub, ready to copy"
+    }
+  },
+  {
     version = "3.7.0",
     notes = {
       "# Frame Fading",

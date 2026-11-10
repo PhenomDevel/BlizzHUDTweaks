@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v3.8.0 (2026-11-10)
 
 - New "About" page in the options: who made the addon (Phenom), version, and links to Discord, CurseForge, Wago, GitHub and bug reports, ready to copy.
 
