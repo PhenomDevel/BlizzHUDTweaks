@@ -439,6 +439,7 @@ local function setFrameDefaultOptions(frameOptions)
   frameOptions["TreatTargetLikeInCombat"] = false
   frameOptions["TreatTargetLikeInCombatTargetType"] = "both"
   frameOptions["MouseOverFadeEnabled"] = true
+  frameOptions["MouseOverFadeDelay"] = 0
 end
 
 do
