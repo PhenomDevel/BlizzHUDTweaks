@@ -6,6 +6,18 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.7.0",
+    notes = {
+      "# Frame Fading",
+      "New condition {Recovering}: while your health or power is not full, frames use its alpha instead of fading out (off by default)",
+      "New option {Delay after mouseover}: the frame stays visible for the set time after the mouse has left it",
+      "# Miscellaneous",
+      "The settings are now split into pages in the sidebar: {Unit Frames}, {Chat}, {Interface} and {Action Bars}",
+      "New {Chat Flash} on the {Chat} page: the faded chat is shown for a while when a new message arrives, per channel (off by default)",
+      "The Objective Tracker and Experience Bar flash now start at the frame's current alpha"
+    }
+  },
+  {
     version = "3.6.0",
     notes = {
       "# Frame Fading",

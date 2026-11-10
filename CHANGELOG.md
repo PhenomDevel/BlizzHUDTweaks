@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v3.7.0 (2026-11-10)
 
 - Miscellaneous: the settings are now split into pages in the sidebar, like categories: "Unit Frames", "Chat", "Interface" and "Action Bars".
 - Frame Fading: new option "Delay after mouseover" (in "Mouseover", global and per frame). The frame stays at full alpha for the set time after the mouse has left it before it fades back. Default 0 s, as before.
