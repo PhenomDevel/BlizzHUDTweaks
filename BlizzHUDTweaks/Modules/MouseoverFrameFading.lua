@@ -83,6 +83,66 @@ local function neighborhoodAlphaValue(globalOptions, frameOptions)
   return alpha
 end
 
+local function recoveringAlphaValue(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.RecoveringAlpha
+  end
+  return frameOptions.RecoveringAlpha
+end
+
+local function recoveringFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.FadeWhileRecovering
+  end
+  return frameOptions.FadeWhileRecovering
+end
+
+-------------------------------------------------------------------------------
+-- Recovering: the player's health or power is not full
+--
+-- Health and power are secret values, addon code can't compare them with
+-- their maximum. But they only change while they are not full: out of combat
+-- health and power regenerate (or rage decays) until they are full, then
+-- their events stop. So "changed within the last RECOVERING_HOLD seconds"
+-- stands for "not full yet". A regeneration tick has to come more often than
+-- that, which it does.
+local RECOVERING_HOLD = 3
+local lastPlayerValueChange = 0
+local recovering = false
+local recoveringTimerPending = false
+
+local function checkRecovering()
+  recoveringTimerPending = false
+  local remaining = lastPlayerValueChange + RECOVERING_HOLD - GetTime()
+  if remaining > 0 then
+    recoveringTimerPending = true
+    C_Timer.After(remaining + 0.05, checkRecovering)
+  elseif recovering then
+    recovering = false
+    MouseoverFrameFading:RefreshFrameAlphas()
+  end
+end
+
+local recoveringEvents = CreateFrame("Frame")
+recoveringEvents:RegisterUnitEvent("UNIT_HEALTH", "player")
+recoveringEvents:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+recoveringEvents:SetScript(
+  "OnEvent",
+  function()
+    lastPlayerValueChange = GetTime()
+    if not recoveringTimerPending then
+      recoveringTimerPending = true
+      C_Timer.After(RECOVERING_HOLD + 0.05, checkRecovering)
+    end
+    if not recovering then
+      recovering = true
+      if addon.db and addon:IsEnabled() and MouseoverFrameFading:IsEnabled() then
+        MouseoverFrameFading:RefreshFrameAlphas()
+      end
+    end
+  end
+)
+
 local function vehicleFadeActive(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     return globalOptions.FadeVehicle
@@ -162,6 +222,8 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha, condition = inCombatAlphaValue(globalOptions, frameOptions), "FadeInCombat"
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha, condition = treatTargetAsCombatAlphaValue(globalOptions, frameOptions), "TreatTargetLikeInCombat"
+  elseif recovering and recoveringFadeActive(globalOptions, frameOptions) then
+    alpha, condition = recoveringAlphaValue(globalOptions, frameOptions), "FadeWhileRecovering"
   elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then
     alpha, condition = neighborhoodAlphaValue(globalOptions, frameOptions), "FadeInNeighborhood"
   elseif select(2, EventHandler:GetInstanceInfo()) ~= "none" and instancedAreaFadeActive(globalOptions, frameOptions) then

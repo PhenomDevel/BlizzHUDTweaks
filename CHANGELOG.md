@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: new condition "Recovering" (off by default). While your health or power (mana, energy, rage, ...) is not full, e.g. after combat or fall damage, frames use its alpha instead of fading out. Set it to 100% to keep your bars visible until you are back at full.
+
 ## v3.6.0 (2026-11-07)
 
 - Frame Fading: new frame "Chat Frame" (in "Interface"). It fades all chat windows, the docked chat tabs and the chat buttons together. Hovering any chat window or typing in the chat shows it at full alpha.
