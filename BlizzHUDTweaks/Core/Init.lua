@@ -79,6 +79,11 @@ local defaultConfig = {
     ["GlobalOptionsMouseoverFrameFadingEnabled"] = true,
     ["GlobalOptionsClassResourceEnabled"] = true,
     ["GlobalOptionsMiscellaneousEnabled"] = true,
+    -- Chat flash channels (Miscellaneous), on unless turned off.
+    ["MiscellaneousChatFlashWhisper"] = true,
+    ["MiscellaneousChatFlashParty"] = true,
+    ["MiscellaneousChatFlashRaid"] = true,
+    ["MiscellaneousChatFlashGuild"] = true,
     ["Enabled"] = true,
     ["*Global*"] = {
       displayName = "! |T134063:16:16:0:0:64:64:6:58:6:58|t|cFFa0a832 Global Settings|r",
@@ -227,13 +232,7 @@ local defaultConfig = {
       displayName = "Swing Timer Ranged"
     },
     ["ChatFrame"] = {
-      displayName = "Chat Frame",
-      ShowOnChatMessage = false,
-      ShowOnChatMessageDuration = 10,
-      ShowOnWhisper = true,
-      ShowOnParty = true,
-      ShowOnRaid = true,
-      ShowOnGuild = true
+      displayName = "Chat Frame"
     },
     ["GamepadMainActionBarFrame"] = {
       displayName = "Gamepad Action Bars"
