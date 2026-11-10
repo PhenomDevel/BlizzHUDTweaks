@@ -74,7 +74,7 @@ local moduleCards = {
   },
   miscellaneous = {
     title = "Miscellaneous",
-    note = "Hides names and levels, changes font sizes and action bar padding.",
+    note = "Unit frame names, levels and font sizes, flashes for chat, objective tracker and XP bar, action bar padding.",
     key = "GlobalOptionsMiscellaneousEnabled",
     module = Miscellaneous
   },

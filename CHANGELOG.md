@@ -2,8 +2,9 @@
 
 ## Unreleased
 
+- Miscellaneous: the settings are now split into pages in the sidebar, like categories: "Unit Frames", "Chat", "Interface" and "Action Bars".
 - Frame Fading: new option "Delay after mouseover" (in "Mouseover", global and per frame). The frame stays at full alpha for the set time after the mouse has left it before it fades back. Default 0 s, as before.
-- Miscellaneous: new card "Chat" with "Chat Flash" (off by default), like the Objective Tracker and Experience Bar flash. When a new message arrives, the faded chat is shown at full alpha for a while. Choose the channels (whispers, party and instance, raid, guild) and the flash duration.
+- Miscellaneous: new "Chat Flash" on the "Chat" page (off by default), like the Objective Tracker and Experience Bar flash. When a new message arrives, the faded chat is shown at full alpha for a while. Choose the channels (whispers, party and instance, raid, guild, and the general channels like /1 General and /2 Trade, which are off by default) and the flash duration.
 - Miscellaneous: the Objective Tracker and Experience Bar flash now start at the frame's current alpha instead of 0, so a half visible frame no longer blinks out first.
 - Frame Fading: new condition "Recovering" (off by default). While your health or power (mana, energy, rage, ...) is not full, e.g. after combat or fall damage, frames use its alpha instead of fading out. Set it to 100% to keep your bars visible until you are back at full.
 
