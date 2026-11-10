@@ -270,6 +270,35 @@ local function determineFadeDelay(globalOptions, frameOptions)
   return delay or 0
 end
 
+-- Seconds a frame stays at full alpha after the mouse has left it.
+local function determineMouseoverFadeDelay(globalOptions, frameOptions)
+  local delay
+
+  if frameOptions.UseGlobalOptions then
+    delay = globalOptions.MouseOverFadeDelay
+  else
+    delay = frameOptions.MouseOverFadeDelay
+  end
+
+  return delay or 0
+end
+
+-- mainFrame -> GetTime() until which the frame stays at full alpha after the
+-- mouse left it. Other refreshes (target change, zone, ...) keep this delay.
+local mouseoverHoldUntil = {}
+
+local function remainingMouseoverHold(frame)
+  local holdUntil = mouseoverHoldUntil[frame]
+  if holdUntil then
+    local remaining = holdUntil - GetTime()
+    if remaining > 0 then
+      return remaining
+    end
+    mouseoverHoldUntil[frame] = nil
+  end
+  return 0
+end
+
 -- Returns nil if the alpha is a secret value (Midnight restrictions), in
 -- which case the frame is left alone.
 local function getNormalizedFrameAlpha(frame)
@@ -283,10 +312,10 @@ end
 local MOUSEOVER_CACHE_TTL = 0.05
 local mouseoverCache = {}
 
-local function fadeSubFrames(subFrames, currentAlpha, targetAlpha, fadeDuration)
+local function fadeSubFrames(subFrames, currentAlpha, targetAlpha, fadeDuration, delay)
   if subFrames then
     for _, frame in ipairs(subFrames) do
-      MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, fadeDuration)
+      MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, fadeDuration, delay)
     end
   end
 end
@@ -573,6 +602,7 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
           local fadeDuration = MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
 
           if isMouseover and not mouseoverFrames[frameMappingOptions.mainFrame] then
+            mouseoverHoldUntil[frameMappingOptions.mainFrame] = nil
             if not inCombat then
               self:Fade(frameMappingOptions.mainFrame, currentAlpha, 1, fadeDuration)
               fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, 1, fadeDuration)
@@ -582,8 +612,12 @@ function MouseoverFrameFading:RefreshMouseoverFrameAlphas()
             end
           elseif not isMouseover and mouseoverFrames[frameMappingOptions.mainFrame] then
             local targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
-            self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration)
-            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
+            local delay = determineMouseoverFadeDelay(globalOptions, frameOptions)
+            if delay > 0 and currentAlpha ~= targetAlpha then
+              mouseoverHoldUntil[frameMappingOptions.mainFrame] = GetTime() + delay
+            end
+            self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, delay)
+            fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration, delay)
           end
 
           mouseoverFrames[frameMappingOptions.mainFrame] = isMouseover
@@ -630,8 +664,11 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
           if useFadeDelay then
             fadeDelay = determineFadeDelay(globalOptions, frameOptions)
           end
+          if not isMouseover then
+            fadeDelay = math.max(fadeDelay, remainingMouseoverHold(frameMappingOptions.mainFrame))
+          end
           self:Fade(frameMappingOptions.mainFrame, currentAlpha, targetAlpha, fadeDuration, fadeDelay, forced)
-          fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration)
+          fadeSubFrames(frameMappingOptions.subFrames, currentAlpha, targetAlpha, fadeDuration, fadeDelay)
         end
       end
     end
