@@ -898,6 +898,9 @@ function addon:ResetFrame(frame)
       MouseoverFrameFading:ClearActiveFade(frame)
     end
     frame:SetAlpha(1)
+    if MouseoverFrameFading and MouseoverFrameFading.RedrawIndoorMinimap then
+      MouseoverFrameFading:RedrawIndoorMinimap(frame)
+    end
   end
 end
 
