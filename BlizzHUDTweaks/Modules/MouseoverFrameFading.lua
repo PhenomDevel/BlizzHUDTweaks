@@ -545,6 +545,27 @@ function MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
   return fadeDuration
 end
 
+-- Indoors (WMO map), the game stops drawing the minimap's map texture when
+-- the alpha of the minimap or its cluster changes; only the border and the
+-- blips stay until the map is redrawn, which zooming does. So after every
+-- fade of the minimap, zoom one step and straight back (net zoom unchanged).
+-- Outdoors the map is unaffected, so nothing happens there.
+function MouseoverFrameFading:RedrawIndoorMinimap(frame)
+  if not Minimap or (frame ~= MinimapCluster and frame ~= Minimap) then
+    return
+  end
+  if not (IsIndoors and IsIndoors()) then
+    return
+  end
+  local zoom = Minimap:GetZoom()
+  local levels = Minimap:GetZoomLevels()
+  if not zoom or not levels or levels < 2 then
+    return
+  end
+  Minimap:SetZoom(zoom < levels - 1 and zoom + 1 or zoom - 1)
+  Minimap:SetZoom(zoom)
+end
+
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay, forced)
   if currentAlpha and targetAlpha and frame:IsShown() then
     if not frame.__BlizzHUDTweaksForceFaded then
@@ -559,6 +580,7 @@ function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, d
           MouseoverFrameFading:TrackActiveFade(frame)
           StartFade(frame, currentAlpha, targetAlpha, duration, function()
             MouseoverFrameFading:ClearActiveFade(frame)
+            MouseoverFrameFading:RedrawIndoorMinimap(frame)
           end, delay)
         end
       end

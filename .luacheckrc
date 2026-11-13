@@ -104,6 +104,7 @@ globals = {
   "BuffFrame",
   "DebuffFrame",
   "IsResting",
+  "IsIndoors",
   "ZoneAbilityFrame",
   "MinimapCluster",
   "StatusTrackingBarManager",
