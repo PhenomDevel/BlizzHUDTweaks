@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.8.1 (2026-11-13)
+
+- Frame Fading: the minimap no longer loses its map indoors after it fades. Before, only the border and the icons stayed until you zoomed in or out.
+
 ## v3.8.0 (2026-11-10)
 
 - New "About" page in the options: who made the addon (Phenom), version, and links to Discord, CurseForge, Wago, GitHub and bug reports, ready to copy.
