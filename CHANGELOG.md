@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: extra damage meter windows (Damage Meter Frame 2 and 3) now fade. Before, they did not fade, because the game creates them after the addon has loaded, e.g. when you open a second window.
+
 ## v3.8.1 (2026-11-13)
 
 - Frame Fading: the minimap no longer loses its map indoors after it fades. Before, only the border and the icons stayed until you zoomed in or out.
