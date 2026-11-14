@@ -282,9 +282,13 @@ local frameMapping = {
   ["BuffBarCooldownViewer"] = {mainFrame = BuffBarCooldownViewer},
   ["ExternalDefensivesFrame"] = {mainFrame = ExternalDefensivesFrame},
   ["PersonalResourceDisplayFrame"] = {mainFrame = PersonalResourceDisplayFrame},
-  ["DamageMeterSessionWindow1"] = {mainFrame = DamageMeterSessionWindow1},
-  ["DamageMeterSessionWindow2"] = {mainFrame = DamageMeterSessionWindow2},
-  ["DamageMeterSessionWindow3"] = {mainFrame = DamageMeterSessionWindow3},
+  -- Blizzard creates the damage meter windows on demand (CreateFrame in
+  -- DamageMeterMixin:SetupSessionWindow), e.g. when a second window is opened
+  -- or when the saved windows are restored after this file loaded, so they
+  -- are resolved later by name.
+  ["DamageMeterSessionWindow1"] = {mainFrame = DamageMeterSessionWindow1, lookup = "DamageMeterSessionWindow1"},
+  ["DamageMeterSessionWindow2"] = {mainFrame = DamageMeterSessionWindow2, lookup = "DamageMeterSessionWindow2"},
+  ["DamageMeterSessionWindow3"] = {mainFrame = DamageMeterSessionWindow3, lookup = "DamageMeterSessionWindow3"},
   -- WoW: Forever only. `lookup` resolves the frame later if it does not exist
   -- yet when this file loads (see resolvePendingFrames).
   ["SwingTimerMainHandFrame"] = {mainFrame = SwingTimerMainHandFrame, lookup = "SwingTimerMainHandFrame"},
