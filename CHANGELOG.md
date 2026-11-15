@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Frame Fading: frames now always show up when a fight starts while a fade delay ("Fade Delay" after combat or "Delay after mouseover") is still running. Before, the waiting fade went on and the frames faded out in combat, e.g. when a rogue opened from stealth shortly after the last fight. Entering or leaving stealth or a shapeshift form also no longer skips the running fade delay.
 - Frame Fading: extra damage meter windows (Damage Meter Frame 2 and 3) now fade. Before, they did not fade, because the game creates them after the addon has loaded, e.g. when you open a second window.
 
 ## v3.8.1 (2026-11-13)

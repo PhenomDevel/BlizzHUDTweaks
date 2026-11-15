@@ -569,20 +569,32 @@ end
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay, forced)
   if currentAlpha and targetAlpha and frame:IsShown() then
     if not frame.__BlizzHUDTweaksForceFaded then
-      if (currentAlpha ~= targetAlpha) or forced then
-        -- Cancel any existing fade for this frame
+      local fade = fades[frame]
+      if fade and fade.running and fade.to == targetAlpha then
+        -- Already fading (or waiting for its delay) towards this alpha: keep
+        -- it, so another refresh (e.g. entering stealth) neither drops the
+        -- pending fade delay nor restarts the fade.
+        return
+      end
+
+      if (currentAlpha == targetAlpha) and not forced then
+        -- The frame is at the new target alpha already, but a fade towards
+        -- another alpha is still running or waiting for its delay. Cancel it,
+        -- otherwise e.g. a fight that starts during the fade delay after the
+        -- last fight leaves the frames fading out in combat.
         if activeFades[frame] then
           MouseoverFrameFading:ClearActiveFade(frame)
         end
-
-        -- If target alpha is different, start new fade
-        if currentAlpha ~= targetAlpha or forced then
-          MouseoverFrameFading:TrackActiveFade(frame)
-          StartFade(frame, currentAlpha, targetAlpha, duration, function()
-            MouseoverFrameFading:ClearActiveFade(frame)
-            MouseoverFrameFading:RedrawIndoorMinimap(frame)
-          end, delay)
+      else
+        -- Cancel any existing fade for this frame and start the new one
+        if activeFades[frame] then
+          MouseoverFrameFading:ClearActiveFade(frame)
         end
+        MouseoverFrameFading:TrackActiveFade(frame)
+        StartFade(frame, currentAlpha, targetAlpha, duration, function()
+          MouseoverFrameFading:ClearActiveFade(frame)
+          MouseoverFrameFading:RedrawIndoorMinimap(frame)
+        end, delay)
       end
     end
   end
@@ -681,7 +693,9 @@ function MouseoverFrameFading:RefreshFrameAlphas(forced, useFadeDelay)
           targetAlpha = determineTargetAlpha(globalOptions, frameOptions)
         end
 
-        if (targetAlpha and targetAlpha ~= currentAlpha) or forced then
+        -- A running fade counts too: Fade() cancels it when the frame is at
+        -- the new target alpha already.
+        if (targetAlpha and targetAlpha ~= currentAlpha) or forced or activeFades[frameMappingOptions.mainFrame] then
           local fadeDelay = 0
           if useFadeDelay then
             fadeDelay = determineFadeDelay(globalOptions, frameOptions)
