@@ -302,7 +302,7 @@ end
 -- Returns nil if the alpha is a secret value (Midnight restrictions), in
 -- which case the frame is left alone.
 local function getNormalizedFrameAlpha(frame)
-  local a = frame:GetAlpha()
+  local a = addon:GetFrameAlpha(frame)
   if issecretvalue and issecretvalue(a) then
     return nil
   end
@@ -472,10 +472,10 @@ fadeDriver:SetScript("OnUpdate", function()
     if fade.running and now >= fade.startTime then
       if not fade.started then
         fade.started = true
-        frame:SetAlpha(fade.from)
+        addon:SetFrameAlpha(frame, fade.from)
       end
       local progress = math.min((now - fade.startTime) / fade.duration, 1)
-      frame:SetAlpha(fade.from + (fade.to - fade.from) * progress)
+      addon:SetFrameAlpha(frame, fade.from + (fade.to - fade.from) * progress)
       if progress >= 1 then
         finishedFades[#finishedFades + 1] = frame
       end
@@ -507,7 +507,7 @@ local function StartFade(frame, startAlpha, endAlpha, duration, finishedFunc, de
   stopFade(frame)
 
   if (not delay or delay <= 0) and (not duration or duration <= 0 or startAlpha == endAlpha) then
-    frame:SetAlpha(endAlpha)
+    addon:SetFrameAlpha(frame, endAlpha)
     if finishedFunc then
       finishedFunc()
     end
@@ -545,25 +545,21 @@ function MouseoverFrameFading:DetermineFadeDuration(globalOptions, frameOptions)
   return fadeDuration
 end
 
--- Indoors (WMO map), the game stops drawing the minimap's map texture when
--- the alpha of the minimap or its cluster changes; only the border and the
--- blips stay until the map is redrawn, which zooming does. So after every
--- fade of the minimap, zoom one step and straight back (net zoom unchanged).
--- Outdoors the map is unaffected, so nothing happens there.
+-- Fallback for a minimap that can't fade through its mask (see
+-- Core/MinimapAlpha.lua): indoors, the game draws the map art black when it
+-- redraws it while the minimap is faded, and only the border and the blips
+-- stay. So after every fade of the minimap, zoom one step and straight back.
 function MouseoverFrameFading:RedrawIndoorMinimap(frame)
   if not Minimap or (frame ~= MinimapCluster and frame ~= Minimap) then
+    return
+  end
+  if addon:MinimapUsesMask() then
     return
   end
   if not (IsIndoors and IsIndoors()) then
     return
   end
-  local zoom = Minimap:GetZoom()
-  local levels = Minimap:GetZoomLevels()
-  if not zoom or not levels or levels < 2 then
-    return
-  end
-  Minimap:SetZoom(zoom < levels - 1 and zoom + 1 or zoom - 1)
-  Minimap:SetZoom(zoom)
+  addon:RedrawMinimap()
 end
 
 function MouseoverFrameFading:Fade(frame, currentAlpha, targetAlpha, duration, delay, forced)

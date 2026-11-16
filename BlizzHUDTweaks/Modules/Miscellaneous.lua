@@ -171,7 +171,7 @@ end
 -- The flash starts at the current alpha, so a half visible frame doesn't
 -- drop to 0 first. Secret alphas start at 0.
 local function getFlashStartAlpha(frame)
-  local alpha = frame:GetAlpha()
+  local alpha = addon:GetFrameAlpha(frame)
   if issecretvalue and issecretvalue(alpha) then
     return 0
   end

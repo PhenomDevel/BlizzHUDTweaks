@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: the minimap now fades without losing its map indoors and in cities, also while it stays faded and you walk around. The map fades through its own mask instead of the whole minimap's transparency, which the game can't draw indoors. The player arrow and the map icons (quests, party members, tracking) stay fully visible while the minimap is partly faded; at 0 % the whole minimap is hidden as before. Minimaps with other shapes than round or square, and Mappy, keep the old way.
+
 ## v3.8.2 (2026-11-15)
 
 - Frame Fading: frames now always show up when a fight starts while a fade delay ("Fade Delay" after combat or "Delay after mouseover") is still running. Before, the waiting fade went on and the frames faded out in combat, e.g. when a rogue opened from stealth shortly after the last fight. Entering or leaving stealth or a shapeshift form also no longer skips the running fade delay.

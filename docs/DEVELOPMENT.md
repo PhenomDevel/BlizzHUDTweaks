@@ -6,10 +6,12 @@
 BlizzHUDTweaks/              addon folder (the only thing that gets installed)
   BlizzHUDTweaks.toc         load order, interface version, SavedVariables
   Libs/                      libraries (git-ignored except LibDeflate, see below)
-  Media/                     Logo.blp (addon icon)
-  Core/                      addon setup (Init.lua: profile defaults, frame mapping), events, utils
+  Media/                     Logo.blp (addon icon), MinimapMasks/ (minimap fade masks)
+  Core/                      addon setup (Init.lua: profile defaults, frame mapping), events, utils,
+                             MinimapAlpha.lua (minimap fading through its mask)
   Modules/                   frame fading, miscellaneous, tooltip
   UI/                        options window, widgets, pages, frame picker, Edit Mode panel, toast, What's new
+tools/                       make_minimap_masks.py (writes Media/MinimapMasks)
 docs/                        developer docs, release process, logo/ (logo.svg, README logo)
 .pkgmeta                     packaging config (BigWigs packager)
 ```

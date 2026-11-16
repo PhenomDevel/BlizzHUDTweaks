@@ -37,6 +37,7 @@ Libs\LibDeflate\LibDeflate.lua
 # Core (Init.lua creates the addon and its modules)
 Core\Init.lua
 Core\Utils.lua
+Core\MinimapAlpha.lua
 Core\EventHandler.lua
 
 # Modules

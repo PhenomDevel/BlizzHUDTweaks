@@ -40,6 +40,12 @@ client (e.g. the Forever swing timer) must be hidden or skipped in the other.
   frame), `refresh(mapping)` (runs with the frame lookup, at most once per
   second), `isMouseover(mapping)` (extra mouseover check) and
   `editModeFrame` (the frame Edit Mode selects, if it is not `mainFrame`).
+- Set and read a faded frame's alpha with `addon:SetFrameAlpha` /
+  `addon:GetFrameAlpha` (`Core/MinimapAlpha.lua`). The minimap
+  (`MinimapCluster`) keeps alpha 1 and fades its map through mask textures
+  (`Media/MinimapMasks`, made by `tools/make_minimap_masks.py`), because
+  indoors the game draws the map art black while `Minimap` is faded. Other
+  shapes and Mappy fall back to the cluster's alpha plus a zoom redraw.
 - Never `SetAlpha` frames that Blizzard fades itself with `UIFrameFade`
   (e.g. chat tabs, chat background textures); fade their parent instead.
 - Profile keys are SavedVariables – never rename a released key without a
