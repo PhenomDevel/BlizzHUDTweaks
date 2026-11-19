@@ -30,6 +30,7 @@ local frameGroups = {
       "ActionBar8",
       "PetActionBar",
       "StanceBar",
+      "TotemBar",
       "ExtraActionButtonFrame",
       "ZoneAbilityFrame",
       "MainMenuBarVehicleLeaveButton"

@@ -1,5 +1,6 @@
 -- luacheck: read globals BlizzHUDTweaksDB C_SwingTimer SwingTimerMainHandFrame SwingTimerOffHandFrame SwingTimerRangedFrame WorldFrame
 -- luacheck: read globals GeneralDockManager ChatFrame1 CHAT_FRAMES GamepadMainActionBarFrame
+-- luacheck: read globals MultiCastActionBarFrame MultiCastFlyoutFrame
 local _, BlizzHUDTweaks = ...
 local addon = LibStub("AceAddon-3.0"):NewAddon("BlizzHUDTweaks", "AceConsole-3.0")
 
@@ -131,6 +132,9 @@ local defaultConfig = {
     ["StanceBar"] = {
       displayName = "Stance Bar"
     },
+    ["TotemBar"] = {
+      displayName = "Totem Bar"
+    },
     ["MicroButtonAndBagsBar"] = nil,
     ["ObjectiveTrackerFrame"] = {
       displayName = "Objective Tracker"
@@ -255,6 +259,16 @@ local frameMapping = {
   ["ActionBar8"] = {mainFrame = MultiBar7},
   ["PetActionBar"] = {mainFrame = PetActionBar},
   ["StanceBar"] = {mainFrame = StanceBar},
+  -- Shaman totems: WoW: Forever has the totem action bar (MultiCastActionBarFrame,
+  -- an Edit Mode system), Retail shows the active totems in TotemFrame below
+  -- the player frame. Only one of the two exists per client.
+  ["TotemBar"] = {
+    mainFrame = MultiCastActionBarFrame or TotemFrame,
+    -- The totem flyout opens above the bar, outside of its bounds.
+    isMouseover = function()
+      return MultiCastFlyoutFrame ~= nil and MultiCastFlyoutFrame:IsVisible() and MultiCastFlyoutFrame:IsMouseOver()
+    end
+  },
   ["ObjectiveTrackerFrame"] = {mainFrame = ObjectiveTrackerFrame},
   ["BuffFrame"] = {mainFrame = BuffFrame},
   ["DebuffFrame"] = {mainFrame = DebuffFrame},

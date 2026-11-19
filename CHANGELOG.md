@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: new frame "Totem Bar" in "Action Bars". It fades the Shaman totem bar in WoW: Forever (including the totem flyout) and the totem frame below the player frame in Retail.
+
 ## v3.8.2 (2026-11-15)
 
 - Frame Fading: frames now always show up when a fight starts while a fade delay ("Fade Delay" after combat or "Delay after mouseover") is still running. Before, the waiting fade went on and the frames faded out in combat, e.g. when a rogue opened from stealth shortly after the last fight. Entering or leaving stealth or a shapeshift form also no longer skips the running fade delay.
