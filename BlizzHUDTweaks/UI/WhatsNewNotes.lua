@@ -6,6 +6,13 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.9.0",
+    notes = {
+      "# Frame Fading",
+      "New frame {Totem Bar} in {Action Bars}: fades the Shaman totem bar (WoW: Forever, including the totem flyout) and the totem frame below the player frame (Retail)"
+    }
+  },
+  {
     version = "3.8.0",
     notes = {
       "# Options",
