@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v3.9.0 (2026-11-19)
 
 - Frame Fading: new frame "Totem Bar" in "Action Bars". It fades the Shaman totem bar in WoW: Forever (including the totem flyout) and the totem frame below the player frame in Retail.
 
