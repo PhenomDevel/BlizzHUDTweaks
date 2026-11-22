@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.9.1 (2026-11-22)
+
+- Frame Fading: no more "attempt to perform boolean test on a secret boolean value" errors with Chat Frame fading in Retail. Before, the error came up on every mouseover check while the game restricts the chat (e.g. in M+, raids or PvP).
+
 ## v3.9.0 (2026-11-19)
 
 - Frame Fading: new frame "Totem Bar" in "Action Bars". It fades the Shaman totem bar in WoW: Forever (including the totem flyout) and the totem frame below the player frame in Retail.
