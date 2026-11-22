@@ -166,6 +166,8 @@ globals = {
   "L",
   "issecrettable",
   "issecretvalue",
+  "ChatFrameUtil",
+  "ChatEdit_GetActiveWindow",
   "BagsBar",
   "TooltipDataProcessor",
   "MicroMenu",
