@@ -407,21 +407,58 @@ local function refreshChatFrames()
   end
 end
 
+-- Chat frames can return secret booleans (e.g. EditBox:HasFocus() during chat
+-- messaging lockdown). A boolean test on a secret value errors and taints, so
+-- treat any secret result as false.
+local function isTrue(value)
+  if issecretvalue and issecretvalue(value) then
+    return false
+  end
+  return value and true or false
+end
+
+local function isShownAndMouseOver(frame)
+  return frame and isTrue(frame:IsVisible()) and isTrue(frame:IsMouseOver())
+end
+
+-- The active chat edit box as tracked by Blizzard's Lua (a plain frame
+-- reference, never secret). Retail: ChatFrameUtil.GetActiveWindow, older
+-- clients: ChatEdit_GetActiveWindow.
+local function getActiveChatEditBox()
+  local getActive = (ChatFrameUtil and ChatFrameUtil.GetActiveWindow) or ChatEdit_GetActiveWindow
+  if not getActive then
+    return nil
+  end
+  local editBox = getActive()
+  if issecretvalue and issecretvalue(editBox) then
+    return nil
+  end
+  return editBox
+end
+
+local function isChatEditBoxFocused(editBox, activeEditBox)
+  if not editBox then
+    return false
+  end
+  if activeEditBox and activeEditBox == editBox then
+    return true
+  end
+  return isTrue(editBox:HasFocus())
+end
+
 -- Mouseover over any shown chat window (incl. its button bar and scroll bar)
 -- or a focused chat edit box counts as mouseover of the chat.
 local function isChatMouseover(mapping)
+  local activeEditBox = getActiveChatEditBox()
   for _, frame in ipairs(mapping.subFrames) do
-    if frame:IsVisible() then
-      if frame:IsMouseOver() then
+    if isTrue(frame:IsVisible()) then
+      if isTrue(frame:IsMouseOver()) then
         return true
       end
-      if frame.buttonFrame and frame.buttonFrame:IsVisible() and frame.buttonFrame:IsMouseOver() then
+      if isShownAndMouseOver(frame.buttonFrame) or isShownAndMouseOver(frame.ScrollBar) then
         return true
       end
-      if frame.ScrollBar and frame.ScrollBar:IsVisible() and frame.ScrollBar:IsMouseOver() then
-        return true
-      end
-      if frame.editBox and frame.editBox:HasFocus() then
+      if isChatEditBoxFocused(frame.editBox, activeEditBox) then
         return true
       end
     end
