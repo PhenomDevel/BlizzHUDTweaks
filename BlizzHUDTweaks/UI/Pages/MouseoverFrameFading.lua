@@ -276,7 +276,8 @@ local conditions = {
     alphaKey = "MountedAlpha",
     desc = "When active this fade will be applied while you're on a mount or on a flight path and *not* in combat, e.g. to hide the UI while flying." ..
       "\n\nWith {Vehicle} enabled, mounts with their own action bar (e.g. Skyriding) use the {Vehicle} alpha instead.",
-    alphaDesc = "Set the alpha value of the frame while mounted or on a flight path."
+    alphaDesc = "Set the alpha value of the frame while mounted or on a flight path.",
+    travelForm = true
   },
   {
     label = "Recovering",
@@ -597,6 +598,10 @@ local function getConditionValueRows(frameName, condition, readOnly)
     targetType.values = targetTypes
     rows[#rows + 1] = targetType
   end
+  if condition.travelForm then
+    rows[#rows + 1] =
+      valueRow("checkbox", frameName, "MountedIncludeTravelForm", "Include druid travel form", "When activated druid travel form (including flight and aquatic form) also counts as mounted.")
+  end
   if condition.fadeDelay then
     local delay =
       valueRow(
@@ -623,6 +628,9 @@ local function getConditionDetail(frameName, condition)
   if condition.targetType then
     local targetType = MouseoverFrameFading:GetValue(Info("TreatTargetLikeInCombatTargetType", frameName)) or "both"
     return targetType .. " targets, uses In Combat"
+  end
+  if condition.travelForm and MouseoverFrameFading:GetValue(Info("MountedIncludeTravelForm", frameName)) then
+    return "incl. travel form"
   end
   if condition.fadeDelay then
     local delay = MouseoverFrameFading:GetValue(Info("OutOfCombatFadeDelay", frameName)) or 0

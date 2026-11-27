@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Frame Fading: new condition "Mounted" (off by default). While you are on a mount or on a flight path and not in combat, frames use its alpha (default 0%), e.g. to hide the UI while flying.
+- Frame Fading: new condition "Mounted" (off by default). While you are on a mount or on a flight path and not in combat, frames use its alpha (default 0%), e.g. to hide the UI while flying. Druid travel form only counts when you turn on "Include druid travel form".
 
 ## v3.9.1 (2026-11-22)
 

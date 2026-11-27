@@ -498,6 +498,7 @@ local function setFrameDefaultOptions(frameOptions)
 
   frameOptions["FadeWhileMounted"] = false
   frameOptions["MountedAlpha"] = 0
+  frameOptions["MountedIncludeTravelForm"] = false
 
   frameOptions["FadeWhileRecovering"] = false
   frameOptions["RecoveringAlpha"] = 1

@@ -97,9 +97,14 @@ local function mountedAlphaValue(globalOptions, frameOptions)
   return frameOptions.MountedAlpha
 end
 
--- On a mount (including druid travel form) or on a flight path.
-local function isMountedOrOnTaxi()
-  return addon:IsMounted() or UnitOnTaxi("player")
+-- On a mount or on a flight path; druid travel form only when the option
+-- for it is on.
+local function isMountedOrOnTaxi(globalOptions, frameOptions)
+  if IsMounted() or UnitOnTaxi("player") then
+    return true
+  end
+  local options = frameOptions.UseGlobalOptions and globalOptions or frameOptions
+  return options.MountedIncludeTravelForm and GetShapeshiftForm() == 3
 end
 
 local function recoveringAlphaValue(globalOptions, frameOptions)
@@ -241,7 +246,7 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha, condition = inCombatAlphaValue(globalOptions, frameOptions), "FadeInCombat"
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha, condition = treatTargetAsCombatAlphaValue(globalOptions, frameOptions), "TreatTargetLikeInCombat"
-  elseif mountedFadeActive(globalOptions, frameOptions) and isMountedOrOnTaxi() then
+  elseif mountedFadeActive(globalOptions, frameOptions) and isMountedOrOnTaxi(globalOptions, frameOptions) then
     alpha, condition = mountedAlphaValue(globalOptions, frameOptions), "FadeWhileMounted"
   elseif recovering and recoveringFadeActive(globalOptions, frameOptions) then
     alpha, condition = recoveringAlphaValue(globalOptions, frameOptions), "FadeWhileRecovering"
