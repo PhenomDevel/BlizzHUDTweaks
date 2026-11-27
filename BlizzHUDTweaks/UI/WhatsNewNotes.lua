@@ -6,6 +6,14 @@ local _, BlizzHUDTweaks = ...
 -- are section headings.
 BlizzHUDTweaks.whatsNew = {
   {
+    version = "3.10.0",
+    notes = {
+      "# Frame Fading",
+      "New condition {Mounted} (off by default): on a mount or flight path out of combat, frames use its alpha, e.g. to hide the UI while flying",
+      "Druid travel form only counts with {Include druid travel form}"
+    }
+  },
+  {
     version = "3.9.0",
     notes = {
       "# Frame Fading",
