@@ -83,6 +83,30 @@ local function neighborhoodAlphaValue(globalOptions, frameOptions)
   return alpha
 end
 
+local function mountedFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.FadeWhileMounted
+  end
+  return frameOptions.FadeWhileMounted
+end
+
+local function mountedAlphaValue(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.MountedAlpha
+  end
+  return frameOptions.MountedAlpha
+end
+
+-- On a mount or on a flight path; druid travel form only when the option
+-- for it is on.
+local function isMountedOrOnTaxi(globalOptions, frameOptions)
+  if IsMounted() or UnitOnTaxi("player") then
+    return true
+  end
+  local options = frameOptions.UseGlobalOptions and globalOptions or frameOptions
+  return options.MountedIncludeTravelForm and GetShapeshiftForm() == 3
+end
+
 local function recoveringAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     return globalOptions.RecoveringAlpha
@@ -222,6 +246,8 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha, condition = inCombatAlphaValue(globalOptions, frameOptions), "FadeInCombat"
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha, condition = treatTargetAsCombatAlphaValue(globalOptions, frameOptions), "TreatTargetLikeInCombat"
+  elseif mountedFadeActive(globalOptions, frameOptions) and isMountedOrOnTaxi(globalOptions, frameOptions) then
+    alpha, condition = mountedAlphaValue(globalOptions, frameOptions), "FadeWhileMounted"
   elseif recovering and recoveringFadeActive(globalOptions, frameOptions) then
     alpha, condition = recoveringAlphaValue(globalOptions, frameOptions), "FadeWhileRecovering"
   elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then

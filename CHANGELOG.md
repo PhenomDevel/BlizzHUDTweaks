@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Frame Fading: new condition "Mounted" (off by default). While you are on a mount or on a flight path and not in combat, frames use its alpha (default 0%), e.g. to hide the UI while flying. Druid travel form only counts when you turn on "Include druid travel form".
+
 ## v3.9.1 (2026-11-22)
 
 - Frame Fading: no more "attempt to perform boolean test on a secret boolean value" errors with Chat Frame fading in Retail. Before, the error came up on every mouseover check while the game restricts the chat (e.g. in M+, raids or PvP).
