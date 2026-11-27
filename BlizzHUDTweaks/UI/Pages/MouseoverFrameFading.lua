@@ -271,6 +271,14 @@ local conditions = {
     targetType = true
   },
   {
+    label = "Mounted",
+    key = "FadeWhileMounted",
+    alphaKey = "MountedAlpha",
+    desc = "When active this fade will be applied while you're on a mount or on a flight path and *not* in combat, e.g. to hide the UI while flying." ..
+      "\n\nWith {Vehicle} enabled, mounts with their own action bar (e.g. Skyriding) use the {Vehicle} alpha instead.",
+    alphaDesc = "Set the alpha value of the frame while mounted or on a flight path."
+  },
+  {
     label = "Recovering",
     key = "FadeWhileRecovering",
     alphaKey = "RecoveringAlpha",

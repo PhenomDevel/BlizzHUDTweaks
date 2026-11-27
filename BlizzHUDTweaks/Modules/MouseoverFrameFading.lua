@@ -83,6 +83,25 @@ local function neighborhoodAlphaValue(globalOptions, frameOptions)
   return alpha
 end
 
+local function mountedFadeActive(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.FadeWhileMounted
+  end
+  return frameOptions.FadeWhileMounted
+end
+
+local function mountedAlphaValue(globalOptions, frameOptions)
+  if frameOptions.UseGlobalOptions then
+    return globalOptions.MountedAlpha
+  end
+  return frameOptions.MountedAlpha
+end
+
+-- On a mount (including druid travel form) or on a flight path.
+local function isMountedOrOnTaxi()
+  return addon:IsMounted() or UnitOnTaxi("player")
+end
+
 local function recoveringAlphaValue(globalOptions, frameOptions)
   if frameOptions.UseGlobalOptions then
     return globalOptions.RecoveringAlpha
@@ -222,6 +241,8 @@ local function determineTargetAlpha(globalOptions, frameOptions)
     alpha, condition = inCombatAlphaValue(globalOptions, frameOptions), "FadeInCombat"
   elseif hasTarget and inCombatFadeActive(globalOptions, frameOptions) and treatTargetFadeActive(globalOptions, frameOptions) then
     alpha, condition = treatTargetAsCombatAlphaValue(globalOptions, frameOptions), "TreatTargetLikeInCombat"
+  elseif mountedFadeActive(globalOptions, frameOptions) and isMountedOrOnTaxi() then
+    alpha, condition = mountedAlphaValue(globalOptions, frameOptions), "FadeWhileMounted"
   elseif recovering and recoveringFadeActive(globalOptions, frameOptions) then
     alpha, condition = recoveringAlphaValue(globalOptions, frameOptions), "FadeWhileRecovering"
   elseif inNeighborhood and neighborhoodFadeActive(globalOptions, frameOptions) then

@@ -163,6 +163,7 @@ globals = {
   "UIWidgetPowerBarContainerFrame",
   "IsMounted",
   "HasBonusActionBar",
+  "UnitOnTaxi",
   "L",
   "issecrettable",
   "issecretvalue",

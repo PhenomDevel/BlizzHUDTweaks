@@ -167,6 +167,8 @@ local eventsToRegister = {
   "UNIT_QUEST_LOG_CHANGED",
   "ZONE_CHANGED_NEW_AREA",
   "PLAYER_MOUNT_DISPLAY_CHANGED",
+  "PLAYER_CONTROL_LOST",
+  "PLAYER_CONTROL_GAINED",
   "PLAYER_TARGET_CHANGED",
   "CHAT_MSG_COMBAT_XP_GAIN",
   "UPDATE_SHAPESHIFT_FORM"
@@ -345,6 +347,30 @@ function EventHandler:PLAYER_MOUNT_DISPLAY_CHANGED()
   if addon:IsEnabled() then
     restoreMouseoverFade()
   end
+end
+
+-- A flight path starts and ends with the player losing and regaining
+-- control. UnitOnTaxi can lag behind the event, so check again shortly after.
+local function refreshForTaxi()
+  if addon:IsEnabled() then
+    restoreMouseoverFade()
+    C_Timer.After(
+      0.5,
+      function()
+        if addon:IsEnabled() then
+          restoreMouseoverFade()
+        end
+      end
+    )
+  end
+end
+
+function EventHandler:PLAYER_CONTROL_LOST()
+  refreshForTaxi()
+end
+
+function EventHandler:PLAYER_CONTROL_GAINED()
+  refreshForTaxi()
 end
 
 function EventHandler:PLAYER_TARGET_CHANGED()
